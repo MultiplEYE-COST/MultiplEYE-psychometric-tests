@@ -20,7 +20,7 @@ In this repository, we will cover the following psychometric tests:
 ### Clone the repository
 
 ```bash
-git clone git@github.com:cuierd/Multipleye-psychometric-tests.git
+git clone git@github.com:MultiplEYE-COST/MultiplEYE-psychometric-tests.git
 ```
 
 ### Create an environment, e.g with [miniconda](https://docs.anaconda.com/free/miniconda/miniconda-install/).
