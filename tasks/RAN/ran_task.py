@@ -118,7 +118,7 @@ frameTolerance = 0.001  # how close to onset before 'same' frame
 win = visual.Window(
     size=[1440, 900], fullscr=True, screen=0,
     winType='pyglet', allowGUI=False, allowStencil=False,
-    monitor='testMonitor', color=[0,0,0], colorSpace='rgb',
+    monitor='testMonitor', color='white', colorSpace='rgb',
     blendMode='avg', useFBO=True,
     units='norm')
 
@@ -143,7 +143,7 @@ results = []
 for trial in range(num_trials):
     # Display fixation screen
     fixation = visual.TextStim(win=win, name='fix_cross', text='+', font='Courier New', pos=(0, 0), height=0.1,
-                               wrapWidth=None, ori=0.0, color='white', colorSpace='rgb', opacity=None,
+                               wrapWidth=None, ori=0.0, color='black', colorSpace='rgb', opacity=None,
                                languageStyle='LTR', depth=0.0);
     fixation.draw()
     win.flip()
@@ -163,7 +163,7 @@ for trial in range(num_trials):
     digits_matrix_str = '; '.join([' '.join(row) for row in matrix_content])
 
     matrix_str = '\n\n'.join([' '.join(row) for row in matrix_content])
-    matrix_display = visual.TextStim(win, text=matrix_str, pos=(0, 0), font='Courier New', height=0.15, wrapWidth=1.5)
+    matrix_display = visual.TextStim(win, text=matrix_str, pos=(0, 0), font='Courier New', height=0.15, wrapWidth=1.5, color='black', colorSpace='rgb')
     matrix_display.draw()
     win.flip()
 

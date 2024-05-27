@@ -85,7 +85,7 @@ frameTolerance = 0.001  # how close to onset before 'same' frame
 win = visual.Window(
     size=[1440, 900], fullscr=True, screen=0, 
     winType='pyglet', allowGUI=False, allowStencil=False,
-    monitor='testMonitor', color=[0,0,0], colorSpace='rgb',
+    monitor='testMonitor', color='white', colorSpace='rgb',
     blendMode='avg', useFBO=True, 
     units='height')
 # store frame rate of monitor if we can measure it
@@ -105,7 +105,7 @@ blank = visual.TextStim(win=win, name='blank',
     text='\n\n',
     font='Open Sans',
     pos=(0, 0), height=0.1, wrapWidth=None, ori=0.0, 
-    color='white', colorSpace='rgb', opacity=None, 
+    color='black', colorSpace='rgb', opacity=None,
     languageStyle='LTR',
     depth=0.0);
 
@@ -115,7 +115,7 @@ fix_cross = visual.TextStim(win=win, name='fix_cross',
     text='+',
     font='Courier New',
     pos=(0, 0), height=0.1, wrapWidth=None, ori=0.0,
-    color='white', colorSpace='rgb', opacity=None,
+    color='black', colorSpace='rgb', opacity=None,
     languageStyle='LTR',
     depth=0.0);
 
