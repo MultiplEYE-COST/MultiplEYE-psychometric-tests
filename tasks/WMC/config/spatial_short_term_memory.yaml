@@ -34,12 +34,12 @@ text:
     font: 'Arial'
     size: 0.05
   end_text:
-    font: 'Arial'
+    font: 'Arial Unicode MS'
     size: 0.14
   draw_text:
-    font: 'Arial'
+    font: 'Arial Unicode MS'
     size: 0.065
   next_button:
-    font: 'Arial'
+    font: 'Arial Unicode MS'
     size: 0.05
     position: [0, -0.45]

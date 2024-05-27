@@ -40,6 +40,7 @@ language = config_data['language']
 country_code = config_data['country_code']
 lab_number = config_data['lab_number']
 random_seed = config_data['random_seed']
+font = config_data['font']
 
 if os.path.exists(experiment_config_path):
     # Load the experiment configuration if the file exists
@@ -132,7 +133,7 @@ defaultKeyboard = keyboard.Keyboard()
 WelcomeScreenClock = core.Clock()
 Welcome_text = visual.TextStim(win=win, name='Welcome_text',
     text=welcome_text,
-    font='Courier New',
+    font=font,
     pos=(0, 0), height=0.05, wrapWidth=None, ori=0.0,
     color='black', colorSpace='rgb', opacity=None,
     languageStyle='LTR',
@@ -143,8 +144,8 @@ Welcome_resp = keyboard.Keyboard()
 StroopInstructionsClock = core.Clock()
 stroop_instructions = visual.TextStim(win=win, name='stroop_instructions',
     text=stroop_instructions,
-    font='Courier New',
-    pos=(0, 0), height=0.035, wrapWidth=None, ori=0.0, 
+    font=font,
+    pos=(0, 0), height=0.035, wrapWidth=1.5, ori=0.0,
     color='black', colorSpace='rgb', opacity=None, 
     languageStyle='LTR',
     depth=0.0,);
@@ -174,7 +175,7 @@ fix_cross = visual.TextStim(win=win, name='fix_cross',
 StroopPracticeClock = core.Clock()
 stroop_practice_word = visual.TextStim(win=win, name='stroop_practice_word',
     text='',
-    font='Courier New',
+    font=font,
     pos=(0, 0), height=0.1, wrapWidth=None, ori=0.0, 
     color='white', colorSpace='rgb', opacity=None, 
     languageStyle='LTR',
@@ -195,8 +196,8 @@ stroop_feedback_text = visual.TextStim(win=win, name='stroop_feedback_text',
 StartWarningClock = core.Clock()
 start_warning_text = visual.TextStim(win=win, name='start_warning_text',
     text=start_warning_text,
-    font='Courier New',
-    pos=(0, 0), height=0.035, wrapWidth=None, ori=0.0,
+    font=font,
+    pos=(0, 0), height=0.035, wrapWidth=1.5, ori=0.0,
     color='black', colorSpace='rgb', opacity=None, 
     languageStyle='LTR',
     depth=0.0);
@@ -205,7 +206,7 @@ start_warning_text = visual.TextStim(win=win, name='start_warning_text',
 StroopTrialsClock = core.Clock()
 stroop_word = visual.TextStim(win=win, name='stroop_word',
     text='',
-    font='Courier New',
+    font=font,
     pos=(0, 0), height=0.1, wrapWidth=None, ori=0.0, 
     color='white', colorSpace='rgb', opacity=None, 
     languageStyle='LTR',
@@ -216,7 +217,7 @@ stroop_key = keyboard.Keyboard()
 DoneClock = core.Clock()
 done_text = visual.TextStim(win=win, name='done_text',
     text=done_text,
-    font='Courier New',
+    font=font,
     pos=(0, 0), height=0.035, wrapWidth=None, ori=0.0,
     color='black', colorSpace='rgb', opacity=None, 
     languageStyle='LTR',
@@ -227,8 +228,8 @@ done_key = keyboard.Keyboard()
 FlankerInstructionClock = core.Clock()
 Flanker_instructions = visual.TextStim(win=win, name='Flanker_instructions',
     text=flanker_instructions,
-    font='Courier New',
-    pos=(0, 0), height=0.035, wrapWidth=None, ori=0.0,
+    font=font,
+    pos=(0, 0), height=0.035, wrapWidth=1.5, ori=0.0,
     color='black', colorSpace='rgb', opacity=None,
     languageStyle='LTR',
     depth=0.0
@@ -271,8 +272,8 @@ Flanker_key = keyboard.Keyboard()
 GoodbyeScreenClock = core.Clock()
 Goodbyetext = visual.TextStim(win=win, name='Goodbyetext',
     text=Goodbyetext,
-    font='Courier New',
-    pos=(0, 0), height=0.05, wrapWidth=None, ori=0.0,
+    font=font,
+    pos=(0, 0), height=0.05, wrapWidth=1.5, ori=0.0,
     color='black', colorSpace='rgb', opacity=None, 
     languageStyle='LTR',
     depth=0.0);
@@ -747,7 +748,7 @@ for thisStroop_practice_trial in stroop_practice_trial:
     if(stroop_practice_key.corr == 1):
         feedback_text = "✓"
     elif(stroop_practice_key.corr == 0):
-        feedback_text = "X"
+        feedback_text = "x"
     stroop_feedback_text.setText(feedback_text)
     # keep track of which components have finished
     stroop_practice_feedbackComponents = [stroop_feedback_text]
@@ -1554,7 +1555,7 @@ for thisFlanker_practice_trial in Flanker_practice_trials:
     if(Flanker_practice_key.corr == 1):
         feedback_text2 = "✓"
     elif(Flanker_practice_key.corr == 0):
-        feedback_text2 = "✗"
+        feedback_text2 = "x"
     Flanker_feedback_text.setText(feedback_text2)
     # keep track of which components have finished
     Flanker_practice_feedbackComponents = [Flanker_feedback_text]

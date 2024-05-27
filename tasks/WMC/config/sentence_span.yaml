@@ -35,7 +35,7 @@ text:
     font: 'Arial'
     size: 0.095
   sentences:
-    font: 'Arial'
+    font: 'Arial Unicode MS'
     size: 0.05
   fixation_cross:
     font: 'Arial'

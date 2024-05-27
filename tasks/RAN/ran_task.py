@@ -29,6 +29,7 @@ language = config_data['language']
 country_code = config_data['country_code']
 lab_number = config_data['lab_number']
 random_seed = config_data['random_seed']
+font = config_data['font']
 
 with open(digits_path, 'r', encoding="utf-8") as file:
     ran_data = yaml.safe_load(file)
@@ -123,16 +124,14 @@ win = visual.Window(
     units='norm')
 
 # Display welcome message
-welcome_text = visual.TextStim(win, text=welcome_text, alignHoriz='center', alignVert='center',
-                                 font='Courier New', pos=(0, 0), height=0.12, wrapWidth=1.5, ori=0.0,
+welcome_text = visual.TextStim(win, text=welcome_text, font=font, pos=(0, 0), height=0.12, wrapWidth=1.5, ori=0.0,
                                     color='black', colorSpace='rgb', opacity=None, languageStyle='LTR', depth=0.0);
 welcome_text.draw()
 win.flip()
 event.waitKeys()
 
 # Display instructions
-instructions = visual.TextStim(win, text=instructions, alignHoriz='center', alignVert='center',
-                               font='Courier New', pos=(0, 0), height=0.1, wrapWidth=1.5, ori=0.0,
+instructions = visual.TextStim(win, text=instructions, font=font, pos=(0, 0), height=0.07, wrapWidth=1.5, ori=0.0,
                                color='black', colorSpace='rgb', opacity=None, languageStyle='LTR', depth=0.0);
 instructions.draw()
 win.flip()
@@ -201,8 +200,7 @@ with open(csv_filename, 'w', newline='') as csvfile:
     csvwriter.writerows(results)
 
 # End of task message
-end_text = visual.TextStim(win, text=done_text, alignHoriz='center', alignVert='center',
-                           font='Courier New',pos=(0, 0), height=0.12, wrapWidth=1.5, ori=0.0,
+end_text = visual.TextStim(win, text=done_text, font=font, pos=(0, 0), height=0.07, wrapWidth=1.5, ori=0.0,
                            color='black', colorSpace='rgb', opacity=None, languageStyle='LTR', depth=0.0)
 end_text.draw()
 win.flip()

@@ -21,6 +21,7 @@ language = config_data['language']
 country_code = config_data['country_code']
 lab_number = config_data['lab_number']
 random_seed = config_data['random_seed']
+font = config_data['font']
 
 if os.path.exists(experiment_config_path):
     # Load the experiment configuration if the file exists
@@ -123,7 +124,7 @@ fix_cross = visual.TextStim(win=win, name='fix_cross',
 DoneClock = core.Clock()
 done_text = visual.TextStim(win=win, name='done_text',
     text=done_text,
-    font='Courier New',
+    font=font,
     pos=(0, 0), height=0.035, wrapWidth=None, ori=0.0,
     color='black', colorSpace='rgb', opacity=None,
     languageStyle='LTR',
@@ -134,7 +135,7 @@ done_key = keyboard.Keyboard()
 PLABInstructionClock = core.Clock()
 PLAB_instructions = visual.TextStim(win=win, name='PLAB_instructions',
     text= PLAB_instructions,
-    font='Courier New',
+    font=font,
     pos=(0, 0), height=0.03, wrapWidth=1.3, ori=0.0,
     color='black', colorSpace='rgb', opacity=None,
     languageStyle='LTR',
@@ -156,7 +157,7 @@ PLAB_pics_1 = visual.ImageStim(
     )
 PLAB_task1 = visual.TextStim(win=win, name='PLAB_task1',
     text='',
-    font='Courier New',
+    font=font,
     pos=(0, -0.28), height=0.035, wrapWidth=None, ori=0.0, # -0.28 is the vertical position of the text from the center
     color='black', colorSpace='rgb', opacity=None,
     languageStyle='LTR',
@@ -165,7 +166,7 @@ PLAB_task1_key = keyboard.Keyboard()
 
 # Rectangles for highlighting options
 highlight_rects = []
-option_positions = [(0, -0.26), (0, -0.30), (0, -0.34), (0, -0.38)]
+option_positions = [(0, -0.26), (0, -0.31), (0, -0.35), (0, -0.40)]
 for pos in option_positions:
     rect = visual.Rect(
         win=win,
@@ -193,7 +194,7 @@ PLAB_pics_2 = visual.ImageStim(
     )
 PLAB_task2 = visual.TextStim(win=win, name='PLAB_task2',
     text='',
-    font='Courier New',
+    font=font,
     pos=(0, -0.28), height=0.035, wrapWidth=None, ori=0.0,
     color='black', colorSpace='rgb', opacity=None,
     languageStyle='LTR',
@@ -205,7 +206,7 @@ PLAB_task2_key = keyboard.Keyboard()
 GoodbyeScreenClock = core.Clock()
 Goodbyetext = visual.TextStim(win=win, name='Goodbyetext',
     text=Goodbyetext,
-    font='Courier New',
+    font=font,
     pos=(0, 0), height=0.05, wrapWidth=None, ori=0.0,
     color='black', colorSpace='rgb', opacity=None,
     languageStyle='LTR',
@@ -219,7 +220,7 @@ routineTimer = core.CountdownTimer()  # to track time remaining of each (non-sli
 
 # Display welcome message
 welcome_text = visual.TextStim(win, text=welcome_text, alignHoriz='center', alignVert='center',
-                                 font='Courier New', pos=(0, 0), height=0.05, ori=0.0,
+                                 font=font, pos=(0, 0), height=0.05, ori=0.0,
                                     color='black', colorSpace='rgb', opacity=None, languageStyle='LTR', depth=0.0);
 welcome_text.draw()
 win.flip()

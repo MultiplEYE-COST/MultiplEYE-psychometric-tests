@@ -40,6 +40,7 @@ language = config_data['language']
 country_code = config_data['country_code']
 lab_number = config_data['lab_number']
 random_seed = config_data['random_seed']
+font = config_data['font']
 
 if os.path.exists(experiment_config_path):
     # Load the experiment configuration if the file exists
@@ -193,7 +194,7 @@ base_init_trialClock = core.Clock()
 mu_init_trialClock = core.Clock()
 mu_text_blank = visual.TextStim(win=win, name='mu_text_blank',
     text=None,
-    font='Arial',
+    font=font,
     units='height', pos=(0, 0), height=config.experiment_messages.size, wrapWidth=None, ori=0, 
     color='white', colorSpace='rgb', opacity=1, 
     languageStyle='LTR',
@@ -275,7 +276,7 @@ base_next_trial_key_resp = keyboard.Keyboard()
 base_intertrialClock = core.Clock()
 base_text_intertrial = visual.TextStim(win=win, name='base_text_intertrial',
     text=None,
-    font='Arial',
+    font=font,
     units='height', pos=(0, 0), height=config.experiment_messages.size, wrapWidth=None, ori=0, 
     color='white', colorSpace='rgb', opacity=1, 
     languageStyle='LTR',
@@ -360,7 +361,7 @@ os_text_letter = visual.TextStim(win=win, name='os_text_letter',
 os_blankClock = core.Clock()
 os_text_blank = visual.TextStim(win=win, name='os_text_blank',
     text=None,
-    font='Arial',
+    font=font,
     units='height', pos=(0, 0), height=config.experiment_messages.size, wrapWidth=None, ori=0, 
     color='white', colorSpace='rgb', opacity=1, 
     languageStyle='LTR',
@@ -391,7 +392,7 @@ os_text_recall = visual.TextStim(win=win, name='os_text_recall',
 base_intertrialClock = core.Clock()
 base_text_intertrial = visual.TextStim(win=win, name='base_text_intertrial',
     text=None,
-    font='Arial',
+    font=font,
     units='height', pos=(0, 0), height=config.experiment_messages.size, wrapWidth=None, ori=0, 
     color='white', colorSpace='rgb', opacity=1, 
     languageStyle='LTR',
@@ -412,7 +413,7 @@ base_key_resp_self_paced_break = keyboard.Keyboard()
 base_after_break_pauseClock = core.Clock()
 base_text_pause_after_break = visual.TextStim(win=win, name='base_text_pause_after_break',
     text=None,
-    font='Arial',
+    font=font,
     units='height', pos=(0, 0), height=config.experiment_messages.size, wrapWidth=None, ori=0, 
     color='white', colorSpace='rgb', opacity=1, 
     languageStyle='LTR',
@@ -497,7 +498,7 @@ ss_text_letter = visual.TextStim(win=win, name='ss_text_letter',
 ss_blankClock = core.Clock()
 ss_text_blank = visual.TextStim(win=win, name='ss_text_blank',
     text=None,
-    font='Arial',
+    font=font,
     units='height', pos=(0, 0), height=config.experiment_messages.size, wrapWidth=None, ori=0, 
     color='white', colorSpace='rgb', opacity=1, 
     languageStyle='LTR',
@@ -528,7 +529,7 @@ ss_text_display_recall = visual.TextStim(win=win, name='ss_text_display_recall',
 base_intertrialClock = core.Clock()
 base_text_intertrial = visual.TextStim(win=win, name='base_text_intertrial',
     text=None,
-    font='Arial',
+    font=font,
     units='height', pos=(0, 0), height=config.experiment_messages.size, wrapWidth=None, ori=0, 
     color='white', colorSpace='rgb', opacity=1, 
     languageStyle='LTR',
@@ -549,7 +550,7 @@ base_key_resp_self_paced_break = keyboard.Keyboard()
 base_after_break_pauseClock = core.Clock()
 base_text_pause_after_break = visual.TextStim(win=win, name='base_text_pause_after_break',
     text=None,
-    font='Arial',
+    font=font,
     units='height', pos=(0, 0), height=config.experiment_messages.size, wrapWidth=None, ori=0, 
     color='white', colorSpace='rgb', opacity=1, 
     languageStyle='LTR',
@@ -613,7 +614,7 @@ sstm_text_fixation_cross = visual.TextStim(win=win, name='sstm_text_fixation_cro
 sstm_empty_gridClock = core.Clock()
 sstm_text_blank = visual.TextStim(win=win, name='sstm_text_blank',
     text=None,
-    font='Arial',
+    font=font,
     units='height', pos=(0, 0), height=config.experiment_messages.size, wrapWidth=None, ori=0, 
     color='white', colorSpace='rgb', opacity=1, 
     languageStyle='LTR',
@@ -632,7 +633,7 @@ sstm_polygon_display_dot = visual.ShapeStim(
 sstm_after_display_dotClock = core.Clock()
 sstm_text_after_display_dot = visual.TextStim(win=win, name='sstm_text_after_display_dot',
     text=None,
-    font='Arial',
+    font=font,
     units='height', pos=(0, 0), height=0.1, wrapWidth=None, ori=0, 
     color='white', colorSpace='rgb', opacity=1, 
     languageStyle='LTR',
@@ -683,7 +684,7 @@ base_next_trial_key_resp = keyboard.Keyboard()
 base_intertrialClock = core.Clock()
 base_text_intertrial = visual.TextStim(win=win, name='base_text_intertrial',
     text=None,
-    font='Arial',
+    font=font,
     units='height', pos=(0, 0), height=config.experiment_messages.size, wrapWidth=None, ori=0, 
     color='white', colorSpace='rgb', opacity=1, 
     languageStyle='LTR',
