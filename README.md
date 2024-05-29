@@ -13,7 +13,7 @@ In this repository, we will cover the following psychometric tests:
 3. **Stroop**: The Stroop test is a test of cognitive control that measures the ability to inhibit automatic responses. The test consists of three parts: a color naming task, a word reading task, and a color-word naming task.
 4. **Flanker**: The Flanker test is a test of cognitive control that measures the ability to inhibit irrelevant information. The test consists of a series of trials in which participants must respond to a central target while ignoring flanking distractors.
 5. **PLAB test**: The PLAB test is Pimsleur Language Aptitude Battery test. It is a test of language aptitude that is designed to measure an individual's ability to learn a foreign language.
-6. **WikiVocab**: The WikiVocab test is a test of vocabulary knowledge that is based on the Wikipedia corpus. It is designed to measure the breadth of an individual's vocabulary knowledge.
+6. **WikiVocab**: The WikiVocab test is a test of vocabulary knowledge that is based on the Wikipedia corpus. It is designed to measure the breadth of an individual's vocabulary knowledge. (under development)
 
 ## Quick Start
 
@@ -22,8 +22,13 @@ In this repository, we will cover the following psychometric tests:
 ```bash
 git clone git@github.com:MultiplEYE-COST/MultiplEYE-psychometric-tests.git
 ```
+or
+```bash
+git clone https://github.com/MultiplEYE-COST/MultiplEYE-psychometric-tests.git
+```
 
 ### Create an environment, e.g with [miniconda](https://docs.anaconda.com/free/miniconda/miniconda-install/).
+Please first check whether you have conda installed. If you have installed it, please skip installing.
 
 **Note**: The steps of creating an environment is similar to the steps in the wg1-experiment-implementation repository. For details, please refer to the guidelines in the [wg1-experiment-implementation repository](http://...)
 
@@ -63,6 +68,7 @@ full_language: English
 country_code: X
 lab_number: 1
 random_seed: 123
+font: Arial Unicode MS
 ```  
 It will run Lewandowsky WMC battery, RAN task, Stroop, Flanker, PLAB task and WikiVocab sequentially, which are also defined in the `config.yaml` file as `True`:
 ```yaml
@@ -104,6 +110,7 @@ full_language: German
 country_code: CH
 lab_number: 2
 random_seed: 123
+font: Arial Unicode MS
 ```
 5. If you want to run only some of the tests, change the corresponding values to `False` in the `config.yaml` file. For example, if you only want to run the WMC battery and the PLAB test, the settings would be:
 ```yaml
@@ -132,26 +139,25 @@ python run_multipleye_psychometric_tests.py
 │
 ├── configs                <- Main configs
 │   ├── config             <- Default config, should be fixed for each lab collecting each language data
-│   ├── experiment         <- experiment caches
+│   └── experiment         <- experiment caches
 │
 ├── data                   <- Psychometric tests results
 │
 ├── languages              <- Instructions and stimuli for different languages
 │
-├── scripts                <- Shell scripts
-│
 ├── tasks                  <- Source code for the psychometric tests
 │   ├── PLAB                     <- PLAB scripts
 │   ├── RAN                      <- RAN scripts
 │   ├── Stroop-Flanker           <- Stroop and Flanker scripts
+│   ├── WikiVocab                <- WikiVocab scripts (under development)
 │   └── WMC                      <- WMC scripts
 │
-├── tests                  <- Tests of any kind
+├── run_multipleye_psychometric_tests.py       <- Main script for running the psychometric tests
 │
 ├── .gitignore                <- List of files ignored by git
 ├── .project-root             <- File for inferring the position of project root directory
 ├── requirements.txt          <- File for installing python dependencies
-└── README.md
+└── README.md          <- The top-level README for developers using this project
 ```
 ## Contact
 Please contact [multipleye@cl.uzh.ch](mailto:multipleye@cl.uzh.ch) for more information.
