@@ -60,18 +60,17 @@ def parse_args():
     )
 
     lab_settings = parser.add_argument_group(
-        'Lab Settings',
-        description=f'At the moment you will run the experiment with the language settings below. '
-                    f'Review and modify the language settings below if they differ from your pre-registration form.',
-        gooey_options={
-            'show_underline': False,
-        },
+        translations['lab_settings'],
+        description=translations['lab_settings_desc'],
+        # gooey_options={
+        #     'show_underline': False,
+        # },
     )
     lab_settings.add_argument(
         '--language',
         widget='TextField',
-        metavar='Language',
-        help='Enter the 2-letter ISO-639-1 language code (e.g., EN, DE).',
+        metavar=translations['language'],
+        help=translations['language_help'],
         default=language,
         required=True,
         gooey_options={'visible': True},
@@ -79,16 +78,16 @@ def parse_args():
     lab_settings.add_argument(
         '--full_language',
         widget='TextField',
-        help='Enter the full name of the language (e.g., English, German).',
-        metavar='Full language',
+        help=translations['full_language_help'],
+        metavar=translations['full_language'],
         default=full_language,
         required=True,
         gooey_options={'visible': True},
     )
     lab_settings.add_argument(
         '--country_code',
-        help='Enter the 2-letter ISO-3166-1 country code (e.g., US, DE).',
-        metavar='Country code',
+        help=translations['country_code_help'],
+        metavar=translations['country_code'],
         widget='TextField',
         default=country_code,
         required=True,
@@ -96,47 +95,47 @@ def parse_args():
     )
     lab_settings.add_argument(
         '--lab_number',
-        metavar='Lab number',
-        help='Enter your lab number as in the pre-registration form.',
+        metavar=translations['lab_number'],
+        help=translations['lab_number_help'],
         widget='TextField',
         default=1,
         type=int,
         required=True,
         gooey_options={'visible': True}
     )
-    participants = parser.add_argument_group('Participant Information')
+    participants = parser.add_argument_group(translations['participants'])
     participants.add_argument(
         '--participant-id',
-        metavar='Participant ID',
+        metavar=translations['participant_id'],
         # default=1,
         type=int,
         widget='TextField',
-        help='Enter the participant ID (1-999).',
+        help=translations['participant_id_help'],
         required=True,
         gooey_options={'visible': True}
     )
     participants.add_argument(
         '--session-id',
-        metavar='Session ID',
+        metavar=translations['session_id'],
         default=2,
         type=int,
         widget='TextField',
-        help='Enter the session ID (1-9).',
+        help=translations['session_id_help'],
         required=True,
         gooey_options={'visible': True}
     )
-    participants.add_argument(
-        '--random_seed',
-        metavar='Random Seed',
-        default=random_seed,
-        type=int,
-        widget='TextField',
-        help='Random seed has to be a number between 1 and 9999.'
-             'It is used to reproduce the same random sequence and numbers for the WMC and RAN experiments.'
-             'If you want to change the random seed, please edit the config.yaml file in the configs folder.',
-        required=True,
-        gooey_options={'visible': True}
-    )
+    # participants.add_argument(
+    #     '--random_seed',
+    #     metavar='Random Seed',
+    #     default=random_seed,
+    #     type=int,
+    #     widget='TextField',
+    #     help='Random seed has to be a number between 1 and 9999.'
+    #          'It is used to reproduce the same random sequence and numbers for the WMC and RAN experiments.'
+    #          'If you want to change the random seed, please edit the config.yaml file in the configs folder.',
+    #     required=True,
+    #     gooey_options={'visible': True}
+    # )
     # add an argument for each test. Tests are WMC, Peabody, PLAB, RAN, StroopFlanker
     tests = parser.add_argument_group('Psychometric Tests',
                                       description='If you want to change the tests that you want to run, please edit the config.yaml file in the configs folder.')
@@ -146,8 +145,8 @@ def parse_args():
     # Main tests checkbox
     tests.add_argument(
         '--wmc',
-        metavar='Working Memory Capacity Battery (WMC)',
-        help='Working Memory Capacity Battery (WMC) test',
+        metavar=translations['wmc'],
+        help=translations['wmc_help'],
         default=wmc,
         required=False,
         action='store_true',
@@ -156,8 +155,8 @@ def parse_args():
 
     tests.add_argument(
         '--ran',
-        metavar='RAN',
-        help='Rapid Automatized Naming (RAN) task',
+        metavar=translations['ran'],
+        help=translations['ran_help'],
         default=ran,
         required=False,
         action='store_true',
@@ -166,8 +165,8 @@ def parse_args():
 
     tests.add_argument(
         '--stroop_flanker',
-        metavar='Stroop and Flanker',
-        help='Stroop and Flanker tasks',
+        metavar=translations['stroop_flanker'],
+        help=translations['stroop_flanker_help'],
         default=stroop_flanker,
         required=False,
         action='store_true',
@@ -175,8 +174,8 @@ def parse_args():
     )
     tests.add_argument(
         '--plab',
-        metavar='PLAB',
-        help='Pimsleur Language Aptitude Battery test',
+        metavar=translations['plab'],
+        help=translations['plab_help'],
         default=plab,
         required=False,
         action='store_true',
