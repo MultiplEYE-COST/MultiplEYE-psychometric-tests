@@ -13,7 +13,7 @@ In this repository, we will cover the following psychometric tests:
 3. **Stroop**: The Stroop test is a test of cognitive control that measures the ability to inhibit automatic responses. The test consists of three parts: a color naming task, a word reading task, and a color-word naming task.
 4. **Flanker**: The Flanker test is a test of cognitive control that measures the ability to inhibit irrelevant information. The test consists of a series of trials in which participants must respond to a central target while ignoring flanking distractors.
 5. **PLAB test**: The PLAB test is Pimsleur Language Aptitude Battery test. It is a test of language aptitude that is designed to measure an individual's ability to learn a foreign language.
-6. **WikiVocab**: The WikiVocab test is a test of vocabulary knowledge that is based on the Wikipedia corpus. It is designed to measure the breadth of an individual's vocabulary knowledge. (under development)
+6. **WikiVocab**: The WikiVocab test is a test of vocabulary knowledge that is based on the Wikipedia corpus. It is designed to measure the breadth of an individual's vocabulary knowledge. For English, German, Dutch, Chinese, the LexTALE test is also available.
 
 ## Quick Start
 
@@ -118,6 +118,7 @@ wmc: True
 ran: False
 stroop_flanker: False
 plab: True
+wiki_vocab: False
 ```
 6. Run the tests with the following command as for English:
 ```bash
@@ -149,8 +150,9 @@ python run_multipleye_psychometric_tests.py
 │   ├── PLAB                     <- PLAB scripts
 │   ├── RAN                      <- RAN scripts
 │   ├── Stroop-Flanker           <- Stroop and Flanker scripts
-│   ├── WikiVocab                <- WikiVocab scripts (under development)
-│   └── WMC                      <- WMC scripts
+│   ├── WikiVocab                <- WikiVocab scripts
+│   ├── WMC                      <- WMC scripts
+│   └── __init__.py
 │
 ├── run_multipleye_psychometric_tests.py       <- Main script for running the psychometric tests
 │

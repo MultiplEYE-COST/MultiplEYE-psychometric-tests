@@ -34,6 +34,7 @@ wmc = config_data['wmc']
 ran = config_data['ran']
 stroop_flanker = config_data['stroop_flanker']
 plab = config_data['plab']
+wiki_vocab = config_data['wiki_vocab']
 
 LANG_DIR = f'{PARENT_FOLDER}/languages/{language}/ui_data/interface_language/'
 IMAGE_DIR = f'{PARENT_FOLDER}/languages/{language}/ui_data/interface_icons/'
@@ -117,7 +118,7 @@ def parse_args():
     participants.add_argument(
         '--session-id',
         metavar=translations['session_id'],
-        default=2,
+        default=1,
         type=int,
         widget='TextField',
         help=translations['session_id_help'],
@@ -181,6 +182,16 @@ def parse_args():
         action='store_true',
         gooey_options={'visible': plab}
     )
+    tests.add_argument(
+        '--wiki_vocab',
+        metavar=translations['wiki_vocab'],
+        help=translations['wiki_vocab_help'],
+        default=wiki_vocab,
+        required=False,
+        action='store_true',
+        gooey_options={'visible': wiki_vocab}
+
+    )
     args = vars(parser.parse_args())
     print(args)
     return args
@@ -240,6 +251,11 @@ if __name__ == '__main__':
         print("Running PLAB")
         run_script('tasks/PLAB/plab.py')
         arguments['run_plab'] = 'success'
+
+    if arguments['wiki_vocab']:
+        print("Running WikiVocab")
+        run_script('tasks/WikiVocab/app.py')
+        arguments['run_wiki_vocab'] = 'success'
 
     with open(participant_config_path, 'w') as file:
         yaml.dump(arguments, file)
