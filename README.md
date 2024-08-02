@@ -76,6 +76,7 @@ wmc: True
 ran: True
 stroop_flanker: True
 plab: True
+wiki_vocab: True
 ```
 The Lewandowsky WMC battery consists of four tasks: Memory Update, Operation Span, Sentence Span, and Spatial Short-Term Memory. By default, it will run all 4 tasks.
 
