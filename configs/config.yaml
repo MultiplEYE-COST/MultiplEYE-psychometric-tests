@@ -1,7 +1,7 @@
 # Description: Configuration file for the experiment. Should be fixed for all participants recruited in the same lab.
-language: ZH
-full_language: Chinese  # English name of the language, e.g., English, German, Spanish, etc.
-country_code: CH
+language: ET
+full_language: Estonian  # English name of the language, e.g., English, German, Spanish, etc.
+country_code: EE
 lab_number: 1
 random_seed: 123  # Alternative: None. Random seed for reproducibility across runs and participants. Try to keep this fixed. If you want different random seeds for different participants, you can set this to None and the random seed will be randomly generated.
 font: Arial Unicode MS  # Font used for the experiment. Arial Unicode MS is recommended because it supports a wide range of characters.

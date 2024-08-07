@@ -54,6 +54,10 @@ conda install -c anaconda hdf5
 ```
 Then you can simply rerun the above command to install the required packages.
 
+**Note**:
+Windows user may encounter error saying "ERROR: Microsoft Visual C++ 14.0 or greater is required. Get it with "Microsoft C++ Build Tools": https://visualstudio.microsoft.com/visual-cpp-build-tools/". If you encounter this error, please download the Microsoft C++ Build Tools from the link provided in the error message and install it. Then you can simply rerun the above command to install the required packages.
+You can find detailed instructions on this stackoverflow [post](https://stackoverflow.com/questions/64261546/how-to-solve-error-microsoft-visual-c-14-0-or-greater-is-required-when-inst).
+
 ### Run the tests in English
 
 By default, the tests are in English. First, you need to download the language data for English in the [MultiplEYE data repository](http://...). After downloading the data, unzip the data folder and put the folder `languages/EN` in the root directory of the repository.
