@@ -95,7 +95,7 @@ class MyMainWindow(QMainWindow):
         self.stimulus_shown_time = time.time()  # Capture the time when stimulus is shown
 
         self.real = QtWidgets.QPushButton(self.centralWidget)
-        self.real.setGeometry(QtCore.QRect(700, 450, 101, 71))  # Align vertically
+        self.real.setGeometry(QtCore.QRect(700, 500, 201, 71))  # Align vertically
         self.real.setFont(font)
         self.real.setStyleSheet("color: rgb(0, 0, 0);")  # Set font color to black
         self.real.setObjectName("real")
@@ -103,7 +103,7 @@ class MyMainWindow(QMainWindow):
         self.real.clicked.connect(partial(self.process_action, "real"))
 
         self.fake = QtWidgets.QPushButton(self.centralWidget)
-        self.fake.setGeometry(QtCore.QRect(100, 450, 101, 71))  # Align vertically
+        self.fake.setGeometry(QtCore.QRect(0, 500, 201, 71))  # Align vertically
         self.fake.setFont(font)
         self.fake.setAutoFillBackground(False)
         self.fake.setStyleSheet("color: rgb(0, 0, 0);")  # Set font color to black
@@ -112,7 +112,7 @@ class MyMainWindow(QMainWindow):
         self.fake.clicked.connect(partial(self.process_action, "fake"))
 
         self.tips = QtWidgets.QLabel(self.centralWidget)
-        self.tips.setGeometry(QtCore.QRect(90, 340, 720, 91))
+        self.tips.setGeometry(QtCore.QRect(90, 300, 720, 191))
         self.tips.setFont(font)
         self.tips.setStyleSheet("color: rgb(0, 0, 0);")  # Set font color to black
         self.tips.setAlignment(QtCore.Qt.AlignCenter)
@@ -120,7 +120,7 @@ class MyMainWindow(QMainWindow):
         self.tips.setText(self.key_instruction)
 
         self.progressBar = QtWidgets.QProgressBar(self.centralWidget)
-        self.progressBar.setGeometry(QtCore.QRect(220, 470, 451, 23))  # Adjusted position
+        self.progressBar.setGeometry(QtCore.QRect(220, 520, 451, 23))  # Adjusted position
         self.progressBar.setStyleSheet("color: rgb(0, 0, 0);")  # Set font color to black
         self.progressBar.setProperty("value", 0)
         self.progressBar.setObjectName("progressBar")
@@ -128,9 +128,10 @@ class MyMainWindow(QMainWindow):
         self.setCentralWidget(self.centralWidget)
 
     def keyPressEvent(self, event):
-        if event.key() == QtCore.Qt.Key_Right:
+        key = event.key()
+        if key in (QtCore.Qt.Key_Right, 16777236):  # Add Windows-specific key code
             self.process_action("real")
-        if event.key() == QtCore.Qt.Key_Left:
+        elif key in (QtCore.Qt.Key_Left, 16777234):  # Add Windows-specific key code
             self.process_action("fake")
 
     def load_image(self):
