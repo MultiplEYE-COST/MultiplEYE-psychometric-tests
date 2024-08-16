@@ -17,11 +17,14 @@ class MyResultWindow(QMainWindow):
         self.initUI()
 
     def initUI(self) -> None:
-        self.resize(900, 600)
+        self.resize(1200, 800)
         # self.showFullScreen()
         self.setStyleSheet("background-color: rgb(221, 235, 255);")
         self.centralWidget = QtWidgets.QWidget(self)
         self.centralWidget.setObjectName("centralWidget")
+
+        center_x = self.width() // 2
+        center_y = self.height() // 2
 
         # Define font settings
         font = QtGui.QFont()
@@ -33,7 +36,7 @@ class MyResultWindow(QMainWindow):
 
         # Adjust QLabel to occupy the full width
         self.resultLabel = QtWidgets.QLabel(self.centralWidget)
-        self.resultLabel.setGeometry(QtCore.QRect(0, 50, 900, 400))  # Adjusted to full width
+        self.resultLabel.setGeometry(QtCore.QRect(center_x - 500, 50, 1000, 400))  # Adjusted to full width
         self.resultLabel.setFont(font)
         self.resultLabel.setStyleSheet("color: rgb(0, 0, 0);")
         self.resultLabel.setAlignment(QtCore.Qt.AlignCenter)  # Center the text

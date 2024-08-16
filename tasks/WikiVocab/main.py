@@ -69,11 +69,12 @@ class MyMainWindow(QMainWindow):
         self.stimulies = self._get_stimuli()
         self.stimuli = next(self.stimulies)
 
-        self.resize(900, 600)
+        self.resize(1200, 800)
         # self.showFullScreen()
         self.setStyleSheet("background-color: rgb(221, 235, 255);")
         self.centralWidget = QtWidgets.QWidget(self)
         self.centralWidget.setObjectName("centralWidget")
+        self.setFocusPolicy(QtCore.Qt.StrongFocus)
 
         # Define styles
         font = QtGui.QFont()
@@ -81,38 +82,44 @@ class MyMainWindow(QMainWindow):
         font.setPointSize(20)
         font.setItalic(False)  # Set italic to False
 
+        # Calculate center positions
+        center_x = self.width() // 2
+        center_y = self.height() // 2
+
         # Use QSvgWidget to render SVGs
         # if Chinese, read png files from ch_items folder
         if self.language == 'zh':
             self.imageLabel = QtWidgets.QLabel(self.centralWidget)
-            self.imageLabel.setGeometry(QtCore.QRect(350, 70, 471, 191))
+            self.imageLabel.setGeometry(QtCore.QRect(center_x - 235, 70, 471, 191))
         else:
             self.imageLabel = QSvgWidget(self.centralWidget)
-            self.imageLabel.setGeometry(QtCore.QRect(210, 70, 471, 191))
+            self.imageLabel.setGeometry(QtCore.QRect(center_x - 235, 70, 471, 191))
 
         self.imageLabel.setObjectName("imageLabel")
         self.load_image()
         self.stimulus_shown_time = time.time()  # Capture the time when stimulus is shown
 
         self.real = QtWidgets.QPushButton(self.centralWidget)
-        self.real.setGeometry(QtCore.QRect(700, 500, 201, 71))  # Align vertically
+        self.real.setGeometry(QtCore.QRect(950, 600, 250, 71))  # Align vertically
         self.real.setFont(font)
         self.real.setStyleSheet("color: rgb(0, 0, 0);")  # Set font color to black
         self.real.setObjectName("real")
         self.real.setText(self.real_text)
+        self.real.setFocusPolicy(QtCore.Qt.NoFocus)
         self.real.clicked.connect(partial(self.process_action, "real"))
 
         self.fake = QtWidgets.QPushButton(self.centralWidget)
-        self.fake.setGeometry(QtCore.QRect(0, 500, 201, 71))  # Align vertically
+        self.fake.setGeometry(QtCore.QRect(0, 600, 250, 71))  # Align vertically
         self.fake.setFont(font)
         self.fake.setAutoFillBackground(False)
         self.fake.setStyleSheet("color: rgb(0, 0, 0);")  # Set font color to black
         self.fake.setObjectName("fake")
         self.fake.setText(self.fake_text)
+        self.fake.setFocusPolicy(QtCore.Qt.NoFocus)
         self.fake.clicked.connect(partial(self.process_action, "fake"))
 
         self.tips = QtWidgets.QLabel(self.centralWidget)
-        self.tips.setGeometry(QtCore.QRect(90, 300, 720, 191))
+        self.tips.setGeometry(QtCore.QRect(center_x - 420, 350, 850, 191))
         self.tips.setFont(font)
         self.tips.setStyleSheet("color: rgb(0, 0, 0);")  # Set font color to black
         self.tips.setAlignment(QtCore.Qt.AlignCenter)
@@ -120,7 +127,7 @@ class MyMainWindow(QMainWindow):
         self.tips.setText(self.key_instruction)
 
         self.progressBar = QtWidgets.QProgressBar(self.centralWidget)
-        self.progressBar.setGeometry(QtCore.QRect(220, 520, 451, 23))  # Adjusted position
+        self.progressBar.setGeometry(QtCore.QRect(center_x - 235, 630, 451, 23))  # Adjusted position
         self.progressBar.setStyleSheet("color: rgb(0, 0, 0);")  # Set font color to black
         self.progressBar.setProperty("value", 0)
         self.progressBar.setObjectName("progressBar")
