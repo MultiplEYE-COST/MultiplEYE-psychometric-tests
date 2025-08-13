@@ -4,17 +4,16 @@ from __future__ import annotations
 
 import json
 import os
-from datetime import date
-from pathlib import Path
 import platform
 import subprocess
-from psychopy import sound, gui, visual, core, data, event, logging, clock, colors
-
-from gooey import Gooey, GooeyParser
+import sys
+from pathlib import Path
 
 import yaml
-import sys
+from gooey import Gooey, GooeyParser
+from psychopy import core
 
+from tasks.WMC.wmc_mac import run_wmc_mac
 
 PARENT_FOLDER = Path(__file__).parent
 
@@ -45,6 +44,7 @@ else:
 
 with open(f'{LANG_DIR}/{GUI_LANG}.json', 'r', encoding='utf-8') as translation_file:
     translations = json.load(translation_file)
+
 
 @Gooey(
     language=GUI_LANG,
@@ -104,6 +104,18 @@ def parse_args():
         required=True,
         gooey_options={'visible': True}
     )
+
+    lab_settings.add_argument(
+        '--year',
+        metavar=translations['year'],
+        help=translations['year_help'],
+        widget='TextField',
+        default=config_data['year'],
+        type=int,
+        required=True,
+        gooey_options={'visible': True}
+    )
+
     participants = parser.add_argument_group(translations['participants'])
     participants.add_argument(
         '--participant-id',
@@ -123,7 +135,7 @@ def parse_args():
         widget='TextField',
         help=translations['session_id_help'],
         required=True,
-        gooey_options={'visible': True}
+        gooey_options={'visible': False}
     )
     # participants.add_argument(
     #     '--random_seed',
@@ -140,9 +152,9 @@ def parse_args():
     # add an argument for each test. Tests are WMC, Peabody, PLAB, RAN, StroopFlanker
     tests = parser.add_argument_group('Psychometric Tests',
                                       description='If you want to change the tests that you want to run, please edit the config.yaml file in the configs folder.')
-    parser.set_defaults(ran=ran)
-    parser.set_defaults(stroop_flanker=stroop_flanker)
-    parser.set_defaults(plab=plab)
+    # parser.set_defaults(ran=ran)
+    # parser.set_defaults(stroop_flanker=stroop_flanker)
+    # parser.set_defaults(plab=plab)
     # Main tests checkbox
     tests.add_argument(
         '--wmc',
@@ -150,7 +162,7 @@ def parse_args():
         help=translations['wmc_help'],
         default=wmc,
         required=False,
-        action='store_true',
+        action='store_true' if not wmc else 'store_false',
         gooey_options={'visible': wmc}
     )
 
@@ -160,7 +172,7 @@ def parse_args():
         help=translations['ran_help'],
         default=ran,
         required=False,
-        action='store_true',
+        action='store_true' if not ran else 'store_false',
         gooey_options={'visible': ran}
     )
 
@@ -170,7 +182,7 @@ def parse_args():
         help=translations['stroop_flanker_help'],
         default=stroop_flanker,
         required=False,
-        action='store_true',
+        action='store_true' if not stroop_flanker else 'store_false',
         gooey_options={'visible': stroop_flanker}
     )
     tests.add_argument(
@@ -179,7 +191,7 @@ def parse_args():
         help=translations['plab_help'],
         default=plab,
         required=False,
-        action='store_true',
+        action='store_true' if not plab else 'store_false',
         gooey_options={'visible': plab}
     )
     tests.add_argument(
@@ -188,41 +200,63 @@ def parse_args():
         help=translations['wiki_vocab_help'],
         default=wiki_vocab,
         required=False,
-        action='store_true',
+        action='store_true' if not wiki_vocab else 'store_false',
         gooey_options={'visible': wiki_vocab}
-
     )
     args = vars(parser.parse_args())
     print(args)
     return args
 
 
-def run_script(script_path):
+def run_script(script_path, part_folder=None):
     try:
-        result = subprocess.run(['python', script_path], check=True, text=True, capture_output=False)
+        result = subprocess.run(['python', script_path, '--participant_folder', part_folder], check=True, text=True, capture_output=False)
         print("Output:", result.stdout)
         print("Errors:", result.stderr)
+
     except subprocess.CalledProcessError as e:
         print("Error:", e.stderr)
         raise e
 
+
 if __name__ == '__main__':
     system = platform.system()
-    print(system)
 
     arguments = parse_args()
     arguments['system'] = system
 
-    experiment_config_folder = f'{PARENT_FOLDER}/data/participant_configs_{language}_{country_code}_{lab_number}/'
-    os.makedirs(experiment_config_folder, exist_ok=True)
-    participant_config_path = f'{experiment_config_folder}/' \
-                              f'{arguments["participant_id"]:03}_{arguments["language"]}_{arguments["country_code"]}' \
+    data_collection_folder = f'{PARENT_FOLDER}/data/MultiplEYE_{arguments["language"].upper()}_{arguments["country_code"].upper()}_{arguments["lab_number"]}_{arguments["year"]}'
+    participant_folder = (f'{data_collection_folder}/{arguments["participant_id"]:03}_{arguments["language"].upper()}_'
+                          f'{arguments["country_code"].upper()}_{arguments["lab_number"]}_PT{arguments["session_id"]}/')
+
+    participant_folder_relative = (f'MultiplEYE_{arguments["language"].upper()}_{arguments["country_code"].upper()}_{arguments["lab_number"]}_{arguments["year"]}/{arguments["participant_id"]:03}_{arguments["language"].upper()}_'
+                                f'{arguments["country_code"].upper()}_{arguments["lab_number"]}_PT{arguments["session_id"]}/')
+
+
+    os.makedirs(participant_folder, exist_ok=True)
+    participant_config_path = f'{participant_folder}/' \
+                              f'{arguments["participant_id"]:03}_{arguments["language"].upper()}_{arguments["country_code"].upper()}' \
                               f'_{arguments["lab_number"]}_PT{arguments["session_id"]}.yaml'
+
     with open(experiment_config_path, 'w', encoding='utf-8') as file:  # cache the arguments
         yaml.dump(arguments, file)
 
     path_to_tasks = os.path.abspath('tasks/')
     sys.path.insert(0, path_to_tasks)  # Add tasks directory to Python path
+
+    # this is some work around to make sure that the arguments are set correctly.
+    # see https://github.com/chriskiehl/Gooey/issues/148
+    arguments['wmc'] = not arguments['wmc']
+    arguments['ran'] = not arguments['ran']
+    arguments['stroop_flanker'] = not arguments['stroop_flanker']
+    arguments['plab'] = not arguments['plab']
+    arguments['wiki_vocab'] = not arguments['wiki_vocab']
+
+    # save the random seed used for the participant
+    arguments['random_seed'] = random_seed
+
+    with open(participant_config_path, 'w') as file:
+        yaml.dump(arguments, file)
 
     if arguments['wmc']:
         print("Running WMC")
@@ -234,29 +268,45 @@ if __name__ == '__main__':
             run_script('tasks/WMC/wmc_linux.py')
         else:
             print("Running WMC on Mac")
-            run_script('tasks/WMC/wmc_mac.py')
+            run_wmc_mac(result_folder=participant_folder_relative)
         arguments['run_wmc'] = 'success'
+
+        with open(participant_config_path, 'w') as file:
+            yaml.dump(arguments, file)
 
     if arguments['ran']:
         print("Running RAN")
-        run_script('tasks/RAN/ran_task.py')
+        run_script('tasks/RAN/ran_task.py', part_folder=participant_folder_relative)
         arguments['run_ran'] = 'success'
+
+        with open(participant_config_path, 'w') as file:
+            yaml.dump(arguments, file)
 
     if arguments['stroop_flanker']:
         print("Running Stroop Flanker")
-        run_script('tasks/Stroop-Flanker/stroop_flanker.py')
+        run_script('tasks/Stroop-Flanker/stroop_flanker.py', part_folder=participant_folder_relative)
         arguments['run_stroop_flanker'] = 'success'
+
+        with open(participant_config_path, 'w') as file:
+            yaml.dump(arguments, file)
 
     if arguments['plab']:
         print("Running PLAB")
-        run_script('tasks/PLAB/plab.py')
+        run_script('tasks/PLAB/plab.py', participant_folder_relative)
         arguments['run_plab'] = 'success'
+
+        with open(participant_config_path, 'w') as file:
+            yaml.dump(arguments, file)
 
     if arguments['wiki_vocab']:
         print("Running WikiVocab")
-        run_script('tasks/WikiVocab/app.py')
+        run_script('tasks/WikiVocab/app.py', participant_folder_relative)
         arguments['run_wiki_vocab'] = 'success'
+
+        with open(participant_config_path, 'w') as file:
+            yaml.dump(arguments, file)
 
     with open(participant_config_path, 'w') as file:
         yaml.dump(arguments, file)
+
     core.quit()

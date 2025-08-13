@@ -1,5 +1,6 @@
-from dotmap import DotMap
 import yaml
+from dotmap import DotMap
+
 
 class ExperimentMessages(DotMap):
     def __init__(self, language, encoding):

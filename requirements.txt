@@ -1,6 +1,6 @@
-psychopy==2023.2.3
+#psychopy==2023.2.3
 pygame==2.5.2
-typing-extensions==3.10.0.2
+typing-extensions
 mypy-extensions==0.4.3
 git+https://github.com/theDebbister/PyGaze
 pandas==2.2.0

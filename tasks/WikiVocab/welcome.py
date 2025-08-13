@@ -1,13 +1,16 @@
-import re
 import os
-
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QMainWindow
-import yaml
-import pandas as pd
+import re
 from datetime import datetime
 
+import pandas as pd
+import yaml
+from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtWidgets import QMainWindow
+
 from main import MyMainWindow
+
+# TODO: pass this as an argument, quick fix for now
+from run_multipleye_psychometric_tests import RESULT_FOLDER
 
 
 class MyWelcomeWindow(QMainWindow):
@@ -137,16 +140,23 @@ class MyWelcomeWindow(QMainWindow):
         else:
             # Set default values if the file does not exist
             expInfo = {'participant_id': 999, 'session_id': 2}
+            participant_id = 999
 
         # Store info about the experiment session
-        psychopyVersion = '2023.2.3'
+        # get actualy psychopy version
+        try:
+            from psychopy import __version__ as psychopyVersion
+        except ImportError:
+            # If psychopy is not installed, we have a problem in any case
+            raise ImportError("Psychopy is not installed. Please install it to run the experiment.")
+
         expName = 'WikiVocab'  # from the Builder filename that created this script
 
         # Create folder name for the results
-        results_folder = f"{participant_id}_{language}_{country_code}_{lab_number}_PT{expInfo['session_id']}"
+        results_folder = RESULT_FOLDER
 
         # Create folder for audio and csv data
-        output_path = f'data/psychometric_test_{language}_{country_code}_{lab_number}/WikiVocab/{results_folder}/'
+        output_path = f'data/{results_folder}/WikiVocab/'
         os.makedirs(output_path, exist_ok=True)
 
         # Data file name stem = absolute path + name; later add .psyexp, .csv, .log, etc

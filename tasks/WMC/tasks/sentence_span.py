@@ -1,15 +1,15 @@
 import os
 import random
+
 import pandas as pd
 import yaml
-
-from tasks.generic_task import GenericTask, GenericTrial
+from tasks.WMC.tasks.generic_task import GenericTask, GenericTrial
 
 
 class SentenceSpanTrial(GenericTrial):
     def __init__(self, letters, sentences):
         assert len(letters) == len(sentences)
-        
+
         super().__init__()
         self.letters = letters
         self.sentences = sentences
@@ -53,7 +53,7 @@ class SentenceSpanSentence:
     def __str__(self):
         return self.sentence_string
 
-    
+
 class SentenceSpanTrialFactory:
     def __init__(self, alphabet, true_sentences, false_sentences):
         self.alphabet = alphabet
@@ -66,17 +66,17 @@ class SentenceSpanTrialFactory:
         n_trials = len(list_lengths) * n_trials_per_condition
         trial_list_lengths = list_lengths * n_trials_per_condition
 
-        extra_true = False    # these extra values will be toggled to
-        extra_false = True    # balance sampling on uneven list lengths
-        
+        extra_true = False  # these extra values will be toggled to
+        extra_false = True  # balance sampling on uneven list lengths
+
         trials = []
         for list_length in trial_list_lengths:
             trial_letters = random.sample(self.alphabet, k=list_length)
 
             if list_length % 2:  # toggle extra value sampling
-                extra_true = not(extra_true)
-                extra_false = not(extra_false)
-            
+                extra_true = not (extra_true)
+                extra_false = not (extra_false)
+
             n_true = list_length // 2 + extra_true * list_length % 2
             n_false = list_length // 2 + extra_false * list_length % 2
 
@@ -111,10 +111,10 @@ class SentenceSpanTask(GenericTask):
         self.language = language
 
         self.config = config
-        
+
         self.key_map = config['key_map']
         self.inv_key_map = {v: k for k, v in config['key_map'].items()}
-        
+
         self.load_sentences(language, config.encoding)
         self.init_trials(config)
         self.init_results(config)
@@ -138,25 +138,25 @@ class SentenceSpanTask(GenericTask):
         sentences = [sentence.lstrip().rstrip() for sentence in sentences]
         sentences = [sentence for sentence in sentences if len(sentence) > 0]
         return sentences
-        
+
     def init_trials(self, config):
         practice_trial_factory = SentenceSpanTrialFactory(
             alphabet=config['alphabet'],
             true_sentences=self.sentences['practice'][True],
             false_sentences=self.sentences['practice'][False],
         )
-        
+
         self.practice_trials = practice_trial_factory.generate(
             list_lengths=config['practice']['list_lengths'],
             n_trials_per_condition=config['practice']['n_trials_per_condition']
         )
-        
+
         trial_factory = SentenceSpanTrialFactory(
             alphabet=config['alphabet'],
             true_sentences=self.sentences['trials'][True],
             false_sentences=self.sentences['trials'][False],
         )
-        
+
         self.trials = trial_factory.generate(
             list_lengths=config['trials']['list_lengths'],
             n_trials_per_condition=config['trials']['n_trials_per_condition']

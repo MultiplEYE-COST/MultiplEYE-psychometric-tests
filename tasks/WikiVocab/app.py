@@ -1,5 +1,6 @@
-from PyQt5.QtWidgets import QApplication
 import sys
+
+from PyQt5.QtWidgets import QApplication
 
 from welcome import MyWelcomeWindow
 

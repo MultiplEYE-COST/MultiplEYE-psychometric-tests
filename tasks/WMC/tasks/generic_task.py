@@ -1,5 +1,7 @@
 import os
+
 import pandas as pd
+
 
 class GenericTrial:
     def __init__(self):
@@ -8,10 +10,11 @@ class GenericTrial:
     def finish(self):
         pass
 
+
 class GenericTask:
     def __init__(self):
         self.name = 'generic'
-        
+
         self.practice_trials = []
         self.trials = []
 
@@ -55,7 +58,7 @@ class GenericTask:
             return self.start_new_practice_trial()
         else:
             return self.start_new_real_trial()
-        
+
     def start_new_real_trial(self):
         assert self.current_trial_id + 1 < len(self.trials)
         self.current_trial_id += 1
@@ -84,7 +87,7 @@ class GenericTask:
     def finish_trial(self):
         if self.current_trial is not None:
             self.current_trial.finish()
-        
+
         if self.get_left_trials() == 0:
             self.do_practice = False
             self.did_practice = True

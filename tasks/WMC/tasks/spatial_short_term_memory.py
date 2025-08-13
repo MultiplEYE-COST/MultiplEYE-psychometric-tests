@@ -1,15 +1,13 @@
-from itertools import product, permutations
 import os
 import random
+from itertools import product
 
 import numpy as np
 import pandas as pd
-
 from psychopy.visual import Line, Polygon, Rect
-from psychopy.event import Mouse
+from tasks.WMC.tasks.generic_task import GenericTask, GenericTrial
+from tasks.WMC.tasks.spatial_short_term_memory_scorer import SpatialShortTermMemoryScorer
 
-from tasks.generic_task import GenericTask, GenericTrial
-from tasks.spatial_short_term_memory_scorer import SpatialShortTermMemoryScorer
 
 class SpatialShortTermMemoryGrid:
     def __init__(self, window, n_rows, n_cols, grid_height, grid_width,
@@ -30,7 +28,7 @@ class SpatialShortTermMemoryGrid:
             'horizontal': [0 for _ in range(self.n_rows + 1)],
             'vertical': [0 for _ in range(self.n_cols + 1)],
         }
-        
+
         cell_height = grid_height / self.n_rows
         cell_width = grid_width / self.n_cols
 
@@ -41,7 +39,7 @@ class SpatialShortTermMemoryGrid:
 
         top_row = top_line - cell_height / 2
         left_col = left_line - cell_width / 2
-        
+
         self.position_map = {
             (row, col): (0, 0)
             for col in range(self.n_cols)
@@ -53,14 +51,14 @@ class SpatialShortTermMemoryGrid:
             line_y = (top_line - i * cell_height)
             start_position = (left_line, line_y)
             end_position = (right_line, line_y)
-            
+
             if window is not None:  # None only for testing
                 this_line = Line(
                     win=window, name=f'horizontal_line_{i}',
                     start=start_position,
                     end=end_position,
                     lineWidth=line_width,
-                    lineColor='black', lineColorSpace='rgb',
+                    lineColor='black', colorSpace='rgb',
                     opacity=1, depth=-1.0, interpolate=False)
                 self.lines['horizontal'][i] = this_line
 
@@ -69,14 +67,14 @@ class SpatialShortTermMemoryGrid:
             line_x = (left_line + i * cell_width)
             start_position = (line_x, bottom_line)
             end_position = (line_x, top_line)
-            
+
             if window is not None:  # None only for testing
                 this_line = Line(
                     win=window, name=f'horizontal_line_{i}',
                     start=start_position,
                     end=end_position,
                     lineWidth=line_width,
-                    lineColor='black', lineColorSpace='rgb',
+                    lineColor='black', colorSpace='rgb',
                     opacity=1, depth=-1.0, interpolate=False)
                 self.lines['vertical'][i] = this_line
 
@@ -93,8 +91,8 @@ class SpatialShortTermMemoryGrid:
                     height=cell_height,
                     ori=0, pos=cell_position,
                     lineWidth=0,
-                    lineColor='white', lineColorSpace='rgb',
-                    fillColor='white', fillColorSpace='rgb',
+                    lineColor='white',
+                    fillColor='white', colorSpace='rgb',
                     opacity=1, depth=-1.0, interpolate=False)
                 self.cells[row][col] = this_cell
 
@@ -110,7 +108,7 @@ class SpatialShortTermMemoryGrid:
     def show(self, show=True):
         if self.window is None:  # None only for testing
             return
-        
+
         for row in range(self.n_rows):
             for col in range(self.n_cols):
                 self.cells[row][col].setAutoDraw(show)
@@ -119,7 +117,6 @@ class SpatialShortTermMemoryGrid:
             grid_line.setAutoDraw(show)
         for grid_line in self.lines['vertical']:
             grid_line.setAutoDraw(show)
-        
 
 
 class SpatialShortTermMemoryTrial(GenericTrial):
@@ -128,12 +125,12 @@ class SpatialShortTermMemoryTrial(GenericTrial):
 
         self.sequence = sequence
         self.grid = grid
-        
+
         self.current_dot = -1
         self.was_pressed = None
         self.init_cell_selection(grid)
         self.init_dot_reserve(window=grid.window,
-                              n_dots=len(sequence)+1,
+                              n_dots=len(sequence) + 1,
                               dot_size=dot_size)
         self.response_dots = None
         self.response_time = None
@@ -145,9 +142,9 @@ class SpatialShortTermMemoryTrial(GenericTrial):
                 dot = Polygon(
                     win=window, name=f'selected_dot_{i}',
                     edges=128, size=(dot_size, dot_size),
-                    ori=0, pos=[0,0],
-                    lineWidth=1, lineColor=[1,1,1], lineColorSpace='rgb',
-                    fillColor='black', fillColorSpace='rgb',
+                    ori=0, pos=[0, 0],
+                    lineWidth=1, lineColor=[1, 1, 1],
+                    fillColor='black', colorSpace='rgb',
                     opacity=1, depth=-1.0, interpolate=False)
                 dot.setAutoDraw(False)
                 self.dot_reserve.append(dot)
@@ -182,10 +179,10 @@ class SpatialShortTermMemoryTrial(GenericTrial):
             self.was_pressed = True
         elif not is_pressed:
             self.was_pressed = False
-            
+
     def selected_required_count(self):
         return self.get_selected_cell_count() == self.get_presentation_count()
-    
+
     def update_selected_dots(self, mouse):
         grid_coordinates = self.get_pressed_coordinates(mouse)
         if grid_coordinates is None:
@@ -226,7 +223,7 @@ class SpatialShortTermMemoryTrial(GenericTrial):
 
     def show(self, show=True):
         self.grid.show(show)
-        
+
         dots = list(filter(None, self.cell_selection.values()))
         for dot in dots:
             dot.setAutoDraw(show)
@@ -280,7 +277,7 @@ class SpatialShortTermMemoryTrialFactory:
         sequence = [None for _ in range(n_dots)]
         sequence[0] = random.choice(self.valid_positions)
 
-        spot = self.create_spot(sequence[0], min_distance-1, False)
+        spot = self.create_spot(sequence[0], min_distance - 1, False)
         valid_positions = [p for p in self.valid_positions if p not in spot]
 
         for _i in range(10000):
@@ -334,7 +331,7 @@ class SpatialShortTermMemoryTrialFactory:
         if drop_diagonal:
             diagonal = np.eye(distances.shape[0], dtype=bool)
             distances = distances[~diagonal].reshape(distances.shape[0], -1)
-            
+
         return distances
 
     def shrink_grid(self, positions, by):
@@ -343,7 +340,7 @@ class SpatialShortTermMemoryTrialFactory:
 
         min_col, max_col = min(cols), max(cols)
         min_row, max_row = min(rows), max(rows)
-        
+
         origin_rows = list(range(min_col + by, max_col - by + 1))
         origin_cols = list(range(min_row + by, max_row - by + 1))
 
@@ -369,7 +366,7 @@ class SpatialShortTermMemoryTask(GenericTask):
         super().__init__()
         random.seed(seed)
         self.name = 'SSTM'
-        
+
         self.config = config
 
         self.grid = SpatialShortTermMemoryGrid(
@@ -381,7 +378,7 @@ class SpatialShortTermMemoryTask(GenericTask):
             line_width=config['grid']['line_width'])
 
         self.date_format = config['date_format']
-        
+
         self.init_trials(config)
         self.scorer = SpatialShortTermMemoryScorer(self.trials, experiment_data)
 
@@ -427,7 +424,7 @@ class SpatialShortTermMemoryTask(GenericTask):
 
         self.scorer.trial_scores.to_csv(filepath, mode='a', sep=' ',
                                         float_format='%.3f')
-        
+
         with open(filepath, 'a') as f:
             f.write('\n')
             f.write('------------------------------------------\n')
@@ -440,7 +437,7 @@ class SpatialShortTermMemoryTask(GenericTask):
         if not os.path.isdir(dirpath):
             os.makedirs(dirpath)
 
-        max_possible_score = sum([len(trial.sequence)*2-2
+        max_possible_score = sum([len(trial.sequence) * 2 - 2
                                   for trial in self.trials])
 
         with open(filepath, 'a') as f:

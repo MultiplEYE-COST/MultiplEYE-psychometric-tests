@@ -13,20 +13,26 @@ If you publish work using this script the most relevant publication is:
 
 from __future__ import absolute_import, division
 
-import pandas as pd
-from psychopy import sound, gui, visual, core, data, event, logging, clock, colors
-from psychopy.constants import (NOT_STARTED, STARTED, PLAYING, PAUSED,
-                                STOPPED, FINISHED, PRESSED, RELEASED, FOREVER)
 import os  # handy system and path functions
-
-from psychopy.hardware import keyboard
-import yaml
 from datetime import datetime
+
+import pandas as pd
+import yaml
+from psychopy import visual, core, data, logging
+from psychopy.constants import (NOT_STARTED, STARTED, FINISHED)
+from psychopy.hardware import keyboard
+
 
 # # Ensure that relative paths start from the same directory as this script
 # _thisDir = os.path.dirname(os.path.abspath(__file__))
 
 date = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+
+# Parse command-line arguments
+parser = argparse.ArgumentParser(description="Run the RAN digit test.")
+parser.add_argument('--participant_folder', type=str, required=True, help="Path to the participant folder.")
+args = parser.parse_args()
+results_folder = args.participant_folder
 
 # Path to the YAML file contains the language and experiment configurations
 # Path to the YAML file contains the language and experiment configurations
@@ -53,12 +59,10 @@ if os.path.exists(experiment_config_path):
 else:
     # Set default values if the file does not exist
     expInfo = {'participant_id': 999, 'session_id': 2}
-
-# Create folder name for the results
-results_folder = f"{participant_id}_{language}_{country_code}_{lab_number}_PT{expInfo['session_id']}"
+    participant_id = 999
 
 # Create folder for audio and csv data
-output_path = f'data/psychometric_test_{language}_{country_code}_{lab_number}/Stroop_Flanker/{results_folder}/'
+output_path = f'data/{results_folder}/Stroop_Flanker/'
 os.makedirs(output_path, exist_ok=True)
 # Data file name stem = absolute path + name; later add .psyexp, .csv, .log, etc
 filename = f"{output_path}" \

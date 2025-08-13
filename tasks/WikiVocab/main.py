@@ -1,16 +1,16 @@
-import os
 import hashlib
-from functools import partial
+import os
 import time  # Add the time module
+from functools import partial
 
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QMainWindow
-from PyQt5.QtSvg import QSvgWidget
-from PyQt5.QtGui import QPixmap
-from bidi import algorithm as bidialg
 import arabic_reshaper
 import matplotlib.pyplot as plt
 import pandas as pd
+from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtSvg import QSvgWidget
+from PyQt5.QtWidgets import QMainWindow
+from bidi import algorithm as bidialg
 
 from result import MyResultWindow
 

@@ -1,5 +1,6 @@
-from dotmap import DotMap
 import yaml
+from dotmap import DotMap
+
 
 class WMCConfig:
     def __init__(

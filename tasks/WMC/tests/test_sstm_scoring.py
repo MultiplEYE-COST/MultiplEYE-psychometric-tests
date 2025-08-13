@@ -1,17 +1,16 @@
 from datetime import datetime, timedelta
-from itertools import product, permutations
+from itertools import permutations
+
 import pandas as pd
-from psychopy import data
 import pytest
-import warnings
-
-from common.config import WMCConfig
 import tasks.spatial_short_term_memory as sstm
-
+from common.config import WMCConfig
+from psychopy import data
 
 score_filenames = [
     'tests/SSTM-01-1-1975.txt',
 ]
+
 
 def load_score_file(filename, nrows_trials, nrows_dots, skiprows):
     index_cols = ['ID', 'Trial']
@@ -102,7 +101,7 @@ def df_diff(df1, df2):
 
 def get_trials_with_unequivalent_dot_score_sum(df1, df2):
     trial_id_col = 'InTrial#'
-    
+
     df_l = df1.copy()
     df_r = df2.copy()
 
@@ -126,7 +125,7 @@ def set_trial_responses(trials, responses):
 
 def generate_all_equivalence_parameters(filename):
     parameters = []
-    
+
     df_trials_example, df_dots_example = load_score_file(
         filename, nrows_trials=14, nrows_dots=52, skiprows=20)
 
@@ -140,7 +139,7 @@ def generate_all_equivalence_parameters(filename):
 
     correct_dots_permutations = get_simple_permutations(example_sequences)
     for correct_dots_permutation in correct_dots_permutations:
-        #response_permutations = get_simple_permutations(example_responses)
+        # response_permutations = get_simple_permutations(example_responses)
         # it's sufficient to permutate the correct dot sequences
         response_permutations = [example_responses]
         for response_permutation in response_permutations:
@@ -154,8 +153,10 @@ def generate_all_equivalence_parameters(filename):
 
     return parameters
 
+
 parameter_dicts = [d for filename in score_filenames
                    for d in generate_all_equivalence_parameters(filename)]
+
 
 @pytest.mark.parametrize("parameter_dict", parameter_dicts)
 def test_example_score_file_equivalence(parameter_dict):
@@ -163,10 +164,10 @@ def test_example_score_file_equivalence(parameter_dict):
     df_dots_example = parameter_dict['df_dots_example']
     correct_dots = parameter_dict['correct_dots']
     response_dots = parameter_dict['response_dots']
-    
+
     trials = create_trials(correct_dots, df_trials_example.RT)
     trials = set_trial_responses(trials, response_dots)
-    
+
     for trial in trials:
         assert len(trial.sequence) == len(trial.response_dots)
 
@@ -177,18 +178,18 @@ def test_example_score_file_equivalence(parameter_dict):
                    'date': None,
                    'datetime': datetime.now()}
     )
-    
+
     scorer = sstm.SpatialShortTermMemoryScorer(trials, experiment_data)
     scorer.compute_scores()
 
     assert df_dots_example.index.equals(scorer.dot_scores.index), (
         r'dot score index does not match!'
     )
-    
+
     dot_diff_l, dot_diff_r = get_trials_with_unequivalent_dot_score_sum(
         df_dots_example, scorer.dot_scores)
 
-    assert len(dot_diff_l) == len(dot_diff_r) == 0 , (
+    assert len(dot_diff_l) == len(dot_diff_r) == 0, (
         f'dot scores do not match! \r\n\r\n'
         f'example: \r\n{dot_diff_l}\r\n\r\n'
         f'but computed scores are: \r\n{dot_diff_r}\r\n\r\n'
@@ -197,11 +198,11 @@ def test_example_score_file_equivalence(parameter_dict):
     assert df_trials_example.index.equals(scorer.trial_scores.index), (
         r'trial score index does not match!'
     )
-    
+
     trial_diff_l, trial_diff_r = df_diff(df_trials_example,
                                          scorer.trial_scores)
 
-    assert len(trial_diff_l) == len(trial_diff_r) == 0 , (
+    assert len(trial_diff_l) == len(trial_diff_r) == 0, (
         f'trial scores do not match! \r\n\r\n'
         f'example: \r\n{trial_diff_l}\r\n\r\n'
         f'but computed scores are: \r\n{trial_diff_r}\r\n\r\n'
@@ -231,7 +232,7 @@ def test_single_trial_sequence():
                                 'date': None,
                                 'datetime': datetime.now()}
     )
-    
+
     scorer = sstm.SpatialShortTermMemoryScorer(trials, experiment_data)
     scorer.compute_scores()
 
@@ -253,12 +254,12 @@ def test_scoring_computation_duration():
 
     trials = create_trials(correct_dots, df_trials_example.RT)
     trials = set_trial_responses(trials, response_dots)
-    
+
     for trial in trials:
         assert len(trial.sequence) == len(trial.response_dots)
 
     subject_id = df_trials_example.index.get_level_values('ID')[0]
-    
+
     experiment_data = data.ExperimentHandler(
         name='test', extraInfo={'Subject ID': subject_id,
                                 'date': None,
@@ -266,7 +267,7 @@ def test_scoring_computation_duration():
     )
 
     start_time = datetime.now()
-    
+
     scorer = sstm.SpatialShortTermMemoryScorer(trials, experiment_data)
     scorer.compute_scores()
 

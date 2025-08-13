@@ -1,8 +1,9 @@
 # Description: Configuration file for the experiment. Should be fixed for all participants recruited in the same lab.
-language: EN
-full_language: English  # English name of the language, e.g., English, German, Spanish, etc.
-country_code: GB
-lab_number: 1
+language: DE
+full_language: German  # English name of the language, e.g., English, German, Spanish, etc.
+country_code: CH
+year: 2025  # estimated end year of the experiment, e.g., 2024.
+lab_number: 1 # identifier of the lab as defined in the pre-registration form!
 random_seed: 123  # Alternative: None. Random seed for reproducibility across runs and participants. Try to keep this fixed. If you want different random seeds for different participants, you can set this to None and the random seed will be randomly generated.
 font: Arial Unicode MS  # Font used for the experiment. Arial Unicode MS is recommended because it supports a wide range of characters.
 wmc: True   # Alternative: False, if you want to run the experiment without the WMC task.

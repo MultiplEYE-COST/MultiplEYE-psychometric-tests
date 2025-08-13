@@ -3,21 +3,29 @@
 """
 This experiment runs the RAN digit test
 """
+import argparse
+import csv
+import os
+from datetime import datetime
 
-from psychopy import sound, gui, visual, core, data, event, logging, clock, colors
+import numpy as np
+import pandas as pd
 import sounddevice as sd
 import soundfile as sf
-from datetime import datetime
-import numpy as np
-import os
-import csv
 import yaml
-import pandas as pd
-
+from psychopy import visual, core, event, logging
 
 date = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
 
-# Path to the YAML file contains the language and experiment configurations
+# Path to the YAMLimport argparse
+
+# Parse command-line arguments
+parser = argparse.ArgumentParser(description="Run the RAN digit test.")
+parser.add_argument('--participant_folder', type=str, required=True, help="Path to the participant folder.")
+args = parser.parse_args()
+results_folder = args.participant_folder
+
+# experiment configurations
 config_path = f'configs/config.yaml'
 experiment_config_path = f'configs/experiment.yaml'
 digits_path = f'tasks/RAN/digits.yaml'
@@ -51,12 +59,10 @@ if os.path.exists(experiment_config_path):
 else:
     # Set default values if the file does not exist
     expInfo = {'participant_id': 999, 'session_id': 2}
-
-# Create folder name for the results
-results_folder = f"{participant_id}_{language}_{country_code}_{lab_number}_PT{expInfo['session_id']}"
+    participant_id = 999
 
 # Create folder for audio and csv data
-output_path = f'data/psychometric_test_{language}_{country_code}_{lab_number}/RAN/{results_folder}/'
+output_path = f'data/{results_folder}/RAN/'
 os.makedirs(output_path, exist_ok=True)
 # Data file name stem = absolute path + name; later add .psyexp, .csv, .log, etc
 filename = f"{output_path}" \
