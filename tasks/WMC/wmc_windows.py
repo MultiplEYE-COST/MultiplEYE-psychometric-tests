@@ -963,7 +963,7 @@ thisExp.addData('base_image_instruction.stopped', base_image_instruction.tStopRe
 if base_key_resp_instruction.keys in ['', [], None]:  # No response was made
     base_key_resp_instruction.keys = None
 thisExp.addData('base_key_resp_instruction.keys', base_key_resp_instruction.keys)
-if base_key_resp_instruction.keys != None:  # we had a response
+if base_key_resp_instruction.keys is not None:  # we had a response
     thisExp.addData('base_key_resp_instruction.rt', base_key_resp_instruction.rt)
 thisExp.addData('base_key_resp_instruction.started', base_key_resp_instruction.tStartRefresh)
 thisExp.addData('base_key_resp_instruction.stopped', base_key_resp_instruction.tStopRefresh)
@@ -1056,14 +1056,14 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
     thisExp.addLoop(mu_instruction_pages)  # add the loop to the experiment
     thisMu_instruction_page = mu_instruction_pages.trialList[0]  # so we can initialise stimuli with some values
     # abbreviate parameter names if possible (e.g. rgb = thisMu_instruction_page.rgb)
-    if thisMu_instruction_page != None:
+    if thisMu_instruction_page is not None:
         for paramName in thisMu_instruction_page:
             exec('{} = thisMu_instruction_page[paramName]'.format(paramName))
 
     for thisMu_instruction_page in mu_instruction_pages:
         currentLoop = mu_instruction_pages
         # abbreviate parameter names if possible (e.g. rgb = thisMu_instruction_page.rgb)
-        if thisMu_instruction_page != None:
+        if thisMu_instruction_page is not None:
             for paramName in thisMu_instruction_page:
                 exec('{} = thisMu_instruction_page[paramName]'.format(paramName))
 
@@ -1196,7 +1196,7 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
         if base_key_resp_instruction.keys in ['', [], None]:  # No response was made
             base_key_resp_instruction.keys = None
         mu_instruction_pages.addData('base_key_resp_instruction.keys', base_key_resp_instruction.keys)
-        if base_key_resp_instruction.keys != None:  # we had a response
+        if base_key_resp_instruction.keys is not None:  # we had a response
             mu_instruction_pages.addData('base_key_resp_instruction.rt', base_key_resp_instruction.rt)
         mu_instruction_pages.addData('base_key_resp_instruction.started', base_key_resp_instruction.tStartRefresh)
         mu_instruction_pages.addData('base_key_resp_instruction.stopped', base_key_resp_instruction.tStopRefresh)
@@ -1217,14 +1217,14 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
     thisExp.addLoop(mu_practice_dummy)  # add the loop to the experiment
     thisMu_practice_dummy = mu_practice_dummy.trialList[0]  # so we can initialise stimuli with some values
     # abbreviate parameter names if possible (e.g. rgb = thisMu_practice_dummy.rgb)
-    if thisMu_practice_dummy != None:
+    if thisMu_practice_dummy is not None:
         for paramName in thisMu_practice_dummy:
             exec('{} = thisMu_practice_dummy[paramName]'.format(paramName))
 
     for thisMu_practice_dummy in mu_practice_dummy:
         currentLoop = mu_practice_dummy
         # abbreviate parameter names if possible (e.g. rgb = thisMu_practice_dummy.rgb)
-        if thisMu_practice_dummy != None:
+        if thisMu_practice_dummy is not None:
             for paramName in thisMu_practice_dummy:
                 exec('{} = thisMu_practice_dummy[paramName]'.format(paramName))
 
@@ -1292,14 +1292,18 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
                 win.callOnFlip(base_key_resp_task_begin.clearEvents,
                                eventType='keyboard')  # clear events on next screen flip
             if base_key_resp_task_begin.status == STARTED and not waitOnFlip:
-                theseKeys = base_key_resp_task_begin.getKeys(keyList=['space'], waitRelease=False)
-                _base_key_resp_task_begin_allKeys.extend(theseKeys)
-                if len(_base_key_resp_task_begin_allKeys):
-                    base_key_resp_task_begin.keys = _base_key_resp_task_begin_allKeys[
-                        -1].name  # just the last key pressed
-                    base_key_resp_task_begin.rt = _base_key_resp_task_begin_allKeys[-1].rt
-                    # a response ends the routine
-                    continueRoutine = False
+                theseKeys = base_key_resp_task_begin.getKeys(keyList=None, waitRelease=False)
+                if theseKeys != [] and theseKeys[-1].value[0] == 'space':
+                    _base_key_resp_task_begin_allKeys.extend(theseKeys)
+                    if len(_base_key_resp_task_begin_allKeys):
+                        base_key_resp_task_begin.keys = _base_key_resp_task_begin_allKeys[
+                            -1].name  # just the last key pressed
+                        base_key_resp_task_begin.rt = _base_key_resp_task_begin_allKeys[-1].rt
+                        # a response ends the routine
+                        continueRoutine = False
+                else:
+                    base_key_resp_task_begin.keys = []
+                    base_key_resp_task_begin.rt = []
 
             # check if all components have finished
             if not continueRoutine:  # a component has requested a forced-end of Routine
@@ -1339,14 +1343,14 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
         thisExp.addLoop(mu_trials)  # add the loop to the experiment
         thisMu_trial = mu_trials.trialList[0]  # so we can initialise stimuli with some values
         # abbreviate parameter names if possible (e.g. rgb = thisMu_trial.rgb)
-        if thisMu_trial != None:
+        if thisMu_trial is not None:
             for paramName in thisMu_trial:
                 exec('{} = thisMu_trial[paramName]'.format(paramName))
 
         for thisMu_trial in mu_trials:
             currentLoop = mu_trials
             # abbreviate parameter names if possible (e.g. rgb = thisMu_trial.rgb)
-            if thisMu_trial != None:
+            if thisMu_trial is not None:
                 for paramName in thisMu_trial:
                     exec('{} = thisMu_trial[paramName]'.format(paramName))
 
@@ -1479,14 +1483,14 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
             thisExp.addLoop(mu_presentations)  # add the loop to the experiment
             thisMu_presentation = mu_presentations.trialList[0]  # so we can initialise stimuli with some values
             # abbreviate parameter names if possible (e.g. rgb = thisMu_presentation.rgb)
-            if thisMu_presentation != None:
+            if thisMu_presentation is not None:
                 for paramName in thisMu_presentation:
                     exec('{} = thisMu_presentation[paramName]'.format(paramName))
 
             for thisMu_presentation in mu_presentations:
                 currentLoop = mu_presentations
                 # abbreviate parameter names if possible (e.g. rgb = thisMu_presentation.rgb)
-                if thisMu_presentation != None:
+                if thisMu_presentation is not None:
                     for paramName in thisMu_presentation:
                         exec('{} = thisMu_presentation[paramName]'.format(paramName))
 
@@ -1640,14 +1644,14 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
             thisExp.addLoop(mu_operations)  # add the loop to the experiment
             thisMu_operation = mu_operations.trialList[0]  # so we can initialise stimuli with some values
             # abbreviate parameter names if possible (e.g. rgb = thisMu_operation.rgb)
-            if thisMu_operation != None:
+            if thisMu_operation is not None:
                 for paramName in thisMu_operation:
                     exec('{} = thisMu_operation[paramName]'.format(paramName))
 
             for thisMu_operation in mu_operations:
                 currentLoop = mu_operations
                 # abbreviate parameter names if possible (e.g. rgb = thisMu_operation.rgb)
-                if thisMu_operation != None:
+                if thisMu_operation is not None:
                     for paramName in thisMu_operation:
                         exec('{} = thisMu_operation[paramName]'.format(paramName))
 
@@ -1801,14 +1805,14 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
             thisExp.addLoop(mu_recalls)  # add the loop to the experiment
             thisMu_recall = mu_recalls.trialList[0]  # so we can initialise stimuli with some values
             # abbreviate parameter names if possible (e.g. rgb = thisMu_recall.rgb)
-            if thisMu_recall != None:
+            if thisMu_recall is not None:
                 for paramName in thisMu_recall:
                     exec('{} = thisMu_recall[paramName]'.format(paramName))
 
             for thisMu_recall in mu_recalls:
                 currentLoop = mu_recalls
                 # abbreviate parameter names if possible (e.g. rgb = thisMu_recall.rgb)
-                if thisMu_recall != None:
+                if thisMu_recall is not None:
                     for paramName in thisMu_recall:
                         exec('{} = thisMu_recall[paramName]'.format(paramName))
 
@@ -1905,7 +1909,9 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
                 for thisComponent in mu_recallComponents:
                     if hasattr(thisComponent, "setAutoDraw"):
                         thisComponent.setAutoDraw(False)
-                keyboard_response = mu_key_resp_recall.keys.replace('num_', '')
+
+                # the first index is the key name, the second is the duration
+                keyboard_response = mu_key_resp_recall.keys[0]
                 is_correct = keyboard_response == str(current_recall['result'])
 
                 thisExp.addData('mu_key_resp_recall.response', keyboard_response)
@@ -1917,7 +1923,7 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
                 if mu_key_resp_recall.keys in ['', [], None]:  # No response was made
                     mu_key_resp_recall.keys = None
                 mu_recalls.addData('mu_key_resp_recall.keys', mu_key_resp_recall.keys)
-                if mu_key_resp_recall.keys != None:  # we had a response
+                if mu_key_resp_recall.keys is not None:  # we had a response
                     mu_recalls.addData('mu_key_resp_recall.rt', mu_key_resp_recall.rt)
                 mu_recalls.addData('mu_key_resp_recall.started', mu_key_resp_recall.tStartRefresh)
                 mu_recalls.addData('mu_key_resp_recall.stopped', mu_key_resp_recall.tStopRefresh)
@@ -1927,7 +1933,7 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
                 # ------Prepare to start Routine "mu_display_recall"-------
                 continueRoutine = True
                 # update component parameters for each repeat
-                keyboard_response = mu_key_resp_recall.keys.replace('num_', '')
+                keyboard_response = mu_key_resp_recall.keys[0]
                 if keyboard_response.isspace():
                     keyboard_response = '.'
                 if len(keyboard_response) > 1:
@@ -2015,14 +2021,14 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
             thisMu_base_next_trial_dummy = mu_base_next_trial_dummy.trialList[
                 0]  # so we can initialise stimuli with some values
             # abbreviate parameter names if possible (e.g. rgb = thisMu_base_next_trial_dummy.rgb)
-            if thisMu_base_next_trial_dummy != None:
+            if thisMu_base_next_trial_dummy is not None:
                 for paramName in thisMu_base_next_trial_dummy:
                     exec('{} = thisMu_base_next_trial_dummy[paramName]'.format(paramName))
 
             for thisMu_base_next_trial_dummy in mu_base_next_trial_dummy:
                 currentLoop = mu_base_next_trial_dummy
                 # abbreviate parameter names if possible (e.g. rgb = thisMu_base_next_trial_dummy.rgb)
-                if thisMu_base_next_trial_dummy != None:
+                if thisMu_base_next_trial_dummy is not None:
                     for paramName in thisMu_base_next_trial_dummy:
                         exec('{} = thisMu_base_next_trial_dummy[paramName]'.format(paramName))
 
@@ -2083,14 +2089,18 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
                         win.callOnFlip(base_next_trial_key_resp.clearEvents,
                                        eventType='keyboard')  # clear events on next screen flip
                     if base_next_trial_key_resp.status == STARTED and not waitOnFlip:
-                        theseKeys = base_next_trial_key_resp.getKeys(keyList=['space'], waitRelease=False)
-                        _base_next_trial_key_resp_allKeys.extend(theseKeys)
-                        if len(_base_next_trial_key_resp_allKeys):
-                            base_next_trial_key_resp.keys = _base_next_trial_key_resp_allKeys[
-                                -1].name  # just the last key pressed
-                            base_next_trial_key_resp.rt = _base_next_trial_key_resp_allKeys[-1].rt
-                            # a response ends the routine
-                            continueRoutine = False
+                        theseKeys = base_next_trial_key_resp.getKeys(keyList=None, waitRelease=False)
+                        if theseKeys != [] and theseKeys[-1].value[0] == 'space':
+                            _base_next_trial_key_resp_allKeys.extend(theseKeys)
+                            if len(_base_next_trial_key_resp_allKeys):
+                                base_next_trial_key_resp.keys = _base_next_trial_key_resp_allKeys[
+                                    -1].name  # just the last key pressed
+                                base_next_trial_key_resp.rt = _base_next_trial_key_resp_allKeys[-1].rt
+                                # a response ends the routine
+                                continueRoutine = False
+                        else:
+                            base_next_trial_key_resp.keys = []
+                            base_next_trial_key_resp.rt = []
 
                     # check if all components have finished
                     if not continueRoutine:  # a component has requested a forced-end of Routine
@@ -2261,13 +2271,17 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
             win.callOnFlip(base_key_resp_task_end.clock.reset)  # t=0 on next screen flip
             win.callOnFlip(base_key_resp_task_end.clearEvents, eventType='keyboard')  # clear events on next screen flip
         if base_key_resp_task_end.status == STARTED and not waitOnFlip:
-            theseKeys = base_key_resp_task_end.getKeys(keyList=['space'], waitRelease=False)
-            _base_key_resp_task_end_allKeys.extend(theseKeys)
-            if len(_base_key_resp_task_end_allKeys):
-                base_key_resp_task_end.keys = _base_key_resp_task_end_allKeys[-1].name  # just the last key pressed
-                base_key_resp_task_end.rt = _base_key_resp_task_end_allKeys[-1].rt
-                # a response ends the routine
-                continueRoutine = False
+            theseKeys = base_key_resp_task_end.getKeys(keyList=None, waitRelease=False)
+            if theseKeys != [] and theseKeys[-1].value[0] == 'space':
+                _base_key_resp_task_end_allKeys.extend(theseKeys)
+                if len(_base_key_resp_task_end_allKeys):
+                    base_key_resp_task_end.keys = _base_key_resp_task_end_allKeys[-1].name  # just the last key pressed
+                    base_key_resp_task_end.rt = _base_key_resp_task_end_allKeys[-1].rt
+                    # a response ends the routine
+                    continueRoutine = False
+            else:
+                base_key_resp_task_end.keys = []
+                base_key_resp_task_end.rt = []
 
         # check if all components have finished
         if not continueRoutine:  # a component has requested a forced-end of Routine
@@ -2311,14 +2325,14 @@ do_operation_span_dummy = data.TrialHandler(nReps=do_os_task, method='random',
 thisExp.addLoop(do_operation_span_dummy)  # add the loop to the experiment
 thisDo_operation_span_dummy = do_operation_span_dummy.trialList[0]  # so we can initialise stimuli with some values
 # abbreviate parameter names if possible (e.g. rgb = thisDo_operation_span_dummy.rgb)
-if thisDo_operation_span_dummy != None:
+if thisDo_operation_span_dummy is not None:
     for paramName in thisDo_operation_span_dummy:
         exec('{} = thisDo_operation_span_dummy[paramName]'.format(paramName))
 
 for thisDo_operation_span_dummy in do_operation_span_dummy:
     currentLoop = do_operation_span_dummy
     # abbreviate parameter names if possible (e.g. rgb = thisDo_operation_span_dummy.rgb)
-    if thisDo_operation_span_dummy != None:
+    if thisDo_operation_span_dummy is not None:
         for paramName in thisDo_operation_span_dummy:
             exec('{} = thisDo_operation_span_dummy[paramName]'.format(paramName))
 
@@ -2386,14 +2400,14 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
     thisExp.addLoop(os_instruction_pages)  # add the loop to the experiment
     thisOs_instruction_page = os_instruction_pages.trialList[0]  # so we can initialise stimuli with some values
     # abbreviate parameter names if possible (e.g. rgb = thisOs_instruction_page.rgb)
-    if thisOs_instruction_page != None:
+    if thisOs_instruction_page is not None:
         for paramName in thisOs_instruction_page:
             exec('{} = thisOs_instruction_page[paramName]'.format(paramName))
 
     for thisOs_instruction_page in os_instruction_pages:
         currentLoop = os_instruction_pages
         # abbreviate parameter names if possible (e.g. rgb = thisOs_instruction_page.rgb)
-        if thisOs_instruction_page != None:
+        if thisOs_instruction_page is not None:
             for paramName in thisOs_instruction_page:
                 exec('{} = thisOs_instruction_page[paramName]'.format(paramName))
 
@@ -2547,14 +2561,14 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
     thisExp.addLoop(os_practice_dummy)  # add the loop to the experiment
     thisOs_practice_dummy = os_practice_dummy.trialList[0]  # so we can initialise stimuli with some values
     # abbreviate parameter names if possible (e.g. rgb = thisOs_practice_dummy.rgb)
-    if thisOs_practice_dummy != None:
+    if thisOs_practice_dummy is not None:
         for paramName in thisOs_practice_dummy:
             exec('{} = thisOs_practice_dummy[paramName]'.format(paramName))
 
     for thisOs_practice_dummy in os_practice_dummy:
         currentLoop = os_practice_dummy
         # abbreviate parameter names if possible (e.g. rgb = thisOs_practice_dummy.rgb)
-        if thisOs_practice_dummy != None:
+        if thisOs_practice_dummy is not None:
             for paramName in thisOs_practice_dummy:
                 exec('{} = thisOs_practice_dummy[paramName]'.format(paramName))
 
@@ -2622,14 +2636,18 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
                 win.callOnFlip(base_key_resp_task_begin.clearEvents,
                                eventType='keyboard')  # clear events on next screen flip
             if base_key_resp_task_begin.status == STARTED and not waitOnFlip:
-                theseKeys = base_key_resp_task_begin.getKeys(keyList=['space'], waitRelease=False)
-                _base_key_resp_task_begin_allKeys.extend(theseKeys)
-                if len(_base_key_resp_task_begin_allKeys):
-                    base_key_resp_task_begin.keys = _base_key_resp_task_begin_allKeys[
-                        -1].name  # just the last key pressed
-                    base_key_resp_task_begin.rt = _base_key_resp_task_begin_allKeys[-1].rt
-                    # a response ends the routine
-                    continueRoutine = False
+                theseKeys = base_key_resp_task_begin.getKeys(keyList=None, waitRelease=False)
+                if theseKeys != [] and theseKeys[-1].value[0] == 'space':
+                    _base_key_resp_task_begin_allKeys.extend(theseKeys)
+                    if len(_base_key_resp_task_begin_allKeys):
+                        base_key_resp_task_begin.keys = _base_key_resp_task_begin_allKeys[
+                            -1].name  # just the last key pressed
+                        base_key_resp_task_begin.rt = _base_key_resp_task_begin_allKeys[-1].rt
+                        # a response ends the routine
+                        continueRoutine = False
+                else:
+                    base_key_resp_task_begin.keys = []
+                    base_key_resp_task_begin.rt = []
 
             # check if all components have finished
             if not continueRoutine:  # a component has requested a forced-end of Routine
@@ -2808,14 +2826,14 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
             thisExp.addLoop(os_presentations)  # add the loop to the experiment
             thisOs_presentation = os_presentations.trialList[0]  # so we can initialise stimuli with some values
             # abbreviate parameter names if possible (e.g. rgb = thisOs_presentation.rgb)
-            if thisOs_presentation != None:
+            if thisOs_presentation is not None:
                 for paramName in thisOs_presentation:
                     exec('{} = thisOs_presentation[paramName]'.format(paramName))
 
             for thisOs_presentation in os_presentations:
                 currentLoop = os_presentations
                 # abbreviate parameter names if possible (e.g. rgb = thisOs_presentation.rgb)
-                if thisOs_presentation != None:
+                if thisOs_presentation is not None:
                     for paramName in thisOs_presentation:
                         exec('{} = thisOs_presentation[paramName]'.format(paramName))
 
@@ -2917,8 +2935,8 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
                                 -1].name  # just the last key pressed
                             os_key_resp_equation.rt = _os_key_resp_equation_allKeys[-1].rt
                             # was this correct?
-                            if (os_key_resp_equation.keys == str(correct_key)) or (
-                                    os_key_resp_equation.keys == correct_key):
+                            if (os_key_resp_equation.keys[0] == str(correct_key)) or (
+                                    os_key_resp_equation.keys[0]  == correct_key):
                                 os_key_resp_equation.corr = 1
                             else:
                                 os_key_resp_equation.corr = 0
@@ -2961,13 +2979,13 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
                     os_key_resp_equation.keys = None
                     # was no response the correct answer?!
                     if str(correct_key).lower() == 'none':
-                        os_key_resp_equation.corr = 1;  # correct non-response
+                        os_key_resp_equation.corr = 1  # correct non-response
                     else:
-                        os_key_resp_equation.corr = 0;  # failed to respond (incorrectly)
+                        os_key_resp_equation.corr = 0  # failed to respond (incorrectly)
                 # store data for os_presentations (TrialHandler)
                 os_presentations.addData('os_key_resp_equation.keys', os_key_resp_equation.keys)
                 os_presentations.addData('os_key_resp_equation.corr', os_key_resp_equation.corr)
-                if os_key_resp_equation.keys != None:  # we had a response
+                if os_key_resp_equation.keys is not None:  # we had a response
                     os_presentations.addData('os_key_resp_equation.rt', os_key_resp_equation.rt)
                 os_presentations.addData('os_key_resp_equation.started', os_key_resp_equation.tStartRefresh)
                 os_presentations.addData('os_key_resp_equation.stopped', os_key_resp_equation.tStopRefresh)
@@ -3123,14 +3141,14 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
             thisExp.addLoop(os_recalls)  # add the loop to the experiment
             thisOs_recall = os_recalls.trialList[0]  # so we can initialise stimuli with some values
             # abbreviate parameter names if possible (e.g. rgb = thisOs_recall.rgb)
-            if thisOs_recall != None:
+            if thisOs_recall is not None:
                 for paramName in thisOs_recall:
                     exec('{} = thisOs_recall[paramName]'.format(paramName))
 
             for thisOs_recall in os_recalls:
                 currentLoop = os_recalls
                 # abbreviate parameter names if possible (e.g. rgb = thisOs_recall.rgb)
-                if thisOs_recall != None:
+                if thisOs_recall is not None:
                     for paramName in thisOs_recall:
                         exec('{} = thisOs_recall[paramName]'.format(paramName))
 
@@ -3208,8 +3226,8 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
                         theseKeys = os_key_resp_recall.getKeys(keyList=list(os_allowed_keys), waitRelease=False)
                         _os_key_resp_recall_allKeys.extend(theseKeys)
                         if len(_os_key_resp_recall_allKeys):
-                            os_key_resp_recall.keys = _os_key_resp_recall_allKeys[-1].name  # just the last key pressed
-                            os_key_resp_recall.rt = _os_key_resp_recall_allKeys[-1].rt
+                            os_key_resp_recall.keys = _os_key_resp_recall_allKeys[-1].name[0]  # just the last key pressed
+                            os_key_resp_recall.rt = _os_key_resp_recall_allKeys[-1].rt[0]
                             # was this correct?
                             if (os_key_resp_recall.keys == str(correct_letter)) or (
                                     os_key_resp_recall.keys == correct_letter):
@@ -3249,7 +3267,7 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
                 # store data for os_recalls (TrialHandler)
                 os_recalls.addData('os_key_resp_recall.keys', os_key_resp_recall.keys)
                 os_recalls.addData('os_key_resp_recall.corr', os_key_resp_recall.corr)
-                if os_key_resp_recall.keys != None:  # we had a response
+                if os_key_resp_recall.keys is not None:  # we had a response
                     os_recalls.addData('os_key_resp_recall.rt', os_key_resp_recall.rt)
                 os_recalls.addData('os_key_resp_recall.started', os_key_resp_recall.tStartRefresh)
                 os_recalls.addData('os_key_resp_recall.stopped', os_key_resp_recall.tStopRefresh)
@@ -3409,14 +3427,14 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
             thisExp.addLoop(os_break_dummy)  # add the loop to the experiment
             thisOs_break_dummy = os_break_dummy.trialList[0]  # so we can initialise stimuli with some values
             # abbreviate parameter names if possible (e.g. rgb = thisOs_break_dummy.rgb)
-            if thisOs_break_dummy != None:
+            if thisOs_break_dummy is not None:
                 for paramName in thisOs_break_dummy:
                     exec('{} = thisOs_break_dummy[paramName]'.format(paramName))
 
             for thisOs_break_dummy in os_break_dummy:
                 currentLoop = os_break_dummy
                 # abbreviate parameter names if possible (e.g. rgb = thisOs_break_dummy.rgb)
-                if thisOs_break_dummy != None:
+                if thisOs_break_dummy is not None:
                     for paramName in thisOs_break_dummy:
                         exec('{} = thisOs_break_dummy[paramName]'.format(paramName))
 
@@ -3477,14 +3495,18 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
                         win.callOnFlip(base_key_resp_self_paced_break.clearEvents,
                                        eventType='keyboard')  # clear events on next screen flip
                     if base_key_resp_self_paced_break.status == STARTED and not waitOnFlip:
-                        theseKeys = base_key_resp_self_paced_break.getKeys(keyList=['space'], waitRelease=False)
-                        _base_key_resp_self_paced_break_allKeys.extend(theseKeys)
-                        if len(_base_key_resp_self_paced_break_allKeys):
-                            base_key_resp_self_paced_break.keys = _base_key_resp_self_paced_break_allKeys[
-                                -1].name  # just the last key pressed
-                            base_key_resp_self_paced_break.rt = _base_key_resp_self_paced_break_allKeys[-1].rt
-                            # a response ends the routine
-                            continueRoutine = False
+                        theseKeys = base_key_resp_self_paced_break.getKeys(keyList=None, waitRelease=False)
+                        if theseKeys != [] and theseKeys[-1].value[0] == 'space':
+                            _base_key_resp_self_paced_break_allKeys.extend(theseKeys)
+                            if len(_base_key_resp_self_paced_break_allKeys):
+                                base_key_resp_self_paced_break.keys = _base_key_resp_self_paced_break_allKeys[
+                                    -1].name  # just the last key pressed
+                                base_key_resp_self_paced_break.rt = _base_key_resp_self_paced_break_allKeys[-1].rt
+                                # a response ends the routine
+                                continueRoutine = False
+                        else:
+                            base_key_resp_self_paced_break.keys = []
+                            base_key_resp_self_paced_break.rt = []
 
                     # check if all components have finished
                     if not continueRoutine:  # a component has requested a forced-end of Routine
@@ -3509,7 +3531,7 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
                 if base_key_resp_self_paced_break.keys in ['', [], None]:  # No response was made
                     base_key_resp_self_paced_break.keys = None
                 os_break_dummy.addData('base_key_resp_self_paced_break.keys', base_key_resp_self_paced_break.keys)
-                if base_key_resp_self_paced_break.keys != None:  # we had a response
+                if base_key_resp_self_paced_break.keys is not None:  # we had a response
                     os_break_dummy.addData('base_key_resp_self_paced_break.rt', base_key_resp_self_paced_break.rt)
                 os_break_dummy.addData('base_key_resp_self_paced_break.started',
                                        base_key_resp_self_paced_break.tStartRefresh)
@@ -3655,13 +3677,17 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
             win.callOnFlip(base_key_resp_task_end.clock.reset)  # t=0 on next screen flip
             win.callOnFlip(base_key_resp_task_end.clearEvents, eventType='keyboard')  # clear events on next screen flip
         if base_key_resp_task_end.status == STARTED and not waitOnFlip:
-            theseKeys = base_key_resp_task_end.getKeys(keyList=['space'], waitRelease=False)
-            _base_key_resp_task_end_allKeys.extend(theseKeys)
-            if len(_base_key_resp_task_end_allKeys):
-                base_key_resp_task_end.keys = _base_key_resp_task_end_allKeys[-1].name  # just the last key pressed
-                base_key_resp_task_end.rt = _base_key_resp_task_end_allKeys[-1].rt
-                # a response ends the routine
-                continueRoutine = False
+            theseKeys = base_key_resp_task_end.getKeys(keyList=None, waitRelease=False)
+            if theseKeys != [] and theseKeys[-1].value[0] == 'space':
+                _base_key_resp_task_end_allKeys.extend(theseKeys)
+                if len(_base_key_resp_task_end_allKeys):
+                    base_key_resp_task_end.keys = _base_key_resp_task_end_allKeys[-1].name  # just the last key pressed
+                    base_key_resp_task_end.rt = _base_key_resp_task_end_allKeys[-1].rt
+                    # a response ends the routine
+                    continueRoutine = False
+            else:
+                base_key_resp_task_end.keys = []
+                base_key_resp_task_end.rt = []
 
         # check if all components have finished
         if not continueRoutine:  # a component has requested a forced-end of Routine
@@ -3882,8 +3908,8 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
                 _base_key_resp_instruction_allKeys.extend(theseKeys)
                 if len(_base_key_resp_instruction_allKeys):
                     base_key_resp_instruction.keys = _base_key_resp_instruction_allKeys[
-                        -1].name  # just the last key pressed
-                    base_key_resp_instruction.rt = _base_key_resp_instruction_allKeys[-1].rt
+                        -1].name[0]  # just the last key pressed
+                    base_key_resp_instruction.rt = _base_key_resp_instruction_allKeys[-1].rt[0]
                     # a response ends the routine
                     continueRoutine = False
 
@@ -3920,7 +3946,7 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
         if base_key_resp_instruction.keys in ['', [], None]:  # No response was made
             base_key_resp_instruction.keys = None
         ss_instruction_pages.addData('base_key_resp_instruction.keys', base_key_resp_instruction.keys)
-        if base_key_resp_instruction.keys != None:  # we had a response
+        if base_key_resp_instruction.keys is not None:  # we had a response
             ss_instruction_pages.addData('base_key_resp_instruction.rt', base_key_resp_instruction.rt)
         ss_instruction_pages.addData('base_key_resp_instruction.started', base_key_resp_instruction.tStartRefresh)
         ss_instruction_pages.addData('base_key_resp_instruction.stopped', base_key_resp_instruction.tStopRefresh)
@@ -3941,14 +3967,14 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
     thisExp.addLoop(ss_practice_dummy)  # add the loop to the experiment
     thisSs_practice_dummy = ss_practice_dummy.trialList[0]  # so we can initialise stimuli with some values
     # abbreviate parameter names if possible (e.g. rgb = thisSs_practice_dummy.rgb)
-    if thisSs_practice_dummy != None:
+    if thisSs_practice_dummy is not None:
         for paramName in thisSs_practice_dummy:
             exec('{} = thisSs_practice_dummy[paramName]'.format(paramName))
 
     for thisSs_practice_dummy in ss_practice_dummy:
         currentLoop = ss_practice_dummy
         # abbreviate parameter names if possible (e.g. rgb = thisSs_practice_dummy.rgb)
-        if thisSs_practice_dummy != None:
+        if thisSs_practice_dummy is not None:
             for paramName in thisSs_practice_dummy:
                 exec('{} = thisSs_practice_dummy[paramName]'.format(paramName))
 
@@ -4016,14 +4042,18 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
                 win.callOnFlip(base_key_resp_task_begin.clearEvents,
                                eventType='keyboard')  # clear events on next screen flip
             if base_key_resp_task_begin.status == STARTED and not waitOnFlip:
-                theseKeys = base_key_resp_task_begin.getKeys(keyList=['space'], waitRelease=False)
-                _base_key_resp_task_begin_allKeys.extend(theseKeys)
-                if len(_base_key_resp_task_begin_allKeys):
-                    base_key_resp_task_begin.keys = _base_key_resp_task_begin_allKeys[
-                        -1].name  # just the last key pressed
-                    base_key_resp_task_begin.rt = _base_key_resp_task_begin_allKeys[-1].rt
-                    # a response ends the routine
-                    continueRoutine = False
+                theseKeys = base_key_resp_task_begin.getKeys(keyList=None, waitRelease=False)
+                if theseKeys != [] and theseKeys[-1].value[0] == 'space':
+                    _base_key_resp_task_begin_allKeys.extend(theseKeys)
+                    if len(_base_key_resp_task_begin_allKeys):
+                        base_key_resp_task_begin.keys = _base_key_resp_task_begin_allKeys[
+                            -1].name  # just the last key pressed
+                        base_key_resp_task_begin.rt = _base_key_resp_task_begin_allKeys[-1].rt
+                        # a response ends the routine
+                        continueRoutine = False
+                else:
+                    base_key_resp_task_begin.keys = []
+                    base_key_resp_task_begin.rt = []
 
             # check if all components have finished
             if not continueRoutine:  # a component has requested a forced-end of Routine
@@ -4048,7 +4078,7 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
         if base_key_resp_task_begin.keys in ['', [], None]:  # No response was made
             base_key_resp_task_begin.keys = None
         ss_practice_dummy.addData('base_key_resp_task_begin.keys', base_key_resp_task_begin.keys)
-        if base_key_resp_task_begin.keys != None:  # we had a response
+        if base_key_resp_task_begin.keys is not None:  # we had a response
             ss_practice_dummy.addData('base_key_resp_task_begin.rt', base_key_resp_task_begin.rt)
         ss_practice_dummy.addData('base_key_resp_task_begin.started', base_key_resp_task_begin.tStartRefresh)
         ss_practice_dummy.addData('base_key_resp_task_begin.stopped', base_key_resp_task_begin.tStopRefresh)
@@ -4063,14 +4093,14 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
         thisExp.addLoop(ss_trials)  # add the loop to the experiment
         thisSs_trial = ss_trials.trialList[0]  # so we can initialise stimuli with some values
         # abbreviate parameter names if possible (e.g. rgb = thisSs_trial.rgb)
-        if thisSs_trial != None:
+        if thisSs_trial is not None:
             for paramName in thisSs_trial:
                 exec('{} = thisSs_trial[paramName]'.format(paramName))
 
         for thisSs_trial in ss_trials:
             currentLoop = ss_trials
             # abbreviate parameter names if possible (e.g. rgb = thisSs_trial.rgb)
-            if thisSs_trial != None:
+            if thisSs_trial is not None:
                 for paramName in thisSs_trial:
                     exec('{} = thisSs_trial[paramName]'.format(paramName))
 
@@ -4308,8 +4338,8 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
                         _ss_key_resp_sentence_allKeys.extend(theseKeys)
                         if len(_ss_key_resp_sentence_allKeys):
                             ss_key_resp_sentence.keys = _ss_key_resp_sentence_allKeys[
-                                -1].name  # just the last key pressed
-                            ss_key_resp_sentence.rt = _ss_key_resp_sentence_allKeys[-1].rt
+                                -1].name[0]  # just the last key pressed
+                            ss_key_resp_sentence.rt = _ss_key_resp_sentence_allKeys[-1].rt[0]
                             # was this correct?
                             if (ss_key_resp_sentence.keys == str(correct_key)) or (
                                     ss_key_resp_sentence.keys == correct_key):
@@ -4599,20 +4629,22 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
                         win.callOnFlip(ss_key_resp_recall.clearEvents,
                                        eventType='keyboard')  # clear events on next screen flip
                     if ss_key_resp_recall.status == STARTED and not waitOnFlip:
-                        theseKeys = ss_key_resp_recall.getKeys(keyList=list(ss_allowed_keys), waitRelease=False)
-                        _ss_key_resp_recall_allKeys.extend(theseKeys)
-                        if len(_ss_key_resp_recall_allKeys):
-                            ss_key_resp_recall.keys = _ss_key_resp_recall_allKeys[-1].name  # just the last key pressed
-                            ss_key_resp_recall.rt = _ss_key_resp_recall_allKeys[-1].rt
-                            # was this correct?
-                            if (ss_key_resp_recall.keys == str(correct_letter)) or (
-                                    ss_key_resp_recall.keys == correct_letter):
-                                ss_key_resp_recall.corr = 1
-                            else:
-                                ss_key_resp_recall.corr = 0
-                            # a response ends the routine
-                            continueRoutine = False
-
+                        theseKeys = ss_key_resp_recall.getKeys(keyList=None, waitRelease=False)
+                        key = theseKeys[-1].name[0]
+                        if key in ss_allowed_keys:
+                            _ss_key_resp_recall_allKeys.extend(theseKeys)
+                            if len(_ss_key_resp_recall_allKeys):
+                                ss_key_resp_recall.keys = _ss_key_resp_recall_allKeys[
+                                    -1].name  # just the last key pressed
+                                ss_key_resp_recall.rt = _ss_key_resp_recall_allKeys[-1].rt
+                                # was this correct?
+                                if (ss_key_resp_recall.keys == str(correct_letter)) or (
+                                        ss_key_resp_recall.keys == correct_letter):
+                                    ss_key_resp_recall.corr = 1
+                                else:
+                                    ss_key_resp_recall.corr = 0
+                                # a response ends the routine
+                                continueRoutine = False
                     # check if all components have finished
                     if not continueRoutine:  # a component has requested a forced-end of Routine
                         break
@@ -4871,14 +4903,18 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
                         win.callOnFlip(base_key_resp_self_paced_break.clearEvents,
                                        eventType='keyboard')  # clear events on next screen flip
                     if base_key_resp_self_paced_break.status == STARTED and not waitOnFlip:
-                        theseKeys = base_key_resp_self_paced_break.getKeys(keyList=['space'], waitRelease=False)
-                        _base_key_resp_self_paced_break_allKeys.extend(theseKeys)
-                        if len(_base_key_resp_self_paced_break_allKeys):
-                            base_key_resp_self_paced_break.keys = _base_key_resp_self_paced_break_allKeys[
-                                -1].name  # just the last key pressed
-                            base_key_resp_self_paced_break.rt = _base_key_resp_self_paced_break_allKeys[-1].rt
-                            # a response ends the routine
-                            continueRoutine = False
+                        theseKeys = base_key_resp_self_paced_break.getKeys(keyList=None, waitRelease=False)
+                        if theseKeys and theseKeys[-1].value[0] == 'space':
+                            _base_key_resp_self_paced_break_allKeys.extend(theseKeys)
+                            if len(_base_key_resp_self_paced_break_allKeys):
+                                base_key_resp_self_paced_break.keys = _base_key_resp_self_paced_break_allKeys[
+                                    -1].name  # just the last key pressed
+                                base_key_resp_self_paced_break.rt = _base_key_resp_self_paced_break_allKeys[-1].rt
+                                # a response ends the routine
+                                continueRoutine = False
+                        else:
+                            base_key_resp_self_paced_break.keys = []
+                            base_key_resp_self_paced_break.rt = []
 
                     # check if all components have finished
                     if not continueRoutine:  # a component has requested a forced-end of Routine
@@ -5049,13 +5085,17 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
             win.callOnFlip(base_key_resp_task_end.clock.reset)  # t=0 on next screen flip
             win.callOnFlip(base_key_resp_task_end.clearEvents, eventType='keyboard')  # clear events on next screen flip
         if base_key_resp_task_end.status == STARTED and not waitOnFlip:
-            theseKeys = base_key_resp_task_end.getKeys(keyList=['space'], waitRelease=False)
-            _base_key_resp_task_end_allKeys.extend(theseKeys)
-            if len(_base_key_resp_task_end_allKeys):
-                base_key_resp_task_end.keys = _base_key_resp_task_end_allKeys[-1].name  # just the last key pressed
-                base_key_resp_task_end.rt = _base_key_resp_task_end_allKeys[-1].rt
-                # a response ends the routine
-                continueRoutine = False
+            theseKeys = base_key_resp_task_end.getKeys(keyList=None, waitRelease=False)
+            if theseKeys and theseKeys[-1].value[0] == 'space':
+                _base_key_resp_task_end_allKeys.extend(theseKeys)
+                if len(_base_key_resp_task_end_allKeys):
+                    base_key_resp_task_end.keys = _base_key_resp_task_end_allKeys[-1].name  # just the last key pressed
+                    base_key_resp_task_end.rt = _base_key_resp_task_end_allKeys[-1].rt
+                    # a response ends the routine
+                    continueRoutine = False
+            else:
+                base_key_resp_task_end.keys = []
+                base_key_resp_task_end.rt = []
 
         # check if all components have finished
         if not continueRoutine:  # a component has requested a forced-end of Routine
@@ -5410,14 +5450,18 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
                 win.callOnFlip(base_key_resp_task_begin.clearEvents,
                                eventType='keyboard')  # clear events on next screen flip
             if base_key_resp_task_begin.status == STARTED and not waitOnFlip:
-                theseKeys = base_key_resp_task_begin.getKeys(keyList=['space'], waitRelease=False)
-                _base_key_resp_task_begin_allKeys.extend(theseKeys)
-                if len(_base_key_resp_task_begin_allKeys):
-                    base_key_resp_task_begin.keys = _base_key_resp_task_begin_allKeys[
-                        -1].name  # just the last key pressed
-                    base_key_resp_task_begin.rt = _base_key_resp_task_begin_allKeys[-1].rt
-                    # a response ends the routine
-                    continueRoutine = False
+                theseKeys = base_key_resp_task_begin.getKeys(keyList=None, waitRelease=False)
+                if theseKeys and theseKeys[-1].value[0] == 'space':
+                    _base_key_resp_task_begin_allKeys.extend(theseKeys)
+                    if len(_base_key_resp_task_begin_allKeys):
+                        base_key_resp_task_begin.keys = _base_key_resp_task_begin_allKeys[
+                            -1].name  # just the last key pressed
+                        base_key_resp_task_begin.rt = _base_key_resp_task_begin_allKeys[-1].rt
+                        # a response ends the routine
+                        continueRoutine = False
+                else:
+                    base_key_resp_task_begin.keys = []
+                    base_key_resp_task_begin.rt = []
 
             # check if all components have finished
             if not continueRoutine:  # a component has requested a forced-end of Routine
@@ -6127,14 +6171,18 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
                         win.callOnFlip(base_next_trial_key_resp.clearEvents,
                                        eventType='keyboard')  # clear events on next screen flip
                     if base_next_trial_key_resp.status == STARTED and not waitOnFlip:
-                        theseKeys = base_next_trial_key_resp.getKeys(keyList=['space'], waitRelease=False)
-                        _base_next_trial_key_resp_allKeys.extend(theseKeys)
-                        if len(_base_next_trial_key_resp_allKeys):
-                            base_next_trial_key_resp.keys = _base_next_trial_key_resp_allKeys[
-                                -1].name  # just the last key pressed
-                            base_next_trial_key_resp.rt = _base_next_trial_key_resp_allKeys[-1].rt
-                            # a response ends the routine
-                            continueRoutine = False
+                        theseKeys = base_next_trial_key_resp.getKeys(keyList=None, waitRelease=False)
+                        if theseKeys and theseKeys[-1].value[0] == 'space':
+                            _base_next_trial_key_resp_allKeys.extend(theseKeys)
+                            if len(_base_next_trial_key_resp_allKeys):
+                                base_next_trial_key_resp.keys = _base_next_trial_key_resp_allKeys[
+                                    -1].name  # just the last key pressed
+                                base_next_trial_key_resp.rt = _base_next_trial_key_resp_allKeys[-1].rt
+                                # a response ends the routine
+                                continueRoutine = False
+                        else:
+                            base_next_trial_key_resp.keys = []
+                            base_next_trial_key_resp.rt = []
 
                     # check if all components have finished
                     if not continueRoutine:  # a component has requested a forced-end of Routine
@@ -6306,13 +6354,17 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
             win.callOnFlip(sstm_key_resp_task_end.clock.reset)  # t=0 on next screen flip
             win.callOnFlip(sstm_key_resp_task_end.clearEvents, eventType='keyboard')  # clear events on next screen flip
         if sstm_key_resp_task_end.status == STARTED and not waitOnFlip:
-            theseKeys = sstm_key_resp_task_end.getKeys(keyList=['space'], waitRelease=False)
-            _sstm_key_resp_task_end_allKeys.extend(theseKeys)
-            if len(_sstm_key_resp_task_end_allKeys):
-                sstm_key_resp_task_end.keys = _sstm_key_resp_task_end_allKeys[-1].name  # just the last key pressed
-                sstm_key_resp_task_end.rt = _sstm_key_resp_task_end_allKeys[-1].rt
-                # a response ends the routine
-                continueRoutine = False
+            theseKeys = sstm_key_resp_task_end.getKeys(keyList=None, waitRelease=False)
+            if theseKeys and theseKeys[-1].value[0] == 'space':
+                _sstm_key_resp_task_end_allKeys.extend(theseKeys)
+                if len(_sstm_key_resp_task_end_allKeys):
+                    sstm_key_resp_task_end.keys = _sstm_key_resp_task_end_allKeys[-1].name  # just the last key pressed
+                    sstm_key_resp_task_end.rt = _sstm_key_resp_task_end_allKeys[-1].rt
+                    # a response ends the routine
+                    continueRoutine = False
+            else:
+                sstm_key_resp_task_end.keys = []
+                sstm_key_resp_task_end.rt = []
 
         # check if all components have finished
         if not continueRoutine:  # a component has requested a forced-end of Routine
@@ -6443,7 +6495,7 @@ thisExp.addData('base_text_end.stopped', base_text_end.tStopRefresh)
 if base_key_resp_end.keys in ['', [], None]:  # No response was made
     base_key_resp_end.keys = None
 thisExp.addData('base_key_resp_end.keys', base_key_resp_end.keys)
-if base_key_resp_end.keys != None:  # we had a response
+if base_key_resp_end.keys is not None:  # we had a response
     thisExp.addData('base_key_resp_end.rt', base_key_resp_end.rt)
 thisExp.addData('base_key_resp_end.started', base_key_resp_end.tStartRefresh)
 thisExp.addData('base_key_resp_end.stopped', base_key_resp_end.tStopRefresh)

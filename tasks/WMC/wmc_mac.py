@@ -655,7 +655,8 @@ def run_wmc_mac(result_folder):
         tThisFlipGlobal = win.getFutureFlipTime(clock=None)
         frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
         # update/draw components on each frame
-        if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+        all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+        if any(key.name[0] == config.common.abort_key for key in all_keys):
             core.quit()
 
         # check if all components have finished
@@ -737,7 +738,8 @@ def run_wmc_mac(result_folder):
         tThisFlipGlobal = win.getFutureFlipTime(clock=None)
         frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
         # update/draw components on each frame
-        if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+        all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+        if any(key.name[0] == config.common.abort_key for key in all_keys):
             core.quit()
 
         # *base_image_instruction* updates
@@ -868,7 +870,8 @@ def run_wmc_mac(result_folder):
             tThisFlipGlobal = win.getFutureFlipTime(clock=None)
             frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
             # update/draw components on each frame
-            if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+            all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+            if any(key.name[0] == config.common.abort_key for key in all_keys):
                 core.quit()
 
             # check if all components have finished
@@ -968,7 +971,8 @@ def run_wmc_mac(result_folder):
                 tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                 frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                 # update/draw components on each frame
-                if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                if any(key.name[0] == config.common.abort_key for key in all_keys):
                     core.quit()
 
                 # *base_image_instruction* updates
@@ -1109,7 +1113,8 @@ def run_wmc_mac(result_folder):
                 tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                 frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                 # update/draw components on each frame
-                if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                if any(key.name[0] == config.common.abort_key for key in all_keys):
                     core.quit()
 
                 # *base_text_begin_task* updates
@@ -1227,7 +1232,8 @@ def run_wmc_mac(result_folder):
                     tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                     frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                     # update/draw components on each frame
-                    if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                    all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                    if any(key.name[0] == config.common.abort_key for key in all_keys):
                         core.quit()
 
                     # check if all components have finished
@@ -1278,7 +1284,8 @@ def run_wmc_mac(result_folder):
                     tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                     frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                     # update/draw components on each frame
-                    if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                    all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                    if any(key.name[0] == config.common.abort_key for key in all_keys):
                         core.quit()
 
                     # *mu_text_blank* updates
@@ -1328,14 +1335,14 @@ def run_wmc_mac(result_folder):
                 thisExp.addLoop(mu_presentations)  # add the loop to the experiment
                 thisMu_presentation = mu_presentations.trialList[0]  # so we can initialise stimuli with some values
                 # abbreviate parameter names if possible (e.g. rgb = thisMu_presentation.rgb)
-                if thisMu_presentation != None:
+                if thisMu_presentation is not None:
                     for paramName in thisMu_presentation:
                         exec('{} = thisMu_presentation[paramName]'.format(paramName))
 
                 for thisMu_presentation in mu_presentations:
                     currentLoop = mu_presentations
                     # abbreviate parameter names if possible (e.g. rgb = thisMu_presentation.rgb)
-                    if thisMu_presentation != None:
+                    if thisMu_presentation is not None:
                         for paramName in thisMu_presentation:
                             exec('{} = thisMu_presentation[paramName]'.format(paramName))
 
@@ -1368,7 +1375,8 @@ def run_wmc_mac(result_folder):
                         tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                         frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                         # update/draw components on each frame
-                        if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                        all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                        if any(key.name[0] == config.common.abort_key for key in all_keys):
                             core.quit()
 
                         # *mu_text_digit* updates
@@ -1436,7 +1444,8 @@ def run_wmc_mac(result_folder):
                         tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                         frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                         # update/draw components on each frame
-                        if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                        all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                        if any(key.name[0] == config.common.abort_key for key in all_keys):
                             core.quit()
 
                         # *mu_text_blank_2* updates
@@ -1529,7 +1538,8 @@ def run_wmc_mac(result_folder):
                         tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                         frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                         # update/draw components on each frame
-                        if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                        all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                        if any(key.name[0] == config.common.abort_key for key in all_keys):
                             core.quit()
 
                         # *mu_text_operation* updates
@@ -1597,7 +1607,8 @@ def run_wmc_mac(result_folder):
                         tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                         frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                         # update/draw components on each frame
-                        if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                        all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                        if any(key.name[0] == config.common.abort_key for key in all_keys):
                             core.quit()
 
                         # *mu_text_blank_2* updates
@@ -1702,7 +1713,8 @@ def run_wmc_mac(result_folder):
                         tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                         frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                         # update/draw components on each frame
-                        if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                        all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                        if any(key.name[0] == config.common.abort_key for key in all_keys):
                             core.quit()
 
                         # *mu_text_question_mark* updates
@@ -1755,7 +1767,9 @@ def run_wmc_mac(result_folder):
                     for thisComponent in mu_recallComponents:
                         if hasattr(thisComponent, "setAutoDraw"):
                             thisComponent.setAutoDraw(False)
-                    keyboard_response = mu_key_resp_recall.keys.replace('num_', '')
+
+                    # the first index is the key name, the second is the duration
+                    keyboard_response = mu_key_resp_recall.keys[0]
                     is_correct = keyboard_response == str(current_recall['result'])
 
                     thisExp.addData('mu_key_resp_recall.response', keyboard_response)
@@ -1767,7 +1781,7 @@ def run_wmc_mac(result_folder):
                     if mu_key_resp_recall.keys in ['', [], None]:  # No response was made
                         mu_key_resp_recall.keys = None
                     mu_recalls.addData('mu_key_resp_recall.keys', mu_key_resp_recall.keys)
-                    if mu_key_resp_recall.keys != None:  # we had a response
+                    if mu_key_resp_recall.keys is not None:  # we had a response
                         mu_recalls.addData('mu_key_resp_recall.rt', mu_key_resp_recall.rt)
                     mu_recalls.addData('mu_key_resp_recall.started', mu_key_resp_recall.tStartRefresh)
                     mu_recalls.addData('mu_key_resp_recall.stopped', mu_key_resp_recall.tStopRefresh)
@@ -1777,7 +1791,7 @@ def run_wmc_mac(result_folder):
                     # ------Prepare to start Routine "mu_display_recall"-------
                     continueRoutine = True
                     # update component parameters for each repeat
-                    keyboard_response = mu_key_resp_recall.keys.replace('num_', '')
+                    keyboard_response = mu_key_resp_recall.keys[0]
                     if keyboard_response.isspace():
                         keyboard_response = '.'
                     if len(keyboard_response) > 1:
@@ -1809,7 +1823,8 @@ def run_wmc_mac(result_folder):
                         tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                         frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                         # update/draw components on each frame
-                        if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                        all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                        if any(key.name[0] == config.common.abort_key for key in all_keys):
                             core.quit()
 
                         # *mu_text_recall* updates
@@ -1865,14 +1880,14 @@ def run_wmc_mac(result_folder):
                 thisMu_base_next_trial_dummy = mu_base_next_trial_dummy.trialList[
                     0]  # so we can initialise stimuli with some values
                 # abbreviate parameter names if possible (e.g. rgb = thisMu_base_next_trial_dummy.rgb)
-                if thisMu_base_next_trial_dummy != None:
+                if thisMu_base_next_trial_dummy is not None:
                     for paramName in thisMu_base_next_trial_dummy:
                         exec('{} = thisMu_base_next_trial_dummy[paramName]'.format(paramName))
 
                 for thisMu_base_next_trial_dummy in mu_base_next_trial_dummy:
                     currentLoop = mu_base_next_trial_dummy
                     # abbreviate parameter names if possible (e.g. rgb = thisMu_base_next_trial_dummy.rgb)
-                    if thisMu_base_next_trial_dummy != None:
+                    if thisMu_base_next_trial_dummy is not None:
                         for paramName in thisMu_base_next_trial_dummy:
                             exec('{} = thisMu_base_next_trial_dummy[paramName]'.format(paramName))
 
@@ -1906,7 +1921,8 @@ def run_wmc_mac(result_folder):
                         tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                         frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                         # update/draw components on each frame
-                        if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                        all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                        if any(key.name[0] == config.common.abort_key for key in all_keys):
                             core.quit()
 
                         # *base_text_next_trial* updates
@@ -2008,7 +2024,8 @@ def run_wmc_mac(result_folder):
                     tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                     frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                     # update/draw components on each frame
-                    if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                    all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                    if any(key.name[0] == config.common.abort_key for key in all_keys):
                         core.quit()
 
                     # *base_text_intertrial* updates
@@ -2089,7 +2106,8 @@ def run_wmc_mac(result_folder):
             tThisFlipGlobal = win.getFutureFlipTime(clock=None)
             frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
             # update/draw components on each frame
-            if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+            all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+            if any(key.name[0] == config.common.abort_key for key in all_keys):
                 core.quit()
 
             # *base_text_task_end* updates
@@ -2213,7 +2231,8 @@ def run_wmc_mac(result_folder):
             tThisFlipGlobal = win.getFutureFlipTime(clock=None)
             frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
             # update/draw components on each frame
-            if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+            all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+            if any(key.name[0] == config.common.abort_key for key in all_keys):
                 core.quit()
 
             # check if all components have finished
@@ -2244,14 +2263,14 @@ def run_wmc_mac(result_folder):
         thisExp.addLoop(os_instruction_pages)  # add the loop to the experiment
         thisOs_instruction_page = os_instruction_pages.trialList[0]  # so we can initialise stimuli with some values
         # abbreviate parameter names if possible (e.g. rgb = thisOs_instruction_page.rgb)
-        if thisOs_instruction_page != None:
+        if thisOs_instruction_page is not None:
             for paramName in thisOs_instruction_page:
                 exec('{} = thisOs_instruction_page[paramName]'.format(paramName))
 
         for thisOs_instruction_page in os_instruction_pages:
             currentLoop = os_instruction_pages
             # abbreviate parameter names if possible (e.g. rgb = thisOs_instruction_page.rgb)
-            if thisOs_instruction_page != None:
+            if thisOs_instruction_page is not None:
                 for paramName in thisOs_instruction_page:
                     exec('{} = thisOs_instruction_page[paramName]'.format(paramName))
 
@@ -2313,7 +2332,8 @@ def run_wmc_mac(result_folder):
                 tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                 frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                 # update/draw components on each frame
-                if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                if any(key.name[0] == config.common.abort_key for key in all_keys):
                     core.quit()
 
                 # *base_image_instruction* updates
@@ -2403,14 +2423,14 @@ def run_wmc_mac(result_folder):
         thisExp.addLoop(os_practice_dummy)  # add the loop to the experiment
         thisOs_practice_dummy = os_practice_dummy.trialList[0]  # so we can initialise stimuli with some values
         # abbreviate parameter names if possible (e.g. rgb = thisOs_practice_dummy.rgb)
-        if thisOs_practice_dummy != None:
+        if thisOs_practice_dummy is not None:
             for paramName in thisOs_practice_dummy:
                 exec('{} = thisOs_practice_dummy[paramName]'.format(paramName))
 
         for thisOs_practice_dummy in os_practice_dummy:
             currentLoop = os_practice_dummy
             # abbreviate parameter names if possible (e.g. rgb = thisOs_practice_dummy.rgb)
-            if thisOs_practice_dummy != None:
+            if thisOs_practice_dummy is not None:
                 for paramName in thisOs_practice_dummy:
                     exec('{} = thisOs_practice_dummy[paramName]'.format(paramName))
 
@@ -2451,7 +2471,8 @@ def run_wmc_mac(result_folder):
                 tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                 frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                 # update/draw components on each frame
-                if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                if any(key.name[0] == config.common.abort_key for key in all_keys):
                     core.quit()
 
                 # *base_text_begin_task* updates
@@ -2568,7 +2589,8 @@ def run_wmc_mac(result_folder):
                     tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                     frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                     # update/draw components on each frame
-                    if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                    all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                    if any(key.name[0] == config.common.abort_key for key in all_keys):
                         core.quit()
 
                     # check if all components have finished
@@ -2618,7 +2640,8 @@ def run_wmc_mac(result_folder):
                     tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                     frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                     # update/draw components on each frame
-                    if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                    all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                    if any(key.name[0] == config.common.abort_key for key in all_keys):
                         core.quit()
 
                     # *os_text_fixation_cross* updates
@@ -2718,7 +2741,8 @@ def run_wmc_mac(result_folder):
                         tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                         frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                         # update/draw components on each frame
-                        if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                        all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                        if any(key.name[0] == config.common.abort_key for key in all_keys):
                             core.quit()
 
                         # *os_text_equation* updates
@@ -2777,8 +2801,8 @@ def run_wmc_mac(result_folder):
                                     -1].name  # just the last key pressed
                                 os_key_resp_equation.rt = _os_key_resp_equation_allKeys[-1].rt
                                 # was this correct?
-                                if (os_key_resp_equation.keys == str(correct_key)) or (
-                                        os_key_resp_equation.keys == correct_key):
+                                if (os_key_resp_equation.keys[0]  == str(correct_key)) or (
+                                        os_key_resp_equation.keys[0]  == correct_key):
                                     os_key_resp_equation.corr = 1
                                 else:
                                     os_key_resp_equation.corr = 0
@@ -2827,7 +2851,7 @@ def run_wmc_mac(result_folder):
                     # store data for os_presentations (TrialHandler)
                     os_presentations.addData('os_key_resp_equation.keys', os_key_resp_equation.keys)
                     os_presentations.addData('os_key_resp_equation.corr', os_key_resp_equation.corr)
-                    if os_key_resp_equation.keys != None:  # we had a response
+                    if os_key_resp_equation.keys is not None:  # we had a response
                         os_presentations.addData('os_key_resp_equation.rt', os_key_resp_equation.rt)
                     os_presentations.addData('os_key_resp_equation.started', os_key_resp_equation.tStartRefresh)
                     os_presentations.addData('os_key_resp_equation.stopped', os_key_resp_equation.tStopRefresh)
@@ -2862,7 +2886,8 @@ def run_wmc_mac(result_folder):
                         tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                         frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                         # update/draw components on each frame
-                        if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                        all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                        if any(key.name[0] == config.common.abort_key for key in all_keys):
                             core.quit()
 
                         # *os_text_letter* updates
@@ -2930,7 +2955,8 @@ def run_wmc_mac(result_folder):
                         tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                         frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                         # update/draw components on each frame
-                        if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                        all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                        if any(key.name[0] == config.common.abort_key for key in all_keys):
                             core.quit()
 
                         # *os_text_blank* updates
@@ -2983,14 +3009,14 @@ def run_wmc_mac(result_folder):
                 thisExp.addLoop(os_recalls)  # add the loop to the experiment
                 thisOs_recall = os_recalls.trialList[0]  # so we can initialise stimuli with some values
                 # abbreviate parameter names if possible (e.g. rgb = thisOs_recall.rgb)
-                if thisOs_recall != None:
+                if thisOs_recall is not None:
                     for paramName in thisOs_recall:
                         exec('{} = thisOs_recall[paramName]'.format(paramName))
 
                 for thisOs_recall in os_recalls:
                     currentLoop = os_recalls
                     # abbreviate parameter names if possible (e.g. rgb = thisOs_recall.rgb)
-                    if thisOs_recall != None:
+                    if thisOs_recall is not None:
                         for paramName in thisOs_recall:
                             exec('{} = thisOs_recall[paramName]'.format(paramName))
 
@@ -3029,7 +3055,8 @@ def run_wmc_mac(result_folder):
                         tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                         frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                         # update/draw components on each frame
-                        if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                        all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                        if any(key.name[0] == config.common.abort_key for key in all_keys):
                             core.quit()
 
                         # *os_text_question_mark* updates
@@ -3069,8 +3096,8 @@ def run_wmc_mac(result_folder):
                             _os_key_resp_recall_allKeys.extend(theseKeys)
                             if len(_os_key_resp_recall_allKeys):
                                 os_key_resp_recall.keys = _os_key_resp_recall_allKeys[
-                                    -1].name  # just the last key pressed
-                                os_key_resp_recall.rt = _os_key_resp_recall_allKeys[-1].rt
+                                    -1].name[0]  # just the last key pressed
+                                os_key_resp_recall.rt = _os_key_resp_recall_allKeys[-1].rt[0]
                                 # was this correct?
                                 if (os_key_resp_recall.keys == str(correct_letter)) or (
                                         os_key_resp_recall.keys == correct_letter):
@@ -3110,7 +3137,7 @@ def run_wmc_mac(result_folder):
                     # store data for os_recalls (TrialHandler)
                     os_recalls.addData('os_key_resp_recall.keys', os_key_resp_recall.keys)
                     os_recalls.addData('os_key_resp_recall.corr', os_key_resp_recall.corr)
-                    if os_key_resp_recall.keys != None:  # we had a response
+                    if os_key_resp_recall.keys is not None:  # we had a response
                         os_recalls.addData('os_key_resp_recall.rt', os_key_resp_recall.rt)
                     os_recalls.addData('os_key_resp_recall.started', os_key_resp_recall.tStartRefresh)
                     os_recalls.addData('os_key_resp_recall.stopped', os_key_resp_recall.tStopRefresh)
@@ -3148,7 +3175,8 @@ def run_wmc_mac(result_folder):
                         tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                         frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                         # update/draw components on each frame
-                        if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                        all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                        if any(key.name[0] == config.common.abort_key for key in all_keys):
                             core.quit()
 
                         # *os_text_recall* updates
@@ -3220,7 +3248,8 @@ def run_wmc_mac(result_folder):
                     tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                     frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                     # update/draw components on each frame
-                    if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                    all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                    if any(key.name[0] == config.common.abort_key for key in all_keys):
                         core.quit()
 
                     # *base_text_intertrial* updates
@@ -3270,14 +3299,14 @@ def run_wmc_mac(result_folder):
                 thisExp.addLoop(os_break_dummy)  # add the loop to the experiment
                 thisOs_break_dummy = os_break_dummy.trialList[0]  # so we can initialise stimuli with some values
                 # abbreviate parameter names if possible (e.g. rgb = thisOs_break_dummy.rgb)
-                if thisOs_break_dummy != None:
+                if thisOs_break_dummy is not None:
                     for paramName in thisOs_break_dummy:
                         exec('{} = thisOs_break_dummy[paramName]'.format(paramName))
 
                 for thisOs_break_dummy in os_break_dummy:
                     currentLoop = os_break_dummy
                     # abbreviate parameter names if possible (e.g. rgb = thisOs_break_dummy.rgb)
-                    if thisOs_break_dummy != None:
+                    if thisOs_break_dummy is not None:
                         for paramName in thisOs_break_dummy:
                             exec('{} = thisOs_break_dummy[paramName]'.format(paramName))
 
@@ -3311,7 +3340,8 @@ def run_wmc_mac(result_folder):
                         tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                         frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                         # update/draw components on each frame
-                        if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                        all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                        if any(key.name[0] == config.common.abort_key for key in all_keys):
                             core.quit()
 
                         # *base_text_self_paced_break* updates
@@ -3376,7 +3406,7 @@ def run_wmc_mac(result_folder):
                     if base_key_resp_self_paced_break.keys in ['', [], None]:  # No response was made
                         base_key_resp_self_paced_break.keys = None
                     os_break_dummy.addData('base_key_resp_self_paced_break.keys', base_key_resp_self_paced_break.keys)
-                    if base_key_resp_self_paced_break.keys != None:  # we had a response
+                    if base_key_resp_self_paced_break.keys is not None:  # we had a response
                         os_break_dummy.addData('base_key_resp_self_paced_break.rt', base_key_resp_self_paced_break.rt)
                     os_break_dummy.addData('base_key_resp_self_paced_break.started',
                                            base_key_resp_self_paced_break.tStartRefresh)
@@ -3411,7 +3441,8 @@ def run_wmc_mac(result_folder):
                         tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                         frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                         # update/draw components on each frame
-                        if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                        all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                        if any(key.name[0] == config.common.abort_key for key in all_keys):
                             core.quit()
 
                         # *base_text_pause_after_break* updates
@@ -3498,7 +3529,8 @@ def run_wmc_mac(result_folder):
             tThisFlipGlobal = win.getFutureFlipTime(clock=None)
             frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
             # update/draw components on each frame
-            if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+            all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+            if any(key.name[0] == config.common.abort_key for key in all_keys):
                 core.quit()
 
             # *base_text_task_end* updates
@@ -3622,7 +3654,8 @@ def run_wmc_mac(result_folder):
             tThisFlipGlobal = win.getFutureFlipTime(clock=None)
             frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
             # update/draw components on each frame
-            if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+            all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+            if any(key.name[0] == config.common.abort_key for key in all_keys):
                 core.quit()
 
             # check if all components have finished
@@ -3722,7 +3755,8 @@ def run_wmc_mac(result_folder):
                 tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                 frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                 # update/draw components on each frame
-                if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                if any(key.name[0] == config.common.abort_key for key in all_keys):
                     core.quit()
 
                 # *base_image_instruction* updates
@@ -3753,8 +3787,8 @@ def run_wmc_mac(result_folder):
                     _base_key_resp_instruction_allKeys.extend(theseKeys)
                     if len(_base_key_resp_instruction_allKeys):
                         base_key_resp_instruction.keys = _base_key_resp_instruction_allKeys[
-                            -1].name  # just the last key pressed
-                        base_key_resp_instruction.rt = _base_key_resp_instruction_allKeys[-1].rt
+                            -1].name[0]   # just the last key pressed
+                        base_key_resp_instruction.rt = _base_key_resp_instruction_allKeys[-1].rt[0]
                         # a response ends the routine
                         continueRoutine = False
 
@@ -3791,7 +3825,7 @@ def run_wmc_mac(result_folder):
             if base_key_resp_instruction.keys in ['', [], None]:  # No response was made
                 base_key_resp_instruction.keys = None
             ss_instruction_pages.addData('base_key_resp_instruction.keys', base_key_resp_instruction.keys)
-            if base_key_resp_instruction.keys != None:  # we had a response
+            if base_key_resp_instruction.keys is not None:  # we had a response
                 ss_instruction_pages.addData('base_key_resp_instruction.rt', base_key_resp_instruction.rt)
             ss_instruction_pages.addData('base_key_resp_instruction.started', base_key_resp_instruction.tStartRefresh)
             ss_instruction_pages.addData('base_key_resp_instruction.stopped', base_key_resp_instruction.tStopRefresh)
@@ -3812,14 +3846,14 @@ def run_wmc_mac(result_folder):
         thisExp.addLoop(ss_practice_dummy)  # add the loop to the experiment
         thisSs_practice_dummy = ss_practice_dummy.trialList[0]  # so we can initialise stimuli with some values
         # abbreviate parameter names if possible (e.g. rgb = thisSs_practice_dummy.rgb)
-        if thisSs_practice_dummy != None:
+        if thisSs_practice_dummy is not None:
             for paramName in thisSs_practice_dummy:
                 exec('{} = thisSs_practice_dummy[paramName]'.format(paramName))
 
         for thisSs_practice_dummy in ss_practice_dummy:
             currentLoop = ss_practice_dummy
             # abbreviate parameter names if possible (e.g. rgb = thisSs_practice_dummy.rgb)
-            if thisSs_practice_dummy != None:
+            if thisSs_practice_dummy is not None:
                 for paramName in thisSs_practice_dummy:
                     exec('{} = thisSs_practice_dummy[paramName]'.format(paramName))
 
@@ -3860,7 +3894,8 @@ def run_wmc_mac(result_folder):
                 tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                 frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                 # update/draw components on each frame
-                if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                if any(key.name[0] == config.common.abort_key for key in all_keys):
                     core.quit()
 
                 # *base_text_begin_task* updates
@@ -3923,7 +3958,7 @@ def run_wmc_mac(result_folder):
             if base_key_resp_task_begin.keys in ['', [], None]:  # No response was made
                 base_key_resp_task_begin.keys = None
             ss_practice_dummy.addData('base_key_resp_task_begin.keys', base_key_resp_task_begin.keys)
-            if base_key_resp_task_begin.keys != None:  # we had a response
+            if base_key_resp_task_begin.keys is not None:  # we had a response
                 ss_practice_dummy.addData('base_key_resp_task_begin.rt', base_key_resp_task_begin.rt)
             ss_practice_dummy.addData('base_key_resp_task_begin.started', base_key_resp_task_begin.tStartRefresh)
             ss_practice_dummy.addData('base_key_resp_task_begin.stopped', base_key_resp_task_begin.tStopRefresh)
@@ -3938,14 +3973,14 @@ def run_wmc_mac(result_folder):
             thisExp.addLoop(ss_trials)  # add the loop to the experiment
             thisSs_trial = ss_trials.trialList[0]  # so we can initialise stimuli with some values
             # abbreviate parameter names if possible (e.g. rgb = thisSs_trial.rgb)
-            if thisSs_trial != None:
+            if thisSs_trial is not None:
                 for paramName in thisSs_trial:
                     exec('{} = thisSs_trial[paramName]'.format(paramName))
 
             for thisSs_trial in ss_trials:
                 currentLoop = ss_trials
                 # abbreviate parameter names if possible (e.g. rgb = thisSs_trial.rgb)
-                if thisSs_trial != None:
+                if thisSs_trial is not None:
                     for paramName in thisSs_trial:
                         exec('{} = thisSs_trial[paramName]'.format(paramName))
 
@@ -3977,7 +4012,8 @@ def run_wmc_mac(result_folder):
                     tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                     frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                     # update/draw components on each frame
-                    if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                    all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                    if any(key.name[0] == config.common.abort_key for key in all_keys):
                         core.quit()
 
                     # check if all components have finished
@@ -4027,7 +4063,8 @@ def run_wmc_mac(result_folder):
                     tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                     frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                     # update/draw components on each frame
-                    if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                    all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                    if any(key.name[0] == config.common.abort_key for key in all_keys):
                         core.quit()
 
                     # *ss_text_fixation_cross* updates
@@ -4127,7 +4164,8 @@ def run_wmc_mac(result_folder):
                         tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                         frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                         # update/draw components on each frame
-                        if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                        all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                        if any(key.name[0] == config.common.abort_key for key in all_keys):
                             core.quit()
 
                         # *ss_text_sentence* updates
@@ -4183,8 +4221,8 @@ def run_wmc_mac(result_folder):
                             _ss_key_resp_sentence_allKeys.extend(theseKeys)
                             if len(_ss_key_resp_sentence_allKeys):
                                 ss_key_resp_sentence.keys = _ss_key_resp_sentence_allKeys[
-                                    -1].name  # just the last key pressed
-                                ss_key_resp_sentence.rt = _ss_key_resp_sentence_allKeys[-1].rt
+                                    -1].name[0]  # just the last key pressed
+                                ss_key_resp_sentence.rt = _ss_key_resp_sentence_allKeys[-1].rt[0]
                                 # was this correct?
                                 if (ss_key_resp_sentence.keys == str(correct_key)) or (
                                         ss_key_resp_sentence.keys == correct_key):
@@ -4271,7 +4309,8 @@ def run_wmc_mac(result_folder):
                         tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                         frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                         # update/draw components on each frame
-                        if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                        all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                        if any(key.name[0] == config.common.abort_key for key in all_keys):
                             core.quit()
 
                         # *ss_text_letter* updates
@@ -4339,7 +4378,8 @@ def run_wmc_mac(result_folder):
                         tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                         frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                         # update/draw components on each frame
-                        if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                        all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                        if any(key.name[0] == config.common.abort_key for key in all_keys):
                             core.quit()
 
                         # *ss_text_blank* updates
@@ -4438,7 +4478,8 @@ def run_wmc_mac(result_folder):
                         tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                         frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                         # update/draw components on each frame
-                        if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                        all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                        if any(key.name[0] == config.common.abort_key for key in all_keys):
                             core.quit()
 
                         # *ss_text_question_mark* updates
@@ -4474,20 +4515,22 @@ def run_wmc_mac(result_folder):
                             win.callOnFlip(ss_key_resp_recall.clearEvents,
                                            eventType='keyboard')  # clear events on next screen flip
                         if ss_key_resp_recall.status == STARTED and not waitOnFlip:
-                            theseKeys = ss_key_resp_recall.getKeys(keyList=list(ss_allowed_keys), waitRelease=False)
-                            _ss_key_resp_recall_allKeys.extend(theseKeys)
-                            if len(_ss_key_resp_recall_allKeys):
-                                ss_key_resp_recall.keys = _ss_key_resp_recall_allKeys[
-                                    -1].name  # just the last key pressed
-                                ss_key_resp_recall.rt = _ss_key_resp_recall_allKeys[-1].rt
-                                # was this correct?
-                                if (ss_key_resp_recall.keys == str(correct_letter)) or (
-                                        ss_key_resp_recall.keys == correct_letter):
-                                    ss_key_resp_recall.corr = 1
-                                else:
-                                    ss_key_resp_recall.corr = 0
-                                # a response ends the routine
-                                continueRoutine = False
+                            theseKeys = ss_key_resp_recall.getKeys(keyList=None, waitRelease=False)
+                            key = theseKeys[-1].name[0]
+                            if key in ss_allowed_keys:
+                                _ss_key_resp_recall_allKeys.extend(theseKeys)
+                                if len(_ss_key_resp_recall_allKeys):
+                                    ss_key_resp_recall.keys = _ss_key_resp_recall_allKeys[
+                                        -1].name  # just the last key pressed
+                                    ss_key_resp_recall.rt = _ss_key_resp_recall_allKeys[-1].rt
+                                    # was this correct?
+                                    if (ss_key_resp_recall.keys == str(correct_letter)) or (
+                                            ss_key_resp_recall.keys == correct_letter):
+                                        ss_key_resp_recall.corr = 1
+                                    else:
+                                        ss_key_resp_recall.corr = 0
+                                    # a response ends the routine
+                                    continueRoutine = False
 
                         # check if all components have finished
                         if not continueRoutine:  # a component has requested a forced-end of Routine
@@ -4557,7 +4600,8 @@ def run_wmc_mac(result_folder):
                         tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                         frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                         # update/draw components on each frame
-                        if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                        all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                        if any(key.name[0] == config.common.abort_key for key in all_keys):
                             core.quit()
 
                         # *ss_text_display_recall* updates
@@ -4629,7 +4673,8 @@ def run_wmc_mac(result_folder):
                     tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                     frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                     # update/draw components on each frame
-                    if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                    all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                    if any(key.name[0] == config.common.abort_key for key in all_keys):
                         core.quit()
 
                     # *base_text_intertrial* updates
@@ -4720,7 +4765,8 @@ def run_wmc_mac(result_folder):
                         tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                         frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                         # update/draw components on each frame
-                        if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                        all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                        if any(key.name[0] == config.common.abort_key for key in all_keys):
                             core.quit()
 
                         # *base_text_self_paced_break* updates
@@ -4820,7 +4866,8 @@ def run_wmc_mac(result_folder):
                         tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                         frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                         # update/draw components on each frame
-                        if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                        all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                        if any(key.name[0] == config.common.abort_key for key in all_keys):
                             core.quit()
 
                         # *base_text_pause_after_break* updates
@@ -4907,7 +4954,8 @@ def run_wmc_mac(result_folder):
             tThisFlipGlobal = win.getFutureFlipTime(clock=None)
             frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
             # update/draw components on each frame
-            if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+            all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+            if any(key.name[0] == config.common.abort_key for key in all_keys):
                 core.quit()
 
             # *base_text_task_end* updates
@@ -5031,7 +5079,8 @@ def run_wmc_mac(result_folder):
             tThisFlipGlobal = win.getFutureFlipTime(clock=None)
             frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
             # update/draw components on each frame
-            if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+            all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+            if any(key.name[0] == config.common.abort_key for key in all_keys):
                 core.quit()
 
             # check if all components have finished
@@ -5131,7 +5180,9 @@ def run_wmc_mac(result_folder):
                 tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                 frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                 # update/draw components on each frame
-                if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                if any(key.name[0] == config.common.abort_key for key in all_keys):
                     core.quit()
 
                 # *base_image_instruction* updates
@@ -5269,7 +5320,9 @@ def run_wmc_mac(result_folder):
                 tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                 frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                 # update/draw components on each frame
-                if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                if any(key.name[0] == config.common.abort_key for key in all_keys):
                     core.quit()
 
                 # *base_text_begin_task* updates
@@ -5386,7 +5439,8 @@ def run_wmc_mac(result_folder):
                     tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                     frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                     # update/draw components on each frame
-                    if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                    all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                    if any(key.name[0] == config.common.abort_key for key in all_keys):
                         core.quit()
 
                     # check if all components have finished
@@ -5437,7 +5491,8 @@ def run_wmc_mac(result_folder):
                     tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                     frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                     # update/draw components on each frame
-                    if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                    all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                    if any(key.name[0] == config.common.abort_key for key in all_keys):
                         core.quit()
 
                     # *sstm_text_fixation_cross* updates
@@ -5506,7 +5561,8 @@ def run_wmc_mac(result_folder):
                     tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                     frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                     # update/draw components on each frame
-                    if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                    all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                    if any(key.name[0] == config.common.abort_key for key in all_keys):
                         core.quit()
 
                     # *sstm_text_blank* updates
@@ -5596,7 +5652,8 @@ def run_wmc_mac(result_folder):
                         tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                         frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                         # update/draw components on each frame
-                        if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                        all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                        if any(key.name[0] == config.common.abort_key for key in all_keys):
                             core.quit()
 
                         # *sstm_polygon_display_dot* updates
@@ -5666,7 +5723,8 @@ def run_wmc_mac(result_folder):
                         tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                         frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                         # update/draw components on each frame
-                        if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                        all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                        if any(key.name[0] == config.common.abort_key for key in all_keys):
                             core.quit()
 
                         # *sstm_text_after_display_dot* updates
@@ -5742,7 +5800,8 @@ def run_wmc_mac(result_folder):
                     tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                     frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                     # update/draw components on each frame
-                    if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                    all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                    if any(key.name[0] == config.common.abort_key for key in all_keys):
                         core.quit()
 
                     # *text_sstm_draw_dots* updates
@@ -5843,7 +5902,8 @@ def run_wmc_mac(result_folder):
                     tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                     frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                     # update/draw components on each frame
-                    if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                    all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                    if any(key.name[0] == config.common.abort_key for key in all_keys):
                         core.quit()
 
                     current_trial.process_mouse_event(sstm_mouse)
@@ -5993,7 +6053,8 @@ def run_wmc_mac(result_folder):
                         tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                         frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                         # update/draw components on each frame
-                        if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                        all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                        if any(key.name[0] == config.common.abort_key for key in all_keys):
                             core.quit()
 
                         # *base_text_next_trial* updates
@@ -6095,7 +6156,8 @@ def run_wmc_mac(result_folder):
                     tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                     frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                     # update/draw components on each frame
-                    if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                    all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                    if any(key.name[0] == config.common.abort_key for key in all_keys):
                         core.quit()
 
                     # *base_text_intertrial* updates
@@ -6178,7 +6240,8 @@ def run_wmc_mac(result_folder):
             tThisFlipGlobal = win.getFutureFlipTime(clock=None)
             frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
             # update/draw components on each frame
-            if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+            all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+            if any(key.name[0] == config.common.abort_key for key in all_keys):
                 core.quit()
 
             # *text_sstm_task_end* updates
@@ -6282,7 +6345,8 @@ def run_wmc_mac(result_folder):
         tThisFlipGlobal = win.getFutureFlipTime(clock=None)
         frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
         # update/draw components on each frame
-        if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+        all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+        if any(key.name[0] == config.common.abort_key for key in all_keys):
             core.quit()
 
         # *base_text_end* updates
@@ -6347,7 +6411,7 @@ def run_wmc_mac(result_folder):
     if base_key_resp_end.keys in ['', [], None]:  # No response was made
         base_key_resp_end.keys = None
     thisExp.addData('base_key_resp_end.keys', base_key_resp_end.keys)
-    if base_key_resp_end.keys != None:  # we had a response
+    if base_key_resp_end.keys is not None:  # we had a response
         thisExp.addData('base_key_resp_end.rt', base_key_resp_end.rt)
     thisExp.addData('base_key_resp_end.started', base_key_resp_end.tStartRefresh)
     thisExp.addData('base_key_resp_end.stopped', base_key_resp_end.tStopRefresh)
