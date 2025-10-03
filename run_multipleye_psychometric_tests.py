@@ -262,10 +262,10 @@ if __name__ == '__main__':
         print("Running WMC")
         if system == 'Windows':
             print("Running WMC on Windows")
-            run_script('tasks/WMC/wmc_windows.py')
+            run_script('tasks/WMC/wmc_windows.py', participant_folder_relative)
         elif system == 'Linux':
             print("Running WMC on Linux")
-            run_script('tasks/WMC/wmc_linux.py')
+            run_script('tasks/WMC/wmc_linux.py', participant_folder_relative)
         else:
             print("Running WMC on Mac")
             run_wmc_mac(result_folder=participant_folder_relative)
