@@ -209,14 +209,18 @@ def parse_args():
 
 
 def run_script(script_path, part_folder=None):
-    try:
-        result = subprocess.run(['python', script_path, '--participant_folder', part_folder], check=True, text=True, capture_output=False)
-        print("Output:", result.stdout)
-        print("Errors:", result.stderr)
+         
+    result = subprocess.run(
+        [sys.executable, script_path, '--participant_folder', part_folder], 
+        check=True, 
+        text=True, 
+        capture_output=False,
+        cwd=script_dir  # Set working directory to project root
+    )
+    print("Output:", result.stdout)
+    print("Errors:", result.stderr)
 
-    except subprocess.CalledProcessError as e:
-        print("Error:", e.stderr)
-        raise e
+
 
 
 if __name__ == '__main__':
