@@ -209,16 +209,30 @@ def parse_args():
 
 
 def run_script(script_path, part_folder=None):
-         
-    result = subprocess.run(
-        [sys.executable, script_path, '--participant_folder', part_folder], 
-        check=True, 
-        text=True, 
-        capture_output=False,
-        cwd=script_dir  # Set working directory to project root
-    )
-    print("Output:", result.stdout)
-    print("Errors:", result.stderr)
+    try:
+        # Set up environment to include project root in PYTHONPATH
+        env = os.environ.copy()
+        project_root = str(PARENT_FOLDER)
+        if 'PYTHONPATH' in env:
+            env['PYTHONPATH'] = f"{project_root}{os.pathsep}{env['PYTHONPATH']}"
+        else:
+            env['PYTHONPATH'] = project_root
+        
+        result = subprocess.run(
+            [sys.executable, script_path, '--participant_folder', part_folder],
+            check=True,
+            text=True,
+            capture_output=False,
+            env=env,
+            cwd=project_root  # Set working directory to project root
+        )
+        print("Output:", result.stdout)
+        print("Errors:", result.stderr)
+
+    except subprocess.CalledProcessError as e:
+        print("Error:", e.stderr)
+        raise e
+
 
 
 
