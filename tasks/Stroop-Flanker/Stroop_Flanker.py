@@ -21,6 +21,7 @@ import yaml
 from psychopy import visual, core, data, logging
 from psychopy.constants import (NOT_STARTED, STARTED, FINISHED)
 from psychopy.hardware import keyboard
+import argparse
 
 
 # # Ensure that relative paths start from the same directory as this script
