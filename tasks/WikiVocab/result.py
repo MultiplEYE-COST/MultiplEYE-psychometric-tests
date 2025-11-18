@@ -9,8 +9,9 @@ class MyResultWindow(QMainWindow):
         self.name = name
         self.result = result
         self.language = language
-        instructions_df = pd.read_excel(f'languages/{self.language.upper()}/instructions/WikiVocab_instructions_{self.language}.xlsx',
-                                        index_col='screen')
+        instructions_df = pd.read_excel(
+            f'languages/{self.language.upper()}/instructions/WikiVocab_instructions_{self.language}.xlsx',
+            index_col='screen')
         Goodbye_text = instructions_df.loc['Goodbye_text', self.language.upper()]
         self.Goodbye_text = Goodbye_text.replace('\\n', '\n')
 
@@ -55,4 +56,3 @@ class MyResultWindow(QMainWindow):
             f"Score with fake words - {self.result['incorrect'] * 100}%\n"
             f"Total score - {self.result['total'] * 100}%\n"
         )
-

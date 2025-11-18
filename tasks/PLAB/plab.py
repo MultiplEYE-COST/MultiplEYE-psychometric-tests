@@ -47,7 +47,6 @@ else:
 psychopyVersion = '2025.1.1'
 expName = 'PLAB'  # from the Builder filename that created this script
 
-
 # Create folder for audio and csv data
 output_path = f'data/{results_folder}/PLAB/'
 os.makedirs(output_path, exist_ok=True)
@@ -57,7 +56,8 @@ filename = f"{output_path}" \
            f"{language}{country_code}{lab_number}" \
            f"_{participant_id}_PT{expInfo['session_id']}_{date}"
 
-instructions_df = pd.read_excel(f'languages/{language}/instructions/PLAB_instructions_{language.lower()}.xlsx', index_col='screen')
+instructions_df = pd.read_excel(f'languages/{language}/instructions/PLAB_instructions_{language.lower()}.xlsx',
+                                index_col='screen')
 welcome_text = instructions_df.loc['Welcome_text', language]
 welcome_text = welcome_text.replace('\\n', '\n')
 done_text = instructions_df.loc['done_text', language]
@@ -75,11 +75,11 @@ PlabStim = f'languages/{language}/PLAB/PlabStim_{language.lower()}.xlsx'
 
 # An ExperimentHandler isn't essential but helps with data saving
 thisExp = data.ExperimentHandler(name='PLAB', version='',
-    extraInfo=expInfo, runtimeInfo=None,
-    savePickle=True, saveWideText=True,
-    dataFileName=filename)
+                                 extraInfo=expInfo, runtimeInfo=None,
+                                 savePickle=True, saveWideText=True,
+                                 dataFileName=filename)
 # save a log file for detail verbose info
-logFile = logging.LogFile(filename+'.log', level=logging.EXP)
+logFile = logging.LogFile(filename + '.log', level=logging.EXP)
 logging.console.setLevel(logging.WARNING)  # this outputs to the screen, not a file
 
 endExpNow = False  # flag for 'escape' or other condition => quit the exp
@@ -89,10 +89,10 @@ frameTolerance = 0.001  # how close to onset before 'same' frame
 
 # Setup the Window
 win = visual.Window(
-    size=[1440, 900], fullscr=True, screen=0, 
+    size=[1440, 900], fullscr=True, screen=0,
     winType='pyglet', allowGUI=False, allowStencil=False,
     monitor='testMonitor', color='white', colorSpace='rgb',
-    blendMode='avg', useFBO=True, 
+    blendMode='avg', useFBO=True,
     units='height')
 # store frame rate of monitor if we can measure it
 expInfo['frameRate'] = win.getActualFrameRate()
@@ -104,68 +104,67 @@ else:
 # create a default keyboard (e.g. to check for escape)
 default_keyboard = keyboard.Keyboard()
 
-
 # Initialize components for Routine "Blank500"
 Blank500Clock = core.Clock()
 blank = visual.TextStim(win=win, name='blank',
-    text='\n\n',
-    font='Open Sans',
-    pos=(0, 0), height=0.1, wrapWidth=None, ori=0.0, 
-    color='black', colorSpace='rgb', opacity=None,
-    languageStyle='LTR',
-    depth=0.0);
+                        text='\n\n',
+                        font='Open Sans',
+                        pos=(0, 0), height=0.1, wrapWidth=None, ori=0.0,
+                        color='black', colorSpace='rgb', opacity=None,
+                        languageStyle='LTR',
+                        depth=0.0);
 
 # Initialize components for Routine "FixationCross"
 FixationCrossClock = core.Clock()
 fix_cross = visual.TextStim(win=win, name='fix_cross',
-    text='+',
-    font='Courier New',
-    pos=(0, 0), height=0.1, wrapWidth=None, ori=0.0,
-    color='black', colorSpace='rgb', opacity=None,
-    languageStyle='LTR',
-    depth=0.0)
+                            text='+',
+                            font='Courier New',
+                            pos=(0, 0), height=0.1, wrapWidth=None, ori=0.0,
+                            color='black', colorSpace='rgb', opacity=None,
+                            languageStyle='LTR',
+                            depth=0.0)
 
 # Initialize components for Routine "Done"
 DoneClock = core.Clock()
 done_text = visual.TextStim(win=win, name='done_text',
-    text=done_text,
-    font=font,
-    pos=(0, 0), height=0.035, wrapWidth=None, ori=0.0,
-    color='black', colorSpace='rgb', opacity=None,
-    languageStyle='LTR',
-    depth=0.0)
-
+                            text=done_text,
+                            font=font,
+                            pos=(0, 0), height=0.035, wrapWidth=None, ori=0.0,
+                            color='black', colorSpace='rgb', opacity=None,
+                            languageStyle='LTR',
+                            depth=0.0)
 
 # Initialize components for Routine "PLABInstruction"
 PLABInstructionClock = core.Clock()
 PLAB_instructions = visual.TextStim(win=win, name='PLAB_instructions',
-    text= PLAB_instructions,
-    font=font,
-    pos=(0, 0), height=0.03, wrapWidth=1.3, ori=0.0,
-    color='black', colorSpace='rgb', opacity=None,
-    languageStyle='LTR',
-    depth=0.0)
+                                    text=PLAB_instructions,
+                                    font=font,
+                                    pos=(0, 0), height=0.03, wrapWidth=1.3, ori=0.0,
+                                    color='black', colorSpace='rgb', opacity=None,
+                                    languageStyle='LTR',
+                                    depth=0.0)
 
 # Initialize components for Routine "PLAB Task1 Trials"
 PLABTask1Clock = core.Clock()
 PLAB_pics_1 = visual.ImageStim(
-        win=win,
-        name='plab_task1',
-        image=task1_img,
-        pos=(0, 0.18), # 0.18 is the vertical position of the image from the center
-        size=(1.5, 0.6), # 1.5 is the width of the image, 0.6 is the height of the image
-        color=[1, 1, 1], colorSpace='rgb',
-        ori=0.0,
-        flipHoriz=False, flipVert=False,
-        texRes=128.0, interpolate=False
-    )
+    win=win,
+    name='plab_task1',
+    image=task1_img,
+    pos=(0, 0.18),  # 0.18 is the vertical position of the image from the center
+    size=(1.5, 0.6),  # 1.5 is the width of the image, 0.6 is the height of the image
+    color=[1, 1, 1], colorSpace='rgb',
+    ori=0.0,
+    flipHoriz=False, flipVert=False,
+    texRes=128.0, interpolate=False
+)
 PLAB_task1 = visual.TextStim(win=win, name='PLAB_task1',
-    text='',
-    font=font,
-    pos=(0, -0.28), height=0.035, wrapWidth=None, ori=0.0, # -0.28 is the vertical position of the text from the center
-    color='black', colorSpace='rgb', opacity=None,
-    languageStyle='LTR',
-    depth=0.0)
+                             text='',
+                             font=font,
+                             pos=(0, -0.28), height=0.035, wrapWidth=None, ori=0.0,
+                             # -0.28 is the vertical position of the text from the center
+                             color='black', colorSpace='rgb', opacity=None,
+                             languageStyle='LTR',
+                             depth=0.0)
 
 # Rectangles for highlighting options
 highlight_rects = []
@@ -181,39 +180,37 @@ for pos in option_positions:
     )
     highlight_rects.append(rect)
 
-
 # Initialize components for Routine "PLAB Task2 Trials"
 PLABTask2Clock = core.Clock()
 PLAB_pics_2 = visual.ImageStim(
-        win=win,
-        name='plab_task2',
-        image=task2_img,
-        pos=(0, 0.18),
-        size=(1.5, 0.6),
-        color=[1, 1, 1], colorSpace='rgb',
-        ori=0.0,
-        flipHoriz=False, flipVert=False,
-        texRes=128.0, interpolate=False
-    )
+    win=win,
+    name='plab_task2',
+    image=task2_img,
+    pos=(0, 0.18),
+    size=(1.5, 0.6),
+    color=[1, 1, 1], colorSpace='rgb',
+    ori=0.0,
+    flipHoriz=False, flipVert=False,
+    texRes=128.0, interpolate=False
+)
 PLAB_task2 = visual.TextStim(win=win, name='PLAB_task2',
-    text='',
-    font=font,
-    pos=(0, -0.28), height=0.035, wrapWidth=None, ori=0.0,
-    color='black', colorSpace='rgb', opacity=None,
-    languageStyle='LTR',
-    depth=0.0)
+                             text='',
+                             font=font,
+                             pos=(0, -0.28), height=0.035, wrapWidth=None, ori=0.0,
+                             color='black', colorSpace='rgb', opacity=None,
+                             languageStyle='LTR',
+                             depth=0.0)
 
 # Initialize components for Routine "GoodbyeScreen"
 GoodbyeScreenClock = core.Clock()
 Goodbyetext = visual.TextStim(win=win, name='Goodbyetext',
-    text=Goodbyetext,
-    font=font,
-    pos=(0, 0), height=0.05, wrapWidth=None, ori=0.0,
-    color='black', colorSpace='rgb', opacity=None,
-    languageStyle='LTR',
-    depth=0.0)
+                              text=Goodbyetext,
+                              font=font,
+                              pos=(0, 0), height=0.05, wrapWidth=None, ori=0.0,
+                              color='black', colorSpace='rgb', opacity=None,
+                              languageStyle='LTR',
+                              depth=0.0)
 key_goodbye = keyboard.Keyboard()
-
 
 # Create some handy timers
 globalClock = core.Clock()  # to track the time since experiment started
@@ -221,12 +218,11 @@ routineTimer = core.CountdownTimer()  # to track time remaining of each (non-sli
 
 # Display welcome message
 welcome_text = visual.TextStim(win, text=welcome_text, alignHoriz='center', alignVert='center',
-                                 font=font, pos=(0, 0), height=0.05, ori=0.0,
-                                    color='black', colorSpace='rgb', opacity=None, languageStyle='LTR', depth=0.0);
+                               font=font, pos=(0, 0), height=0.05, ori=0.0,
+                               color='black', colorSpace='rgb', opacity=None, languageStyle='LTR', depth=0.0);
 welcome_text.draw()
 win.flip()
 event.waitKeys()
-
 
 # ------Prepare to start Routine "PLABInstruction"-------
 continueRoutine = True
@@ -259,7 +255,7 @@ while continueRoutine:
     # update/draw components on each frame
 
     # *PLAB_instructions* updates
-    if PLAB_instructions.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
+    if PLAB_instructions.status == NOT_STARTED and tThisFlip >= 0.0 - frameTolerance:
         # keep track of start time/frame for later
         PLAB_instructions.frameNStart = frameN  # exact frame index
         PLAB_instructions.tStart = t  # local t and not account for scr refresh
@@ -269,7 +265,7 @@ while continueRoutine:
 
     # *default_keyboard* updates
     waitOnFlip = False
-    if default_keyboard.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
+    if default_keyboard.status == NOT_STARTED and tThisFlip >= 0.0 - frameTolerance:
         # keep track of start time/frame for later
         default_keyboard.frameNStart = frameN  # exact frame index
         default_keyboard.tStart = t  # local t and not account for scr refresh
@@ -324,7 +320,7 @@ thisExp.addData('PLAB_instructions.stopped', PLAB_instructions.tStopRefresh)
 # check responses
 if default_keyboard.keys in ['', [], None]:  # No response was made
     default_keyboard.keys = None
-thisExp.addData('default_keyboard.keys',default_keyboard.keys)
+thisExp.addData('default_keyboard.keys', default_keyboard.keys)
 if default_keyboard.keys is not None:  # we had a response
     thisExp.addData('default_keyboard.rt', default_keyboard.rt)
 thisExp.addData('default_keyboard.started', default_keyboard.tStartRefresh)
@@ -362,7 +358,7 @@ while continueRoutine and routineTimer.getTime() > 0:
     # update/draw components on each frame
 
     # *blank* updates
-    if blank.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
+    if blank.status == NOT_STARTED and tThisFlip >= 0.0 - frameTolerance:
         # keep track of start time/frame for later
         blank.frameNStart = frameN  # exact frame index
         blank.tStart = t  # local t and not account for scr refresh
@@ -371,7 +367,7 @@ while continueRoutine and routineTimer.getTime() > 0:
         blank.setAutoDraw(True)
     if blank.status == STARTED:
         # is it time to stop? (based on global clock, using actual start)
-        if tThisFlipGlobal > blank.tStartRefresh + .5-frameTolerance:
+        if tThisFlipGlobal > blank.tStartRefresh + .5 - frameTolerance:
             # keep track of stop time/frame for later
             blank.tStop = t  # not accounting for scr refresh
             blank.frameNStop = frameN  # exact frame index
@@ -409,8 +405,8 @@ PLAB_task1_list = full_trial_list[:4]
 PLAB_task2_list = full_trial_list[4:]
 # set up handler to look after randomisation of conditions etc
 PLAB_task1_trials = data.TrialHandler(nReps=1.0, method='sequential',
-    trialList=PLAB_task1_list,
-    seed=None, name='PLAB_task1_trials')
+                                      trialList=PLAB_task1_list,
+                                      seed=None, name='PLAB_task1_trials')
 thisExp.addLoop(PLAB_task1_trials)  # add the loop to the experiment
 
 mouse = event.Mouse(win=win)
@@ -660,7 +656,7 @@ while continueRoutine:
     # update/draw components on each frame
 
     # *done_text* updates
-    if done_text.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
+    if done_text.status == NOT_STARTED and tThisFlip >= 0.0 - frameTolerance:
         # keep track of start time/frame for later
         done_text.frameNStart = frameN  # exact frame index
         done_text.tStart = t  # local t and not account for scr refresh
@@ -670,7 +666,7 @@ while continueRoutine:
 
     # *done_key* updates
     waitOnFlip = False
-    if default_keyboard.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
+    if default_keyboard.status == NOT_STARTED and tThisFlip >= 0.0 - frameTolerance:
         # keep track of start time/frame for later
         default_keyboard.frameNStart = frameN  # exact frame index
         default_keyboard.tStart = t  # local t and not account for scr refresh
@@ -730,7 +726,6 @@ thisExp.nextEntry()
 # the Routine "Done" was not non-slip safe, so reset the non-slip timer
 routineTimer.reset()
 
-
 # ------Prepare to start Routine "GoodbyeScreen"-------
 continueRoutine = True
 routineTimer.add(10.000000)
@@ -761,9 +756,9 @@ while continueRoutine and routineTimer.getTime() > 0:
     tThisFlipGlobal = win.getFutureFlipTime(clock=None)
     frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
     # update/draw components on each frame
-    
+
     # *Goodbyetext* updates
-    if Goodbyetext.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
+    if Goodbyetext.status == NOT_STARTED and tThisFlip >= 0.0 - frameTolerance:
         # keep track of start time/frame for later
         Goodbyetext.frameNStart = frameN  # exact frame index
         Goodbyetext.tStart = t  # local t and not account for scr refresh
@@ -772,16 +767,16 @@ while continueRoutine and routineTimer.getTime() > 0:
         Goodbyetext.setAutoDraw(True)
     if Goodbyetext.status == STARTED:
         # is it time to stop? (based on global clock, using actual start)
-        if tThisFlipGlobal > Goodbyetext.tStartRefresh + 10-frameTolerance:
+        if tThisFlipGlobal > Goodbyetext.tStartRefresh + 10 - frameTolerance:
             # keep track of stop time/frame for later
             Goodbyetext.tStop = t  # not accounting for scr refresh
             Goodbyetext.frameNStop = frameN  # exact frame index
             win.timeOnFlip(Goodbyetext, 'tStopRefresh')  # time at next scr refresh
             Goodbyetext.setAutoDraw(False)
-    
+
     # *default_keyboard* updates
     waitOnFlip = False
-    if default_keyboard.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
+    if default_keyboard.status == NOT_STARTED and tThisFlip >= 0.0 - frameTolerance:
         # keep track of start time/frame for later
         default_keyboard.frameNStart = frameN  # exact frame index
         default_keyboard.tStart = t  # local t and not account for scr refresh
@@ -794,7 +789,7 @@ while continueRoutine and routineTimer.getTime() > 0:
         win.callOnFlip(default_keyboard.clearEvents, eventType='keyboard')  # clear events on next screen flip
     if default_keyboard.status == STARTED:
         # is it time to stop? (based on global clock, using actual start)
-        if tThisFlipGlobal > default_keyboard.tStartRefresh + 10-frameTolerance:
+        if tThisFlipGlobal > default_keyboard.tStartRefresh + 10 - frameTolerance:
             # keep track of stop time/frame for later
             default_keyboard.tStop = t  # not accounting for scr refresh
             default_keyboard.frameNStop = frameN  # exact frame index
@@ -821,7 +816,7 @@ while continueRoutine and routineTimer.getTime() > 0:
 
     default_keyboard.keys = []
     default_keyboard.rt = []
-    
+
     # check if all components have finished
     if not continueRoutine:  # a component has requested a forced-end of Routine
         break
@@ -830,7 +825,7 @@ while continueRoutine and routineTimer.getTime() > 0:
         if hasattr(thisComponent, "status") and thisComponent.status != FINISHED:
             continueRoutine = True
             break  # at least one component has not yet finished
-    
+
     # refresh the screen
     if continueRoutine:  # don't flip if this routine is over or we'll get a blank screen
         win.flip()
@@ -844,7 +839,7 @@ thisExp.addData('Goodbyetext.stopped', Goodbyetext.tStopRefresh)
 # check responses
 if default_keyboard.keys in ['', [], None]:  # No response was made
     default_keyboard.keys = None
-thisExp.addData('default_keyboard.keys',default_keyboard.keys)
+thisExp.addData('default_keyboard.keys', default_keyboard.keys)
 if default_keyboard.keys is not None:  # we had a response
     thisExp.addData('default_keyboard.rt', default_keyboard.rt)
 thisExp.addData('default_keyboard.started', default_keyboard.tStartRefresh)
@@ -856,7 +851,7 @@ thisExp.nextEntry()
 win.flip()
 
 # these shouldn't be strictly necessary (should auto-save)
-thisExp.saveAsWideText(filename+'.csv', delim='auto')
+thisExp.saveAsWideText(filename + '.csv', delim='auto')
 thisExp.saveAsPickle(filename)
 logging.flush()
 # make sure everything is closed down

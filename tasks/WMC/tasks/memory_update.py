@@ -3,6 +3,7 @@ import random
 
 import pandas as pd
 from psychopy import visual
+
 from tasks.WMC.tasks.generic_task import GenericTask, GenericTrial
 
 operator_string_map = {

@@ -3,6 +3,7 @@ import random
 
 import pandas as pd
 import yaml
+
 from tasks.WMC.tasks.generic_task import GenericTask, GenericTrial
 
 

@@ -2936,7 +2936,7 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
                             os_key_resp_equation.rt = _os_key_resp_equation_allKeys[-1].rt
                             # was this correct?
                             if (os_key_resp_equation.keys[0] == str(correct_key)) or (
-                                    os_key_resp_equation.keys[0]  == correct_key):
+                                    os_key_resp_equation.keys[0] == correct_key):
                                 os_key_resp_equation.corr = 1
                             else:
                                 os_key_resp_equation.corr = 0
@@ -3226,7 +3226,8 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
                         theseKeys = os_key_resp_recall.getKeys(keyList=list(os_allowed_keys), waitRelease=False)
                         _os_key_resp_recall_allKeys.extend(theseKeys)
                         if len(_os_key_resp_recall_allKeys):
-                            os_key_resp_recall.keys = _os_key_resp_recall_allKeys[-1].name[0]  # just the last key pressed
+                            os_key_resp_recall.keys = _os_key_resp_recall_allKeys[-1].name[
+                                0]  # just the last key pressed
                             os_key_resp_recall.rt = _os_key_resp_recall_allKeys[-1].rt[0]
                             # was this correct?
                             if (os_key_resp_recall.keys == str(correct_letter)) or (

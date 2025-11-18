@@ -5,6 +5,7 @@ from itertools import product
 import numpy as np
 import pandas as pd
 from psychopy.visual import Line, Polygon, Rect
+
 from tasks.WMC.tasks.generic_task import GenericTask, GenericTrial
 from tasks.WMC.tasks.spatial_short_term_memory_scorer import SpatialShortTermMemoryScorer
 

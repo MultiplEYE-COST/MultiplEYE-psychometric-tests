@@ -55,8 +55,9 @@ class MyMainWindow(QMainWindow):
         self.result_df = None
         self.current_index = -1
         self.stimulus_shown_time = None  # To capture the time when stimulus is shown
-        instructions_df = pd.read_excel(f'languages/{self.language.upper()}/instructions/WikiVocab_instructions_{self.language}.xlsx',
-                                        index_col='screen')
+        instructions_df = pd.read_excel(
+            f'languages/{self.language.upper()}/instructions/WikiVocab_instructions_{self.language}.xlsx',
+            index_col='screen')
         key_instruction = instructions_df.loc['key_instruction', self.language.upper()]
         self.key_instruction = key_instruction.replace('\\n', '\n')
         self.real_text = instructions_df.loc['real_text', self.language.upper()]
@@ -239,7 +240,6 @@ class MyMainWindow(QMainWindow):
                     text = arabic_reshaper.reshape(text)
                 plot_text(bidialg.get_display(text), img_name, font_name)
 
-
     def get_result_folder(self) -> str:
         return self.result_folder
 
@@ -270,7 +270,7 @@ class MyMainWindow(QMainWindow):
     @property
     def prepared_results(self) -> dict:
         self.result_df["is_right"] = (
-            self.result_df["correct_answer"] == self.result_df["real_answer"]
+                self.result_df["correct_answer"] == self.result_df["real_answer"]
         ).astype(int)
         incorrect_data = self.result_df[self.result_df["correct_answer"] == 0]
         correct_data = self.result_df[self.result_df["correct_answer"] == 1]

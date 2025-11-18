@@ -231,7 +231,6 @@ def run_wmc_mac(result_folder):
                                      languageStyle='LTR',
                                      depth=-1.0)
 
-
     # Initialize components for Routine "os_init"
     os_initClock = core.Clock()
 
@@ -688,7 +687,6 @@ def run_wmc_mac(result_folder):
     # where images will get a grey border. a workaround is
     # setting up an aperture to hide these borders.
 
-
     instr_img_size = Image.open(instruction_filepath).size
 
     # set aperture parameters from image size in pixels
@@ -1029,7 +1027,6 @@ def run_wmc_mac(result_folder):
                 # refresh the screen
                 if continueRoutine:  # don't flip if this routine is over or we'll get a blank screen
                     win.flip()
-
 
             # -------Ending Routine "base_instruction"-------
             for thisComponent in base_instructionComponents:
@@ -2138,7 +2135,8 @@ def run_wmc_mac(result_folder):
                 if theseKeys != [] and theseKeys[-1].value[0] == 'space':
                     _base_key_resp_task_end_allKeys.extend(theseKeys)
                     if len(_base_key_resp_task_end_allKeys):
-                        base_key_resp_task_end.keys = _base_key_resp_task_end_allKeys[-1].name  # just the last key pressed
+                        base_key_resp_task_end.keys = _base_key_resp_task_end_allKeys[
+                            -1].name  # just the last key pressed
                         base_key_resp_task_end.rt = _base_key_resp_task_end_allKeys[-1].rt
                         # a response ends the routine
                         continueRoutine = False
@@ -2801,8 +2799,8 @@ def run_wmc_mac(result_folder):
                                     -1].name  # just the last key pressed
                                 os_key_resp_equation.rt = _os_key_resp_equation_allKeys[-1].rt
                                 # was this correct?
-                                if (os_key_resp_equation.keys[0]  == str(correct_key)) or (
-                                        os_key_resp_equation.keys[0]  == correct_key):
+                                if (os_key_resp_equation.keys[0] == str(correct_key)) or (
+                                        os_key_resp_equation.keys[0] == correct_key):
                                     os_key_resp_equation.corr = 1
                                 else:
                                     os_key_resp_equation.corr = 0
@@ -3369,7 +3367,7 @@ def run_wmc_mac(result_folder):
                                            eventType='keyboard')  # clear events on next screen flip
                         if base_key_resp_self_paced_break.status == STARTED and not waitOnFlip:
                             theseKeys = base_key_resp_self_paced_break.getKeys(keyList=None, waitRelease=False)
-                            if theseKeys !=  [] and theseKeys[-1].value[0] == 'space':
+                            if theseKeys != [] and theseKeys[-1].value[0] == 'space':
                                 _base_key_resp_self_paced_break_allKeys.extend(theseKeys)
                                 if len(_base_key_resp_self_paced_break_allKeys):
                                     base_key_resp_self_paced_break.keys = _base_key_resp_self_paced_break_allKeys[
@@ -3561,7 +3559,8 @@ def run_wmc_mac(result_folder):
                 if theseKeys != [] and theseKeys[-1].value[0] == 'space':
                     _base_key_resp_task_end_allKeys.extend(theseKeys)
                     if len(_base_key_resp_task_end_allKeys):
-                        base_key_resp_task_end.keys = _base_key_resp_task_end_allKeys[-1].name  # just the last key pressed
+                        base_key_resp_task_end.keys = _base_key_resp_task_end_allKeys[
+                            -1].name  # just the last key pressed
                         base_key_resp_task_end.rt = _base_key_resp_task_end_allKeys[-1].rt
                         # a response ends the routine
                         continueRoutine = False
@@ -3787,7 +3786,7 @@ def run_wmc_mac(result_folder):
                     _base_key_resp_instruction_allKeys.extend(theseKeys)
                     if len(_base_key_resp_instruction_allKeys):
                         base_key_resp_instruction.keys = _base_key_resp_instruction_allKeys[
-                            -1].name[0]   # just the last key pressed
+                            -1].name[0]  # just the last key pressed
                         base_key_resp_instruction.rt = _base_key_resp_instruction_allKeys[-1].rt[0]
                         # a response ends the routine
                         continueRoutine = False
@@ -4986,7 +4985,8 @@ def run_wmc_mac(result_folder):
                 if theseKeys and theseKeys[-1].value[0] == 'space':
                     _base_key_resp_task_end_allKeys.extend(theseKeys)
                     if len(_base_key_resp_task_end_allKeys):
-                        base_key_resp_task_end.keys = _base_key_resp_task_end_allKeys[-1].name  # just the last key pressed
+                        base_key_resp_task_end.keys = _base_key_resp_task_end_allKeys[
+                            -1].name  # just the last key pressed
                         base_key_resp_task_end.rt = _base_key_resp_task_end_allKeys[-1].rt
                         # a response ends the routine
                         continueRoutine = False
@@ -6272,7 +6272,8 @@ def run_wmc_mac(result_folder):
                 if theseKeys and theseKeys[-1].value[0] == 'space':
                     _sstm_key_resp_task_end_allKeys.extend(theseKeys)
                     if len(_sstm_key_resp_task_end_allKeys):
-                        sstm_key_resp_task_end.keys = _sstm_key_resp_task_end_allKeys[-1].name  # just the last key pressed
+                        sstm_key_resp_task_end.keys = _sstm_key_resp_task_end_allKeys[
+                            -1].name  # just the last key pressed
                         sstm_key_resp_task_end.rt = _sstm_key_resp_task_end_allKeys[-1].rt
                         # a response ends the routine
                         continueRoutine = False

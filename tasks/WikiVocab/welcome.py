@@ -8,7 +8,6 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMainWindow
 
 from main import MyMainWindow
-
 # TODO: pass this as an argument, quick fix for now
 from run_multipleye_psychometric_tests import RESULT_FOLDER
 
@@ -41,8 +40,9 @@ class MyWelcomeWindow(QMainWindow):
         self.filename = exp[4]
         self.output_path = exp[5]
 
-        instructions_df = pd.read_excel(f'languages/{self.language.upper()}/instructions/WikiVocab_instructions_{self.language}.xlsx',
-                                        index_col='screen')
+        instructions_df = pd.read_excel(
+            f'languages/{self.language.upper()}/instructions/WikiVocab_instructions_{self.language}.xlsx',
+            index_col='screen')
         welcome_text = instructions_df.loc['Welcome_text', self.language.upper()]
         welcome_text = welcome_text.replace('\\n', '\n')
         WikiVocab_instructions = instructions_df.loc['WikiVocab_instructions', self.language.upper()]

@@ -2,6 +2,7 @@ import operator as op
 import random
 
 import pandas as pd
+
 from tasks.WMC.tasks.generic_task import GenericTask, GenericTrial
 
 operator_map = {

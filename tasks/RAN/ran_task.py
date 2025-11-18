@@ -88,11 +88,15 @@ def start_recording(samplerate=44100, channels=1, device_index=0, dtype='float32
     global recording, recording_start_time
     recording_start_time = core.getTime()
     recording = []  # Ensure recording is an empty list before starting
+
     def callback(indata, frames, time, status):
         recording.extend(indata.copy())
-    stream = sd.InputStream(samplerate=samplerate, device=device_index, channels=channels, dtype=dtype, callback=callback)
+
+    stream = sd.InputStream(samplerate=samplerate, device=device_index, channels=channels, dtype=dtype,
+                            callback=callback)
     stream.start()
     return stream
+
 
 # Function to stop the current recording and save it
 def stop_and_save_recording(stream, filename, samplerate=44100):
@@ -105,17 +109,19 @@ def stop_and_save_recording(stream, filename, samplerate=44100):
     recording.clear()  # Clear the recording list for the next trial
     return reading_time
 
+
 # Print available devices
 print(sd.query_devices())
 
 # Load the instructions
-instructions_df = pd.read_excel(f'languages/{language}/instructions/RAN_instructions_{language.lower()}.xlsx', index_col='screen')
+instructions_df = pd.read_excel(f'languages/{language}/instructions/RAN_instructions_{language.lower()}.xlsx',
+                                index_col='screen')
 welcome_text = instructions_df.loc['Welcome_text', language].replace('\\n', '\n')
 instructions = instructions_df.loc['RAN_instructions', language].replace('\\n', '\n')
 done_text = instructions_df.loc['done_text', language].replace('\\n', '\n')
 
 # save a log file for detail verbose info
-logFile = logging.LogFile(filename+'.log', level=logging.EXP)
+logFile = logging.LogFile(filename + '.log', level=logging.EXP)
 logging.console.setLevel(logging.WARNING)  # this outputs to the screen, not a file
 
 endExpNow = False  # flag for 'escape' or other condition => quit the exp
@@ -131,7 +137,7 @@ win = visual.Window(
 
 # Display welcome message
 welcome_text = visual.TextStim(win, text=welcome_text, font=font, pos=(0, 0), height=0.12, wrapWidth=1.5, ori=0.0,
-                                    color='black', colorSpace='rgb', opacity=None, languageStyle='LTR', depth=0.0);
+                               color='black', colorSpace='rgb', opacity=None, languageStyle='LTR', depth=0.0);
 welcome_text.draw()
 win.flip()
 event.waitKeys()
@@ -168,7 +174,8 @@ for trial in range(num_trials):
     digits_matrix_str = '; '.join([' '.join(row) for row in matrix_content])
 
     matrix_str = '\n\n'.join([' '.join(row) for row in matrix_content])
-    matrix_display = visual.TextStim(win, text=matrix_str, pos=(0, 0), font='Courier New', height=0.15, wrapWidth=1.5, color='black', colorSpace='rgb')
+    matrix_display = visual.TextStim(win, text=matrix_str, pos=(0, 0), font='Courier New', height=0.15, wrapWidth=1.5,
+                                     color='black', colorSpace='rgb')
     matrix_display.draw()
     win.flip()
 
