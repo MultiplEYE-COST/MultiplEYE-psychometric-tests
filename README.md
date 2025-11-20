@@ -60,7 +60,7 @@ You can find detailed instructions on this stackoverflow [post](https://stackove
 
 ### Run the tests in English
 
-By default, the tests are in English. First, you need to download the language data for English in the [MultiplEYE data repository](http://...). After downloading the data, unzip the data folder and put the folder `languages/EN` in the root directory of the repository.
+By default, the tests are in English. First, you need to download the language data for English in the [MultiplEYE data repository](https://drive.switch.ch/index.php/s/i9ecUhd8ygcRDMg?path=%2FPsychometric%20tests%2Flanguages%2FEN). After downloading the data, unzip the data folder and put the folder `languages/EN` in the root directory of the repository.
 To run the tests in English, run the following command:
 ```bash
 python run_multipleye_psychometric_tests.py
