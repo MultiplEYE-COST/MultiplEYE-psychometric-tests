@@ -30,7 +30,7 @@ git clone https://github.com/MultiplEYE-COST/MultiplEYE-psychometric-tests.git
 ### Create an environment, e.g with [miniconda](https://docs.anaconda.com/free/miniconda/miniconda-install/).
 Please first check whether you have conda installed. If you have installed it, please skip installing.
 
-**Note**: The steps of creating an environment is similar to the steps in the wg1-experiment-implementation repository. For details, please refer to the guidelines in the [wg1-experiment-implementation repository](http://...)
+**Note**: The steps of creating an environment is similar to the steps in the wg1-experiment-implementation repository. For details, please refer to the guidelines in the [wg1-experiment-implementation repository](https://github.com/MultiplEYE-COST/wg1-experiment-implementation)
 
 1. In the root directory of the repository, create a new environment with the following command:
 ```bash
