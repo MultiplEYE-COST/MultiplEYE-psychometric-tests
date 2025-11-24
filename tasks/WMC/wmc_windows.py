@@ -13,6 +13,8 @@ If you publish work using this script the most relevant publication is:
 
 from __future__ import absolute_import, division
 
+import argparse
+
 from psychopy import prefs
 
 prefs.hardware['audioLib'] = 'pygame'
@@ -30,6 +32,11 @@ date = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')  # add a simple timestamp
 # Path to the YAML file contains the language and experiment configurations
 config_path = f'configs/config.yaml'
 experiment_config_path = f'configs/experiment.yaml'
+
+parser = argparse.ArgumentParser(description="Run the RAN digit test.")
+parser.add_argument('--participant_folder', type=str, required=True, help="Path to the participant folder.")
+args = parser.parse_args()
+results_folder = args.participant_folder
 
 # Load the YAML file
 with open(config_path, 'r', encoding="utf-8") as file:
@@ -74,9 +81,6 @@ if dlg.OK:  # The user pressed OK
     print("User entered:", wmcInfo)
 else:
     core.quit()
-
-# Create folder name for the results
-results_folder = f"{participant_id}_{language}_{country_code}_{lab_number}_PT{expInfo['session_id']}"
 
 # Create folder for audio and csv data
 output_path = f'data/{results_folder}/WMC/'

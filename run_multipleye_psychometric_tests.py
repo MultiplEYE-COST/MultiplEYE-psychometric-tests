@@ -210,7 +210,8 @@ def parse_args():
 
 def run_script(script_path, part_folder=None):
     try:
-        result = subprocess.run(['python', script_path, '--participant_folder', part_folder], check=True, text=True, capture_output=False)
+        result = subprocess.run(['python', script_path, '--participant_folder', part_folder],
+                                check=True, text=True, capture_output=False)
         print("Output:", result.stdout)
         print("Errors:", result.stderr)
 
@@ -262,10 +263,10 @@ if __name__ == '__main__':
         print("Running WMC")
         if system == 'Windows':
             print("Running WMC on Windows")
-            run_script('tasks/WMC/wmc_windows.py')
+            run_script('tasks/WMC/wmc_windows.py', part_folder=participant_folder_relative)
         elif system == 'Linux':
             print("Running WMC on Linux")
-            run_script('tasks/WMC/wmc_linux.py')
+            run_script('tasks/WMC/wmc_linux.py', part_folder=participant_folder_relative)
         else:
             print("Running WMC on Mac")
             run_wmc_mac(result_folder=participant_folder_relative)
