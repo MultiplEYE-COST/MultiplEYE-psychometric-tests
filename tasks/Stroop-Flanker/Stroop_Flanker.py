@@ -13,6 +13,7 @@ If you publish work using this script the most relevant publication is:
 
 from __future__ import absolute_import, division
 
+import argparse
 import os  # handy system and path functions
 from datetime import datetime
 
