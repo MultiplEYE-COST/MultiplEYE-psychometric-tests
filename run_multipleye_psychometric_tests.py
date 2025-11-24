@@ -13,8 +13,6 @@ import yaml
 from gooey import Gooey, GooeyParser
 from psychopy import core
 
-from tasks.WMC.wmc_mac import run_wmc_mac
-
 PARENT_FOLDER = Path(__file__).parent
 
 # Path to the YAML file contains the language and experiment configurations
@@ -269,7 +267,7 @@ if __name__ == '__main__':
             run_script('tasks/WMC/wmc_linux.py', part_folder=participant_folder_relative)
         else:
             print("Running WMC on Mac")
-            run_wmc_mac(result_folder=participant_folder_relative)
+            run_script('tasks/WMC/wmc_mac.py', part_folder=participant_folder_relative)
         arguments['run_wmc'] = 'success'
 
         with open(participant_config_path, 'w') as file:

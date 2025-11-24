@@ -4,7 +4,7 @@ import random
 import pandas as pd
 import yaml
 
-from tasks.WMC.tasks.generic_task import GenericTask, GenericTrial
+from tasks.generic_task import GenericTask, GenericTrial
 
 
 class SentenceSpanTrial(GenericTrial):
