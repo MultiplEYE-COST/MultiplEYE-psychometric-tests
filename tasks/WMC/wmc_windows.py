@@ -14,6 +14,7 @@ If you publish work using this script the most relevant publication is:
 from __future__ import absolute_import, division
 
 import argparse
+import os
 
 from psychopy import prefs
 
@@ -21,22 +22,25 @@ prefs.hardware['audioLib'] = 'pygame'
 from psychopy import gui, visual, core, data, event, logging
 from psychopy.constants import (NOT_STARTED, STARTED, FINISHED)
 
-import numpy as np  # whole numpy lib is available, prepend 'np.'
-import os  # handy system and path functions
+import numpy as np
 import yaml
 from psychopy.hardware import keyboard
 from datetime import datetime
+from common.config import WMCConfig
+from common.experiment_messages import ExperimentMessages
+from common.instructions import Instructions
+from PIL import Image
+
+parser = argparse.ArgumentParser(description="Run the RAN digit test.")
+parser.add_argument('--participant_folder', type=str, required=True, help="Path to the participant folder.")
+args = parser.parse_args()
+results_folder = args.participant_folder
 
 date = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')  # add a simple timestamp
 
 # Path to the YAML file contains the language and experiment configurations
 config_path = f'configs/config.yaml'
 experiment_config_path = f'configs/experiment.yaml'
-
-parser = argparse.ArgumentParser(description="Run the RAN digit test.")
-parser.add_argument('--participant_folder', type=str, required=True, help="Path to the participant folder.")
-args = parser.parse_args()
-results_folder = args.participant_folder
 
 # Load the YAML file
 with open(config_path, 'r', encoding="utf-8") as file:
@@ -61,7 +65,6 @@ else:
                'lab_number': lab_number}
     participant_id = 999
 
-psychopyVersion = '2023.2.3'
 expName = 'WMC'
 
 dlg = gui.Dlg(title=expName)
@@ -94,7 +97,7 @@ filename = f"{output_path}" \
 # An ExperimentHandler isn't essential but helps with data saving
 thisExp = data.ExperimentHandler(name='WMC', version='',
                                  extraInfo=expInfo, runtimeInfo=None,
-                                 originPath='C:\\Users\\danie\\Documents\\workspace\\wmc-battery\\wmc_lastrun.py',
+                                 # originPath='C:\\Users\\danie\\Documents\\workspace\\wmc-battery\\wmc_lastrun.py',
                                  savePickle=True, saveWideText=True,
                                  dataFileName=filename)
 # save a log file for detail verbose info
@@ -126,16 +129,9 @@ defaultKeyboard = keyboard.Keyboard()
 
 # Initialize components for Routine "base_init"
 base_initClock = core.Clock()
-import os
-
-from psychopy.hardware.keyboard import Keyboard
-
-from common.config import WMCConfig
-from common.experiment_messages import ExperimentMessages
-from common.instructions import Instructions
 
 # for catching experiment quit key
-experiment_keyboard = Keyboard()
+experiment_keyboard = keyboard.Keyboard()
 
 thisExp.extraInfo['datetime'] = datetime.today()
 
@@ -205,7 +201,7 @@ base_text_begin_task = visual.TextStim(win=win, name='base_text_begin_task',
                                        wrapWidth=text_wrap_width, ori=0,
                                        color='black', colorSpace='rgb', opacity=1,
                                        languageStyle='LTR',
-                                       depth=-1.0);
+                                       depth=-1.0)
 base_key_resp_task_begin = keyboard.Keyboard()
 
 # Initialize components for Routine "base_init_trial"
@@ -220,7 +216,7 @@ mu_text_blank = visual.TextStim(win=win, name='mu_text_blank',
                                 ori=0,
                                 color='white', colorSpace='rgb', opacity=1,
                                 languageStyle='LTR',
-                                depth=-1.0);
+                                depth=-1.0)
 
 # Initialize components for Routine "mu_display_digit"
 mu_display_digitClock = core.Clock()
@@ -231,29 +227,19 @@ mu_text_digit = visual.TextStim(win=win, name='mu_text_digit',
                                 ori=0,
                                 color='black', colorSpace='rgb', opacity=1,
                                 languageStyle='LTR',
-                                depth=-1.0);
-
-# Initialize components for Routine "mu_empty_cells"
-mu_empty_cellsClock = core.Clock()
-mu_text_blank_2 = visual.TextStim(win=win, name='mu_text_blank_2',
-                                  text=None,
-                                  font=config.memory_update.text.font,
-                                  units='height', pos=(0, 0), height=config.memory_update.text.size, wrapWidth=None,
-                                  ori=0,
-                                  color='black', colorSpace='rgb', opacity=1,
-                                  languageStyle='LTR',
-                                  depth=-1.0);
+                                depth=-1.0)
 
 # Initialize components for Routine "mu_display_operation"
 mu_display_operationClock = core.Clock()
 mu_text_operation = visual.TextStim(win=win, name='mu_text_operation',
                                     text='',
                                     font=config.memory_update.text.font,
-                                    units='height', pos=[0, 0], height=config.memory_update.text.size, wrapWidth=None,
+                                    units='height', pos=[0, 0], height=config.memory_update.text.size,
+                                    wrapWidth=None,
                                     ori=0,
                                     color='black', colorSpace='rgb', opacity=1,
                                     languageStyle='LTR',
-                                    depth=-1.0);
+                                    depth=-1.0)
 
 # Initialize components for Routine "mu_empty_cells"
 mu_empty_cellsClock = core.Clock()
@@ -264,7 +250,7 @@ mu_text_blank_2 = visual.TextStim(win=win, name='mu_text_blank_2',
                                   ori=0,
                                   color='black', colorSpace='rgb', opacity=1,
                                   languageStyle='LTR',
-                                  depth=-1.0);
+                                  depth=-1.0)
 
 # Initialize components for Routine "mu_recall"
 mu_recallClock = core.Clock()
@@ -275,7 +261,7 @@ mu_text_question_mark = visual.TextStim(win=win, name='mu_text_question_mark',
                                         wrapWidth=None, ori=0,
                                         color='black', colorSpace='rgb', opacity=1,
                                         languageStyle='LTR',
-                                        depth=-1.0);
+                                        depth=-1.0)
 mu_key_resp_recall = keyboard.Keyboard()
 
 # Initialize components for Routine "mu_display_recall"
@@ -286,75 +272,10 @@ mu_text_recall = visual.TextStim(win=win, name='mu_text_recall',
                                  pos=[0, 0], height=config.memory_update.text.size, wrapWidth=None, ori=0,
                                  color='black', colorSpace='rgb', opacity=1,
                                  languageStyle='LTR',
-                                 depth=-1.0);
-
-# Initialize components for Routine "base_next_trial"
-base_next_trialClock = core.Clock()
-base_text_next_trial = visual.TextStim(win=win, name='base_text_next_trial',
-                                       text='',
-                                       font=config.experiment_messages.font,
-                                       pos=(0, 0), height=config.experiment_messages.size, wrapWidth=None, ori=0,
-                                       color='black', colorSpace='rgb', opacity=1,
-                                       languageStyle='LTR',
-                                       depth=-1.0);
-base_next_trial_key_resp = keyboard.Keyboard()
-
-# Initialize components for Routine "base_intertrial"
-base_intertrialClock = core.Clock()
-base_text_intertrial = visual.TextStim(win=win, name='base_text_intertrial',
-                                       text=None,
-                                       font=font,
-                                       units='height', pos=(0, 0), height=config.experiment_messages.size,
-                                       wrapWidth=None, ori=0,
-                                       color='white', colorSpace='rgb', opacity=1,
-                                       languageStyle='LTR',
-                                       depth=-1.0);
-
-# Initialize components for Routine "base_task_end"
-base_task_endClock = core.Clock()
-base_text_task_end = visual.TextStim(win=win, name='base_text_task_end',
-                                     text='',
-                                     font=config.experiment_messages.font,
-                                     units='height', pos=(0, 0), height=config.experiment_messages.size,
-                                     wrapWidth=text_wrap_width, ori=0,
-                                     color='black', colorSpace='rgb', opacity=1,
-                                     languageStyle='LTR',
-                                     depth=-1.0);
-base_key_resp_task_end = keyboard.Keyboard()
+                                 depth=-1.0)
 
 # Initialize components for Routine "os_init"
 os_initClock = core.Clock()
-
-# Initialize components for Routine "base_instruction"
-base_instructionClock = core.Clock()
-base_image_instruction = visual.ImageStim(
-    win=win,
-    name='base_image_instruction', units='pix',
-    image='sin', mask=None,
-    ori=0, pos=(0, 0), size=1.0,
-    color=[1, 1, 1], colorSpace='rgb', opacity=1,
-    flipHoriz=False, flipVert=False,
-    texRes=128, interpolate=True, depth=-1.0)
-base_key_resp_instruction = keyboard.Keyboard()
-base_aperture_instruction = visual.Aperture(
-    win=win, name='base_aperture_instruction',
-    units='height', size=10, pos=(0, 0))
-base_aperture_instruction.disable()  # disable until its actually used
-
-# Initialize components for Routine "base_init_task"
-base_init_taskClock = core.Clock()
-base_text_begin_task = visual.TextStim(win=win, name='base_text_begin_task',
-                                       text='',
-                                       font=config.experiment_messages.font,
-                                       units='height', pos=(0, 0), height=config.experiment_messages.size,
-                                       wrapWidth=text_wrap_width, ori=0,
-                                       color='black', colorSpace='rgb', opacity=1,
-                                       languageStyle='LTR',
-                                       depth=-1.0);
-base_key_resp_task_begin = keyboard.Keyboard()
-
-# Initialize components for Routine "base_init_trial"
-base_init_trialClock = core.Clock()
 
 # Initialize components for Routine "os_init_trial"
 os_init_trialClock = core.Clock()
@@ -362,10 +283,11 @@ os_text_fixation_cross = visual.TextStim(win=win, name='os_text_fixation_cross',
                                          text='+',
                                          font=config.operation_span.text.fixation_cross.font,
                                          units='height', pos=(0, 0),
-                                         height=config.operation_span.text.fixation_cross.size, wrapWidth=None, ori=0,
+                                         height=config.operation_span.text.fixation_cross.size, wrapWidth=None,
+                                         ori=0,
                                          color='black', colorSpace='rgb', opacity=1,
                                          languageStyle='LTR',
-                                         depth=-1.0);
+                                         depth=-1.0)
 
 # Initialize components for Routine "os_equation"
 os_equationClock = core.Clock()
@@ -376,7 +298,7 @@ os_text_equation = visual.TextStim(win=win, name='os_text_equation',
                                    wrapWidth=None, ori=0,
                                    color='black', colorSpace='rgb', opacity=1,
                                    languageStyle='LTR',
-                                   depth=-1.0);
+                                   depth=-1.0)
 os_key_resp_equation = keyboard.Keyboard()
 
 # Initialize components for Routine "os_letter"
@@ -388,7 +310,7 @@ os_text_letter = visual.TextStim(win=win, name='os_text_letter',
                                  wrapWidth=None, ori=0,
                                  color='black', colorSpace='rgb', opacity=1,
                                  languageStyle='LTR',
-                                 depth=-1.0);
+                                 depth=-1.0)
 
 # Initialize components for Routine "os_blank"
 os_blankClock = core.Clock()
@@ -399,7 +321,7 @@ os_text_blank = visual.TextStim(win=win, name='os_text_blank',
                                 ori=0,
                                 color='white', colorSpace='rgb', opacity=1,
                                 languageStyle='LTR',
-                                depth=-1.0);
+                                depth=-1.0)
 
 # Initialize components for Routine "os_recall"
 os_recallClock = core.Clock()
@@ -410,7 +332,7 @@ os_text_question_mark = visual.TextStim(win=win, name='os_text_question_mark',
                                         wrapWidth=None, ori=0,
                                         color='black', colorSpace='rgb', opacity=1,
                                         languageStyle='LTR',
-                                        depth=-1.0);
+                                        depth=-1.0)
 os_key_resp_recall = keyboard.Keyboard()
 
 # Initialize components for Routine "os_display_recall"
@@ -422,7 +344,7 @@ os_text_recall = visual.TextStim(win=win, name='os_text_recall',
                                  wrapWidth=None, ori=0,
                                  color='black', colorSpace='rgb', opacity=1,
                                  languageStyle='LTR',
-                                 depth=-1.0);
+                                 depth=-1.0)
 
 # Initialize components for Routine "base_intertrial"
 base_intertrialClock = core.Clock()
@@ -433,7 +355,7 @@ base_text_intertrial = visual.TextStim(win=win, name='base_text_intertrial',
                                        wrapWidth=None, ori=0,
                                        color='white', colorSpace='rgb', opacity=1,
                                        languageStyle='LTR',
-                                       depth=-1.0);
+                                       depth=-1.0)
 
 # Initialize components for Routine "base_self_paced_break"
 base_self_paced_breakClock = core.Clock()
@@ -444,7 +366,7 @@ base_text_self_paced_break = visual.TextStim(win=win, name='base_text_self_paced
                                              wrapWidth=text_wrap_width, ori=0,
                                              color='black', colorSpace='rgb', opacity=1,
                                              languageStyle='LTR',
-                                             depth=-1.0);
+                                             depth=-1.0)
 base_key_resp_self_paced_break = keyboard.Keyboard()
 
 # Initialize components for Routine "base_after_break_pause"
@@ -456,7 +378,7 @@ base_text_pause_after_break = visual.TextStim(win=win, name='base_text_pause_aft
                                               wrapWidth=None, ori=0,
                                               color='white', colorSpace='rgb', opacity=1,
                                               languageStyle='LTR',
-                                              depth=-1.0);
+                                              depth=-1.0)
 
 # Initialize components for Routine "base_task_end"
 base_task_endClock = core.Clock()
@@ -467,7 +389,7 @@ base_text_task_end = visual.TextStim(win=win, name='base_text_task_end',
                                      wrapWidth=text_wrap_width, ori=0,
                                      color='black', colorSpace='rgb', opacity=1,
                                      languageStyle='LTR',
-                                     depth=-1.0);
+                                     depth=-1.0)
 base_key_resp_task_end = keyboard.Keyboard()
 
 # Initialize components for Routine "ss_init"
@@ -498,7 +420,7 @@ base_text_begin_task = visual.TextStim(win=win, name='base_text_begin_task',
                                        wrapWidth=text_wrap_width, ori=0,
                                        color='black', colorSpace='rgb', opacity=1,
                                        languageStyle='LTR',
-                                       depth=-1.0);
+                                       depth=-1.0)
 base_key_resp_task_begin = keyboard.Keyboard()
 
 # Initialize components for Routine "base_init_trial"
@@ -513,7 +435,7 @@ ss_text_fixation_cross = visual.TextStim(win=win, name='ss_text_fixation_cross',
                                          height=config.sentence_span.text.fixation_cross.size, wrapWidth=None, ori=0,
                                          color='black', colorSpace='rgb', opacity=1,
                                          languageStyle='LTR',
-                                         depth=-1.0);
+                                         depth=-1.0)
 
 # Initialize components for Routine "ss_sentence"
 ss_sentenceClock = core.Clock()
@@ -524,7 +446,7 @@ ss_text_sentence = visual.TextStim(win=win, name='ss_text_sentence',
                                    wrapWidth=text_wrap_width, ori=0,
                                    color='black', colorSpace='rgb', opacity=1,
                                    languageStyle='LTR',
-                                   depth=-1.0);
+                                   depth=-1.0)
 ss_key_resp_sentence = keyboard.Keyboard()
 
 # Initialize components for Routine "ss_letter"
@@ -536,7 +458,7 @@ ss_text_letter = visual.TextStim(win=win, name='ss_text_letter',
                                  wrapWidth=None, ori=0,
                                  color='black', colorSpace='rgb', opacity=1,
                                  languageStyle='LTR',
-                                 depth=-1.0);
+                                 depth=-1.0)
 
 # Initialize components for Routine "ss_blank"
 ss_blankClock = core.Clock()
@@ -547,7 +469,7 @@ ss_text_blank = visual.TextStim(win=win, name='ss_text_blank',
                                 ori=0,
                                 color='white', colorSpace='rgb', opacity=1,
                                 languageStyle='LTR',
-                                depth=-1.0);
+                                depth=-1.0)
 
 # Initialize components for Routine "ss_recall"
 ss_recallClock = core.Clock()
@@ -558,7 +480,7 @@ ss_text_question_mark = visual.TextStim(win=win, name='ss_text_question_mark',
                                         wrapWidth=None, ori=0,
                                         color='black', colorSpace='rgb', opacity=1,
                                         languageStyle='LTR',
-                                        depth=-1.0);
+                                        depth=-1.0)
 ss_key_resp_recall = keyboard.Keyboard()
 
 # Initialize components for Routine "ss_display_recall"
@@ -570,7 +492,7 @@ ss_text_display_recall = visual.TextStim(win=win, name='ss_text_display_recall',
                                          wrapWidth=None, ori=0,
                                          color='black', colorSpace='rgb', opacity=1,
                                          languageStyle='LTR',
-                                         depth=-1.0);
+                                         depth=-1.0)
 
 # Initialize components for Routine "base_intertrial"
 base_intertrialClock = core.Clock()
@@ -581,7 +503,7 @@ base_text_intertrial = visual.TextStim(win=win, name='base_text_intertrial',
                                        wrapWidth=None, ori=0,
                                        color='white', colorSpace='rgb', opacity=1,
                                        languageStyle='LTR',
-                                       depth=-1.0);
+                                       depth=-1.0)
 
 # Initialize components for Routine "base_self_paced_break"
 base_self_paced_breakClock = core.Clock()
@@ -592,7 +514,7 @@ base_text_self_paced_break = visual.TextStim(win=win, name='base_text_self_paced
                                              wrapWidth=text_wrap_width, ori=0,
                                              color='black', colorSpace='rgb', opacity=1,
                                              languageStyle='LTR',
-                                             depth=-1.0);
+                                             depth=-1.0)
 base_key_resp_self_paced_break = keyboard.Keyboard()
 
 # Initialize components for Routine "base_after_break_pause"
@@ -604,7 +526,7 @@ base_text_pause_after_break = visual.TextStim(win=win, name='base_text_pause_aft
                                               wrapWidth=None, ori=0,
                                               color='white', colorSpace='rgb', opacity=1,
                                               languageStyle='LTR',
-                                              depth=-1.0);
+                                              depth=-1.0)
 
 # Initialize components for Routine "base_task_end"
 base_task_endClock = core.Clock()
@@ -615,7 +537,7 @@ base_text_task_end = visual.TextStim(win=win, name='base_text_task_end',
                                      wrapWidth=text_wrap_width, ori=0,
                                      color='black', colorSpace='rgb', opacity=1,
                                      languageStyle='LTR',
-                                     depth=-1.0);
+                                     depth=-1.0)
 base_key_resp_task_end = keyboard.Keyboard()
 
 # Initialize components for Routine "sstm_init"
@@ -646,7 +568,7 @@ base_text_begin_task = visual.TextStim(win=win, name='base_text_begin_task',
                                        wrapWidth=text_wrap_width, ori=0,
                                        color='black', colorSpace='rgb', opacity=1,
                                        languageStyle='LTR',
-                                       depth=-1.0);
+                                       depth=-1.0)
 base_key_resp_task_begin = keyboard.Keyboard()
 
 # Initialize components for Routine "base_init_trial"
@@ -662,7 +584,7 @@ sstm_text_fixation_cross = visual.TextStim(win=win, name='sstm_text_fixation_cro
                                            wrapWidth=None, ori=0,
                                            color='black', colorSpace='rgb', opacity=1,
                                            languageStyle='LTR',
-                                           depth=-1.0);
+                                           depth=-1.0)
 
 # Initialize components for Routine "sstm_empty_grid"
 sstm_empty_gridClock = core.Clock()
@@ -673,7 +595,7 @@ sstm_text_blank = visual.TextStim(win=win, name='sstm_text_blank',
                                   ori=0,
                                   color='white', colorSpace='rgb', opacity=1,
                                   languageStyle='LTR',
-                                  depth=-1.0);
+                                  depth=-1.0)
 
 # Initialize components for Routine "sstm_display_dot"
 sstm_display_dotClock = core.Clock()
@@ -692,7 +614,7 @@ sstm_text_after_display_dot = visual.TextStim(win=win, name='sstm_text_after_dis
                                               units='height', pos=(0, 0), height=0.1, wrapWidth=None, ori=0,
                                               color='white', colorSpace='rgb', opacity=1,
                                               languageStyle='LTR',
-                                              depth=-1.0);
+                                              depth=-1.0)
 
 # Initialize components for Routine "sstm_draw_request"
 sstm_draw_requestClock = core.Clock()
@@ -704,7 +626,7 @@ text_sstm_draw_dots = visual.TextStim(win=win, name='text_sstm_draw_dots',
                                       wrapWidth=text_wrap_width, ori=0,
                                       color='black', colorSpace='rgb', opacity=1,
                                       languageStyle='LTR',
-                                      depth=-1.0);
+                                      depth=-1.0)
 text_sstm_presentation_end = visual.TextStim(win=win, name='text_sstm_presentation_end',
                                              text='',
                                              font=config.spatial_short_term_memory.text.end_text.font,
@@ -712,7 +634,7 @@ text_sstm_presentation_end = visual.TextStim(win=win, name='text_sstm_presentati
                                              wrapWidth=None, ori=0,
                                              color='black', colorSpace='rgb', opacity=1,
                                              languageStyle='LTR',
-                                             depth=-2.0);
+                                             depth=-2.0)
 
 # Initialize components for Routine "sstm_recall"
 sstm_recallClock = core.Clock()
@@ -724,7 +646,7 @@ sstm_text_next = visual.TextStim(win=win, name='sstm_text_next',
                                  wrapWidth=text_wrap_width, ori=0,
                                  color='black', colorSpace='rgb', opacity=1,
                                  languageStyle='LTR',
-                                 depth=-1.0);
+                                 depth=-1.0)
 sstm_mouse = event.Mouse(win=win)
 x, y = [None, None]
 sstm_mouse.mouseClock = core.Clock()
@@ -737,7 +659,7 @@ base_text_next_trial = visual.TextStim(win=win, name='base_text_next_trial',
                                        pos=(0, 0), height=config.experiment_messages.size, wrapWidth=None, ori=0,
                                        color='black', colorSpace='rgb', opacity=1,
                                        languageStyle='LTR',
-                                       depth=-1.0);
+                                       depth=-1.0)
 base_next_trial_key_resp = keyboard.Keyboard()
 
 # Initialize components for Routine "base_intertrial"
@@ -749,7 +671,7 @@ base_text_intertrial = visual.TextStim(win=win, name='base_text_intertrial',
                                        wrapWidth=None, ori=0,
                                        color='white', colorSpace='rgb', opacity=1,
                                        languageStyle='LTR',
-                                       depth=-1.0);
+                                       depth=-1.0)
 
 # Initialize components for Routine "sstm_task_end"
 sstm_task_endClock = core.Clock()
@@ -760,7 +682,7 @@ text_sstm_task_end = visual.TextStim(win=win, name='text_sstm_task_end',
                                      wrapWidth=text_wrap_width, ori=0,
                                      color='black', colorSpace='rgb', opacity=1,
                                      languageStyle='LTR',
-                                     depth=-1.0);
+                                     depth=-1.0)
 sstm_key_resp_task_end = keyboard.Keyboard()
 
 # Initialize components for Routine "base_end"
@@ -772,7 +694,7 @@ base_text_end = visual.TextStim(win=win, name='base_text_end',
                                 wrapWidth=text_wrap_width, ori=0,
                                 color='black', colorSpace='rgb', opacity=1,
                                 languageStyle='LTR',
-                                depth=-1.0);
+                                depth=-1.0)
 base_key_resp_end = keyboard.Keyboard()
 
 # Create some handy timers
@@ -817,7 +739,8 @@ while continueRoutine:
     tThisFlipGlobal = win.getFutureFlipTime(clock=None)
     frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
     # update/draw components on each frame
-    if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+    all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+    if any(key.name[0] == config.common.abort_key for key in all_keys):
         core.quit()
 
     # check if all components have finished
@@ -900,7 +823,8 @@ while continueRoutine:
     tThisFlipGlobal = win.getFutureFlipTime(clock=None)
     frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
     # update/draw components on each frame
-    if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+    all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+    if any(key.name[0] == config.common.abort_key for key in all_keys):
         core.quit()
 
     # *base_image_instruction* updates
@@ -924,12 +848,14 @@ while continueRoutine:
         # keyboard checking is just starting
         waitOnFlip = True
         win.callOnFlip(base_key_resp_instruction.clock.reset)  # t=0 on next screen flip
-        win.callOnFlip(base_key_resp_instruction.clearEvents, eventType='keyboard')  # clear events on next screen flip
+        win.callOnFlip(base_key_resp_instruction.clearEvents,
+                       eventType='keyboard')  # clear events on next screen flip
     if base_key_resp_instruction.status == STARTED and not waitOnFlip:
         theseKeys = base_key_resp_instruction.getKeys(keyList=None, waitRelease=False)
         _base_key_resp_instruction_allKeys.extend(theseKeys)
         if len(_base_key_resp_instruction_allKeys):
-            base_key_resp_instruction.keys = _base_key_resp_instruction_allKeys[-1].name  # just the last key pressed
+            base_key_resp_instruction.keys = _base_key_resp_instruction_allKeys[
+                -1].name  # just the last key pressed
             base_key_resp_instruction.rt = _base_key_resp_instruction_allKeys[-1].rt
             # a response ends the routine
             continueRoutine = False
@@ -1029,7 +955,8 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
         tThisFlipGlobal = win.getFutureFlipTime(clock=None)
         frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
         # update/draw components on each frame
-        if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+        all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+        if any(key.name[0] == config.common.abort_key for key in all_keys):
             core.quit()
 
         # check if all components have finished
@@ -1080,8 +1007,6 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
         # where images will get a grey border. a workaround is
         # setting up an aperture to hide these borders.
 
-        from PIL import Image
-
         instr_img_size = Image.open(instruction_filepath).size
 
         # set aperture parameters from image size in pixels
@@ -1131,7 +1056,8 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
             tThisFlipGlobal = win.getFutureFlipTime(clock=None)
             frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
             # update/draw components on each frame
-            if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+            all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+            if any(key.name[0] == config.common.abort_key for key in all_keys):
                 core.quit()
 
             # *base_image_instruction* updates
@@ -1269,7 +1195,8 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
             tThisFlipGlobal = win.getFutureFlipTime(clock=None)
             frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
             # update/draw components on each frame
-            if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+            all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+            if any(key.name[0] == config.common.abort_key for key in all_keys):
                 core.quit()
 
             # *base_text_begin_task* updates
@@ -1386,7 +1313,8 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
                 tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                 frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                 # update/draw components on each frame
-                if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                if any(key.name[0] == config.common.abort_key for key in all_keys):
                     core.quit()
 
                 # check if all components have finished
@@ -1437,7 +1365,8 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
                 tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                 frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                 # update/draw components on each frame
-                if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                if any(key.name[0] == config.common.abort_key for key in all_keys):
                     core.quit()
 
                 # *mu_text_blank* updates
@@ -1527,7 +1456,8 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
                     tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                     frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                     # update/draw components on each frame
-                    if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                    all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                    if any(key.name[0] == config.common.abort_key for key in all_keys):
                         core.quit()
 
                     # *mu_text_digit* updates
@@ -1595,7 +1525,8 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
                     tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                     frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                     # update/draw components on each frame
-                    if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                    all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                    if any(key.name[0] == config.common.abort_key for key in all_keys):
                         core.quit()
 
                     # *mu_text_blank_2* updates
@@ -1688,7 +1619,8 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
                     tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                     frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                     # update/draw components on each frame
-                    if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                    all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                    if any(key.name[0] == config.common.abort_key for key in all_keys):
                         core.quit()
 
                     # *mu_text_operation* updates
@@ -1756,7 +1688,8 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
                     tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                     frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                     # update/draw components on each frame
-                    if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                    all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                    if any(key.name[0] == config.common.abort_key for key in all_keys):
                         core.quit()
 
                     # *mu_text_blank_2* updates
@@ -1861,7 +1794,8 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
                     tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                     frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                     # update/draw components on each frame
-                    if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                    all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                    if any(key.name[0] == config.common.abort_key for key in all_keys):
                         core.quit()
 
                     # *mu_text_question_mark* updates
@@ -1891,7 +1825,8 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
                         theseKeys = mu_key_resp_recall.getKeys(keyList=None, waitRelease=False)
                         _mu_key_resp_recall_allKeys.extend(theseKeys)
                         if len(_mu_key_resp_recall_allKeys):
-                            mu_key_resp_recall.keys = _mu_key_resp_recall_allKeys[-1].name  # just the last key pressed
+                            mu_key_resp_recall.keys = _mu_key_resp_recall_allKeys[
+                                -1].name  # just the last key pressed
                             mu_key_resp_recall.rt = _mu_key_resp_recall_allKeys[-1].rt
                             # a response ends the routine
                             continueRoutine = False
@@ -1969,7 +1904,8 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
                     tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                     frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                     # update/draw components on each frame
-                    if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                    all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                    if any(key.name[0] == config.common.abort_key for key in all_keys):
                         core.quit()
 
                     # *mu_text_recall* updates
@@ -2066,7 +2002,8 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
                     tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                     frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                     # update/draw components on each frame
-                    if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                    all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                    if any(key.name[0] == config.common.abort_key for key in all_keys):
                         core.quit()
 
                     # *base_text_next_trial* updates
@@ -2168,7 +2105,8 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
                 tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                 frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                 # update/draw components on each frame
-                if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                if any(key.name[0] == config.common.abort_key for key in all_keys):
                     core.quit()
 
                 # *base_text_intertrial* updates
@@ -2249,7 +2187,8 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
         tThisFlipGlobal = win.getFutureFlipTime(clock=None)
         frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
         # update/draw components on each frame
-        if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+        all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+        if any(key.name[0] == config.common.abort_key for key in all_keys):
             core.quit()
 
         # *base_text_task_end* updates
@@ -2273,13 +2212,15 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
             # keyboard checking is just starting
             waitOnFlip = True
             win.callOnFlip(base_key_resp_task_end.clock.reset)  # t=0 on next screen flip
-            win.callOnFlip(base_key_resp_task_end.clearEvents, eventType='keyboard')  # clear events on next screen flip
+            win.callOnFlip(base_key_resp_task_end.clearEvents,
+                           eventType='keyboard')  # clear events on next screen flip
         if base_key_resp_task_end.status == STARTED and not waitOnFlip:
             theseKeys = base_key_resp_task_end.getKeys(keyList=None, waitRelease=False)
             if theseKeys != [] and theseKeys[-1].value[0] == 'space':
                 _base_key_resp_task_end_allKeys.extend(theseKeys)
                 if len(_base_key_resp_task_end_allKeys):
-                    base_key_resp_task_end.keys = _base_key_resp_task_end_allKeys[-1].name  # just the last key pressed
+                    base_key_resp_task_end.keys = _base_key_resp_task_end_allKeys[
+                        -1].name  # just the last key pressed
                     base_key_resp_task_end.rt = _base_key_resp_task_end_allKeys[-1].rt
                     # a response ends the routine
                     continueRoutine = False
@@ -2322,7 +2263,7 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
 
 
 # set up handler to look after randomisation of conditions etc
-do_operation_span_dummy = data.TrialHandler(nReps=do_os_task, method='random',
+do_operation_span_dummy = data.TrialHandler(nReps=1 if do_os_task else 0, method='random',
                                             extraInfo=expInfo, originPath=-1,
                                             trialList=[None],
                                             seed=None, name='do_operation_span_dummy')
@@ -2373,7 +2314,8 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
         tThisFlipGlobal = win.getFutureFlipTime(clock=None)
         frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
         # update/draw components on each frame
-        if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+        all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+        if any(key.name[0] == config.common.abort_key for key in all_keys):
             core.quit()
 
         # check if all components have finished
@@ -2424,8 +2366,6 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
         # where images will get a grey border. a workaround is
         # setting up an aperture to hide these borders.
 
-        from PIL import Image
-
         instr_img_size = Image.open(instruction_filepath).size
 
         # set aperture parameters from image size in pixels
@@ -2475,7 +2415,8 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
             tThisFlipGlobal = win.getFutureFlipTime(clock=None)
             frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
             # update/draw components on each frame
-            if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+            all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+            if any(key.name[0] == config.common.abort_key for key in all_keys):
                 core.quit()
 
             # *base_image_instruction* updates
@@ -2613,7 +2554,8 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
             tThisFlipGlobal = win.getFutureFlipTime(clock=None)
             frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
             # update/draw components on each frame
-            if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+            all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+            if any(key.name[0] == config.common.abort_key for key in all_keys):
                 core.quit()
 
             # *base_text_begin_task* updates
@@ -2730,7 +2672,8 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
                 tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                 frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                 # update/draw components on each frame
-                if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                if any(key.name[0] == config.common.abort_key for key in all_keys):
                     core.quit()
 
                 # check if all components have finished
@@ -2880,7 +2823,8 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
                     tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                     frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                     # update/draw components on each frame
-                    if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                    all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                    if any(key.name[0] == config.common.abort_key for key in all_keys):
                         core.quit()
 
                     # *os_text_equation* updates
@@ -3024,7 +2968,8 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
                     tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                     frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                     # update/draw components on each frame
-                    if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                    all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                    if any(key.name[0] == config.common.abort_key for key in all_keys):
                         core.quit()
 
                     # *os_text_letter* updates
@@ -3092,7 +3037,8 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
                     tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                     frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                     # update/draw components on each frame
-                    if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                    all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                    if any(key.name[0] == config.common.abort_key for key in all_keys):
                         core.quit()
 
                     # *os_text_blank* updates
@@ -3191,7 +3137,8 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
                     tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                     frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                     # update/draw components on each frame
-                    if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                    all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                    if any(key.name[0] == config.common.abort_key for key in all_keys):
                         core.quit()
 
                     # *os_text_question_mark* updates
@@ -3230,8 +3177,8 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
                         theseKeys = os_key_resp_recall.getKeys(keyList=list(os_allowed_keys), waitRelease=False)
                         _os_key_resp_recall_allKeys.extend(theseKeys)
                         if len(_os_key_resp_recall_allKeys):
-                            os_key_resp_recall.keys = _os_key_resp_recall_allKeys[-1].name[
-                                0]  # just the last key pressed
+                            os_key_resp_recall.keys = _os_key_resp_recall_allKeys[
+                                -1].name[0]  # just the last key pressed
                             os_key_resp_recall.rt = _os_key_resp_recall_allKeys[-1].rt[0]
                             # was this correct?
                             if (os_key_resp_recall.keys == str(correct_letter)) or (
@@ -3266,9 +3213,9 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
                     os_key_resp_recall.keys = None
                     # was no response the correct answer?!
                     if str(correct_letter).lower() == 'none':
-                        os_key_resp_recall.corr = 1;  # correct non-response
+                        os_key_resp_recall.corr = 1  # correct non-response
                     else:
-                        os_key_resp_recall.corr = 0;  # failed to respond (incorrectly)
+                        os_key_resp_recall.corr = 0  # failed to respond (incorrectly)
                 # store data for os_recalls (TrialHandler)
                 os_recalls.addData('os_key_resp_recall.keys', os_key_resp_recall.keys)
                 os_recalls.addData('os_key_resp_recall.corr', os_key_resp_recall.corr)
@@ -3310,7 +3257,8 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
                     tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                     frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                     # update/draw components on each frame
-                    if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                    all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                    if any(key.name[0] == config.common.abort_key for key in all_keys):
                         core.quit()
 
                     # *os_text_recall* updates
@@ -3382,7 +3330,8 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
                 tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                 frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                 # update/draw components on each frame
-                if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                if any(key.name[0] == config.common.abort_key for key in all_keys):
                     core.quit()
 
                 # *base_text_intertrial* updates
@@ -3473,7 +3422,8 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
                     tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                     frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                     # update/draw components on each frame
-                    if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                    all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                    if any(key.name[0] == config.common.abort_key for key in all_keys):
                         core.quit()
 
                     # *base_text_self_paced_break* updates
@@ -3530,8 +3480,10 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
                 for thisComponent in base_self_paced_breakComponents:
                     if hasattr(thisComponent, "setAutoDraw"):
                         thisComponent.setAutoDraw(False)
-                os_break_dummy.addData('base_text_self_paced_break.started', base_text_self_paced_break.tStartRefresh)
-                os_break_dummy.addData('base_text_self_paced_break.stopped', base_text_self_paced_break.tStopRefresh)
+                os_break_dummy.addData('base_text_self_paced_break.started',
+                                       base_text_self_paced_break.tStartRefresh)
+                os_break_dummy.addData('base_text_self_paced_break.stopped',
+                                       base_text_self_paced_break.tStopRefresh)
                 # check responses
                 if base_key_resp_self_paced_break.keys in ['', [], None]:  # No response was made
                     base_key_resp_self_paced_break.keys = None
@@ -3571,7 +3523,8 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
                     tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                     frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                     # update/draw components on each frame
-                    if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                    all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                    if any(key.name[0] == config.common.abort_key for key in all_keys):
                         core.quit()
 
                     # *base_text_pause_after_break* updates
@@ -3608,8 +3561,10 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
                 for thisComponent in base_after_break_pauseComponents:
                     if hasattr(thisComponent, "setAutoDraw"):
                         thisComponent.setAutoDraw(False)
-                os_break_dummy.addData('base_text_pause_after_break.started', base_text_pause_after_break.tStartRefresh)
-                os_break_dummy.addData('base_text_pause_after_break.stopped', base_text_pause_after_break.tStopRefresh)
+                os_break_dummy.addData('base_text_pause_after_break.started',
+                                       base_text_pause_after_break.tStartRefresh)
+                os_break_dummy.addData('base_text_pause_after_break.stopped',
+                                       base_text_pause_after_break.tStopRefresh)
                 # the Routine "base_after_break_pause" was not non-slip safe, so reset the non-slip timer
                 routineTimer.reset()
                 thisExp.nextEntry()
@@ -3656,7 +3611,8 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
         tThisFlipGlobal = win.getFutureFlipTime(clock=None)
         frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
         # update/draw components on each frame
-        if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+        all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+        if any(key.name[0] == config.common.abort_key for key in all_keys):
             core.quit()
 
         # *base_text_task_end* updates
@@ -3680,13 +3636,15 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
             # keyboard checking is just starting
             waitOnFlip = True
             win.callOnFlip(base_key_resp_task_end.clock.reset)  # t=0 on next screen flip
-            win.callOnFlip(base_key_resp_task_end.clearEvents, eventType='keyboard')  # clear events on next screen flip
+            win.callOnFlip(base_key_resp_task_end.clearEvents,
+                           eventType='keyboard')  # clear events on next screen flip
         if base_key_resp_task_end.status == STARTED and not waitOnFlip:
             theseKeys = base_key_resp_task_end.getKeys(keyList=None, waitRelease=False)
             if theseKeys != [] and theseKeys[-1].value[0] == 'space':
                 _base_key_resp_task_end_allKeys.extend(theseKeys)
                 if len(_base_key_resp_task_end_allKeys):
-                    base_key_resp_task_end.keys = _base_key_resp_task_end_allKeys[-1].name  # just the last key pressed
+                    base_key_resp_task_end.keys = _base_key_resp_task_end_allKeys[
+                        -1].name  # just the last key pressed
                     base_key_resp_task_end.rt = _base_key_resp_task_end_allKeys[-1].rt
                     # a response ends the routine
                     continueRoutine = False
@@ -3726,7 +3684,6 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
     thisExp.nextEntry()
 
 # completed do_os_task repeats of 'do_operation_span_dummy'
-
 
 # set up handler to look after randomisation of conditions etc
 do_sentence_span_dummy = data.TrialHandler(nReps=do_ss_task, method='random',
@@ -3780,7 +3737,8 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
         tThisFlipGlobal = win.getFutureFlipTime(clock=None)
         frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
         # update/draw components on each frame
-        if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+        all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+        if any(key.name[0] == config.common.abort_key for key in all_keys):
             core.quit()
 
         # check if all components have finished
@@ -3831,8 +3789,6 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
         # where images will get a grey border. a workaround is
         # setting up an aperture to hide these borders.
 
-        from PIL import Image
-
         instr_img_size = Image.open(instruction_filepath).size
 
         # set aperture parameters from image size in pixels
@@ -3882,7 +3838,8 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
             tThisFlipGlobal = win.getFutureFlipTime(clock=None)
             frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
             # update/draw components on each frame
-            if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+            all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+            if any(key.name[0] == config.common.abort_key for key in all_keys):
                 core.quit()
 
             # *base_image_instruction* updates
@@ -4020,7 +3977,8 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
             tThisFlipGlobal = win.getFutureFlipTime(clock=None)
             frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
             # update/draw components on each frame
-            if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+            all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+            if any(key.name[0] == config.common.abort_key for key in all_keys):
                 core.quit()
 
             # *base_text_begin_task* updates
@@ -4137,7 +4095,8 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
                 tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                 frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                 # update/draw components on each frame
-                if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                if any(key.name[0] == config.common.abort_key for key in all_keys):
                     core.quit()
 
                 # check if all components have finished
@@ -4187,7 +4146,8 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
                 tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                 frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                 # update/draw components on each frame
-                if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                if any(key.name[0] == config.common.abort_key for key in all_keys):
                     core.quit()
 
                 # *ss_text_fixation_cross* updates
@@ -4287,7 +4247,8 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
                     tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                     frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                     # update/draw components on each frame
-                    if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                    all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                    if any(key.name[0] == config.common.abort_key for key in all_keys):
                         core.quit()
 
                     # *ss_text_sentence* updates
@@ -4390,9 +4351,9 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
                     ss_key_resp_sentence.keys = None
                     # was no response the correct answer?!
                     if str(correct_key).lower() == 'none':
-                        ss_key_resp_sentence.corr = 1;  # correct non-response
+                        ss_key_resp_sentence.corr = 1  # correct non-response
                     else:
-                        ss_key_resp_sentence.corr = 0;  # failed to respond (incorrectly)
+                        ss_key_resp_sentence.corr = 0  # failed to respond (incorrectly)
                 # store data for ss_presentations (TrialHandler)
                 ss_presentations.addData('ss_key_resp_sentence.keys', ss_key_resp_sentence.keys)
                 ss_presentations.addData('ss_key_resp_sentence.corr', ss_key_resp_sentence.corr)
@@ -4431,7 +4392,8 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
                     tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                     frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                     # update/draw components on each frame
-                    if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                    all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                    if any(key.name[0] == config.common.abort_key for key in all_keys):
                         core.quit()
 
                     # *ss_text_letter* updates
@@ -4499,7 +4461,8 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
                     tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                     frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                     # update/draw components on each frame
-                    if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                    all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                    if any(key.name[0] == config.common.abort_key for key in all_keys):
                         core.quit()
 
                     # *ss_text_blank* updates
@@ -4598,7 +4561,8 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
                     tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                     frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                     # update/draw components on each frame
-                    if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                    all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                    if any(key.name[0] == config.common.abort_key for key in all_keys):
                         core.quit()
 
                     # *ss_text_question_mark* updates
@@ -4650,6 +4614,7 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
                                     ss_key_resp_recall.corr = 0
                                 # a response ends the routine
                                 continueRoutine = False
+
                     # check if all components have finished
                     if not continueRoutine:  # a component has requested a forced-end of Routine
                         break
@@ -4674,9 +4639,9 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
                     ss_key_resp_recall.keys = None
                     # was no response the correct answer?!
                     if str(correct_letter).lower() == 'none':
-                        ss_key_resp_recall.corr = 1;  # correct non-response
+                        ss_key_resp_recall.corr = 1  # correct non-response
                     else:
-                        ss_key_resp_recall.corr = 0;  # failed to respond (incorrectly)
+                        ss_key_resp_recall.corr = 0  # failed to respond (incorrectly)
                 # store data for ss_recalls (TrialHandler)
                 ss_recalls.addData('ss_key_resp_recall.keys', ss_key_resp_recall.keys)
                 ss_recalls.addData('ss_key_resp_recall.corr', ss_key_resp_recall.corr)
@@ -4718,7 +4683,8 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
                     tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                     frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                     # update/draw components on each frame
-                    if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                    all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                    if any(key.name[0] == config.common.abort_key for key in all_keys):
                         core.quit()
 
                     # *ss_text_display_recall* updates
@@ -4790,7 +4756,8 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
                 tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                 frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                 # update/draw components on each frame
-                if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                if any(key.name[0] == config.common.abort_key for key in all_keys):
                     core.quit()
 
                 # *base_text_intertrial* updates
@@ -4881,7 +4848,8 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
                     tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                     frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                     # update/draw components on each frame
-                    if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                    all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                    if any(key.name[0] == config.common.abort_key for key in all_keys):
                         core.quit()
 
                     # *base_text_self_paced_break* updates
@@ -4938,8 +4906,10 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
                 for thisComponent in base_self_paced_breakComponents:
                     if hasattr(thisComponent, "setAutoDraw"):
                         thisComponent.setAutoDraw(False)
-                ss_break_dummy.addData('base_text_self_paced_break.started', base_text_self_paced_break.tStartRefresh)
-                ss_break_dummy.addData('base_text_self_paced_break.stopped', base_text_self_paced_break.tStopRefresh)
+                ss_break_dummy.addData('base_text_self_paced_break.started',
+                                       base_text_self_paced_break.tStartRefresh)
+                ss_break_dummy.addData('base_text_self_paced_break.stopped',
+                                       base_text_self_paced_break.tStopRefresh)
                 # check responses
                 if base_key_resp_self_paced_break.keys in ['', [], None]:  # No response was made
                     base_key_resp_self_paced_break.keys = None
@@ -4979,7 +4949,8 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
                     tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                     frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                     # update/draw components on each frame
-                    if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                    all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                    if any(key.name[0] == config.common.abort_key for key in all_keys):
                         core.quit()
 
                     # *base_text_pause_after_break* updates
@@ -5016,8 +4987,10 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
                 for thisComponent in base_after_break_pauseComponents:
                     if hasattr(thisComponent, "setAutoDraw"):
                         thisComponent.setAutoDraw(False)
-                ss_break_dummy.addData('base_text_pause_after_break.started', base_text_pause_after_break.tStartRefresh)
-                ss_break_dummy.addData('base_text_pause_after_break.stopped', base_text_pause_after_break.tStopRefresh)
+                ss_break_dummy.addData('base_text_pause_after_break.started',
+                                       base_text_pause_after_break.tStartRefresh)
+                ss_break_dummy.addData('base_text_pause_after_break.stopped',
+                                       base_text_pause_after_break.tStopRefresh)
                 # the Routine "base_after_break_pause" was not non-slip safe, so reset the non-slip timer
                 routineTimer.reset()
                 thisExp.nextEntry()
@@ -5064,7 +5037,8 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
         tThisFlipGlobal = win.getFutureFlipTime(clock=None)
         frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
         # update/draw components on each frame
-        if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+        all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+        if any(key.name[0] == config.common.abort_key for key in all_keys):
             core.quit()
 
         # *base_text_task_end* updates
@@ -5088,13 +5062,15 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
             # keyboard checking is just starting
             waitOnFlip = True
             win.callOnFlip(base_key_resp_task_end.clock.reset)  # t=0 on next screen flip
-            win.callOnFlip(base_key_resp_task_end.clearEvents, eventType='keyboard')  # clear events on next screen flip
+            win.callOnFlip(base_key_resp_task_end.clearEvents,
+                           eventType='keyboard')  # clear events on next screen flip
         if base_key_resp_task_end.status == STARTED and not waitOnFlip:
             theseKeys = base_key_resp_task_end.getKeys(keyList=None, waitRelease=False)
             if theseKeys and theseKeys[-1].value[0] == 'space':
                 _base_key_resp_task_end_allKeys.extend(theseKeys)
                 if len(_base_key_resp_task_end_allKeys):
-                    base_key_resp_task_end.keys = _base_key_resp_task_end_allKeys[-1].name  # just the last key pressed
+                    base_key_resp_task_end.keys = _base_key_resp_task_end_allKeys[
+                        -1].name  # just the last key pressed
                     base_key_resp_task_end.rt = _base_key_resp_task_end_allKeys[-1].rt
                     # a response ends the routine
                     continueRoutine = False
@@ -5134,7 +5110,6 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
     thisExp.nextEntry()
 
 # completed do_ss_task repeats of 'do_sentence_span_dummy'
-
 
 # set up handler to look after randomisation of conditions etc
 do_spatial_short_term_memory_dummy = data.TrialHandler(nReps=do_sstm_task, method='random',
@@ -5188,7 +5163,8 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
         tThisFlipGlobal = win.getFutureFlipTime(clock=None)
         frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
         # update/draw components on each frame
-        if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+        all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+        if any(key.name[0] == config.common.abort_key for key in all_keys):
             core.quit()
 
         # check if all components have finished
@@ -5239,8 +5215,6 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
         # where images will get a grey border. a workaround is
         # setting up an aperture to hide these borders.
 
-        from PIL import Image
-
         instr_img_size = Image.open(instruction_filepath).size
 
         # set aperture parameters from image size in pixels
@@ -5290,7 +5264,9 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
             tThisFlipGlobal = win.getFutureFlipTime(clock=None)
             frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
             # update/draw components on each frame
-            if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+            all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+            all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+            if any(key.name[0] == config.common.abort_key for key in all_keys):
                 core.quit()
 
             # *base_image_instruction* updates
@@ -5428,7 +5404,9 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
             tThisFlipGlobal = win.getFutureFlipTime(clock=None)
             frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
             # update/draw components on each frame
-            if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+            all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+            all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+            if any(key.name[0] == config.common.abort_key for key in all_keys):
                 core.quit()
 
             # *base_text_begin_task* updates
@@ -5545,7 +5523,8 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
                 tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                 frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                 # update/draw components on each frame
-                if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                if any(key.name[0] == config.common.abort_key for key in all_keys):
                     core.quit()
 
                 # check if all components have finished
@@ -5596,7 +5575,8 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
                 tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                 frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                 # update/draw components on each frame
-                if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                if any(key.name[0] == config.common.abort_key for key in all_keys):
                     core.quit()
 
                 # *sstm_text_fixation_cross* updates
@@ -5665,7 +5645,8 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
                 tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                 frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                 # update/draw components on each frame
-                if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                if any(key.name[0] == config.common.abort_key for key in all_keys):
                     core.quit()
 
                 # *sstm_text_blank* updates
@@ -5755,7 +5736,8 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
                     tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                     frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                     # update/draw components on each frame
-                    if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                    all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                    if any(key.name[0] == config.common.abort_key for key in all_keys):
                         core.quit()
 
                     # *sstm_polygon_display_dot* updates
@@ -5792,8 +5774,10 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
                 for thisComponent in sstm_display_dotComponents:
                     if hasattr(thisComponent, "setAutoDraw"):
                         thisComponent.setAutoDraw(False)
-                sstm_presentations.addData('sstm_polygon_display_dot.started', sstm_polygon_display_dot.tStartRefresh)
-                sstm_presentations.addData('sstm_polygon_display_dot.stopped', sstm_polygon_display_dot.tStopRefresh)
+                sstm_presentations.addData('sstm_polygon_display_dot.started',
+                                           sstm_polygon_display_dot.tStartRefresh)
+                sstm_presentations.addData('sstm_polygon_display_dot.stopped',
+                                           sstm_polygon_display_dot.tStopRefresh)
                 # the Routine "sstm_display_dot" was not non-slip safe, so reset the non-slip timer
                 routineTimer.reset()
 
@@ -5823,7 +5807,8 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
                     tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                     frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                     # update/draw components on each frame
-                    if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                    all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                    if any(key.name[0] == config.common.abort_key for key in all_keys):
                         core.quit()
 
                     # *sstm_text_after_display_dot* updates
@@ -5899,7 +5884,8 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
                 tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                 frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                 # update/draw components on each frame
-                if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                if any(key.name[0] == config.common.abort_key for key in all_keys):
                     core.quit()
 
                 # *text_sstm_draw_dots* updates
@@ -6000,7 +5986,8 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
                 tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                 frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                 # update/draw components on each frame
-                if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                if any(key.name[0] == config.common.abort_key for key in all_keys):
                     core.quit()
 
                 current_trial.process_mouse_event(sstm_mouse)
@@ -6093,7 +6080,8 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
             if len(sstm_mouse.midButton): sstm_trials.addData('sstm_mouse.midButton', sstm_mouse.midButton[0])
             if len(sstm_mouse.rightButton): sstm_trials.addData('sstm_mouse.rightButton', sstm_mouse.rightButton[0])
             if len(sstm_mouse.time): sstm_trials.addData('sstm_mouse.time', sstm_mouse.time[0])
-            if len(sstm_mouse.clicked_name): sstm_trials.addData('sstm_mouse.clicked_name', sstm_mouse.clicked_name[0])
+            if len(sstm_mouse.clicked_name): sstm_trials.addData('sstm_mouse.clicked_name',
+                                                                 sstm_mouse.clicked_name[0])
             sstm_trials.addData('sstm_mouse.started', sstm_mouse.tStart)
             sstm_trials.addData('sstm_mouse.stopped', sstm_mouse.tStop)
             # the Routine "sstm_recall" was not non-slip safe, so reset the non-slip timer
@@ -6149,7 +6137,8 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
                     tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                     frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                     # update/draw components on each frame
-                    if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                    all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                    if any(key.name[0] == config.common.abort_key for key in all_keys):
                         core.quit()
 
                     # *base_text_next_trial* updates
@@ -6216,7 +6205,8 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
                     sstm_next_trial_dummy.addData('base_next_trial_key_resp.rt', base_next_trial_key_resp.rt)
                 sstm_next_trial_dummy.addData('base_next_trial_key_resp.started',
                                               base_next_trial_key_resp.tStartRefresh)
-                sstm_next_trial_dummy.addData('base_next_trial_key_resp.stopped', base_next_trial_key_resp.tStopRefresh)
+                sstm_next_trial_dummy.addData('base_next_trial_key_resp.stopped',
+                                              base_next_trial_key_resp.tStopRefresh)
                 # the Routine "base_next_trial" was not non-slip safe, so reset the non-slip timer
                 routineTimer.reset()
                 thisExp.nextEntry()
@@ -6250,7 +6240,8 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
                 tThisFlipGlobal = win.getFutureFlipTime(clock=None)
                 frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
                 # update/draw components on each frame
-                if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+                all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+                if any(key.name[0] == config.common.abort_key for key in all_keys):
                     core.quit()
 
                 # *base_text_intertrial* updates
@@ -6333,7 +6324,8 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
         tThisFlipGlobal = win.getFutureFlipTime(clock=None)
         frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
         # update/draw components on each frame
-        if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+        all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+        if any(key.name[0] == config.common.abort_key for key in all_keys):
             core.quit()
 
         # *text_sstm_task_end* updates
@@ -6357,13 +6349,15 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
             # keyboard checking is just starting
             waitOnFlip = True
             win.callOnFlip(sstm_key_resp_task_end.clock.reset)  # t=0 on next screen flip
-            win.callOnFlip(sstm_key_resp_task_end.clearEvents, eventType='keyboard')  # clear events on next screen flip
+            win.callOnFlip(sstm_key_resp_task_end.clearEvents,
+                           eventType='keyboard')  # clear events on next screen flip
         if sstm_key_resp_task_end.status == STARTED and not waitOnFlip:
             theseKeys = sstm_key_resp_task_end.getKeys(keyList=None, waitRelease=False)
             if theseKeys and theseKeys[-1].value[0] == 'space':
                 _sstm_key_resp_task_end_allKeys.extend(theseKeys)
                 if len(_sstm_key_resp_task_end_allKeys):
-                    sstm_key_resp_task_end.keys = _sstm_key_resp_task_end_allKeys[-1].name  # just the last key pressed
+                    sstm_key_resp_task_end.keys = _sstm_key_resp_task_end_allKeys[
+                        -1].name  # just the last key pressed
                     sstm_key_resp_task_end.rt = _sstm_key_resp_task_end_allKeys[-1].rt
                     # a response ends the routine
                     continueRoutine = False
@@ -6396,14 +6390,15 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
     do_spatial_short_term_memory_dummy.addData('sstm_key_resp_task_end.keys', sstm_key_resp_task_end.keys)
     if sstm_key_resp_task_end.keys != None:  # we had a response
         do_spatial_short_term_memory_dummy.addData('sstm_key_resp_task_end.rt', sstm_key_resp_task_end.rt)
-    do_spatial_short_term_memory_dummy.addData('sstm_key_resp_task_end.started', sstm_key_resp_task_end.tStartRefresh)
-    do_spatial_short_term_memory_dummy.addData('sstm_key_resp_task_end.stopped', sstm_key_resp_task_end.tStopRefresh)
+    do_spatial_short_term_memory_dummy.addData('sstm_key_resp_task_end.started',
+                                               sstm_key_resp_task_end.tStartRefresh)
+    do_spatial_short_term_memory_dummy.addData('sstm_key_resp_task_end.stopped',
+                                               sstm_key_resp_task_end.tStopRefresh)
     # the Routine "sstm_task_end" was not non-slip safe, so reset the non-slip timer
     routineTimer.reset()
     thisExp.nextEntry()
 
 # completed do_sstm_task repeats of 'do_spatial_short_term_memory_dummy'
-
 
 # ------Prepare to start Routine "base_end"-------
 continueRoutine = True
@@ -6435,7 +6430,8 @@ while continueRoutine:
     tThisFlipGlobal = win.getFutureFlipTime(clock=None)
     frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
     # update/draw components on each frame
-    if experiment_keyboard.getKeys(keyList=[config.common.abort_key], clear=False):
+    all_keys = experiment_keyboard.getKeys(keyList=None, clear=False, waitRelease=False)
+    if any(key.name[0] == config.common.abort_key for key in all_keys):
         core.quit()
 
     # *base_text_end* updates

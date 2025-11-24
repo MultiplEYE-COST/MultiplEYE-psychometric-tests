@@ -1053,8 +1053,6 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
 
     # completed n_instruction_pages repeats of 'mu_instruction_pages'
 
-    print('mu_instruction_pages completed')
-
     # set up handler to look after randomisation of conditions etc
     mu_practice_dummy = data.TrialHandler(nReps=2, method='random',
                                           extraInfo=expInfo, originPath=-1,
@@ -1165,7 +1163,6 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
             if continueRoutine:  # don't flip if this routine is over or we'll get a blank screen
                 win.flip()
 
-        print('base_init_task completed')
         # -------Ending Routine "base_init_task"-------
         for thisComponent in base_init_taskComponents:
             if hasattr(thisComponent, "setAutoDraw"):
@@ -1191,14 +1188,14 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
         thisExp.addLoop(mu_trials)  # add the loop to the experiment
         thisMu_trial = mu_trials.trialList[0]  # so we can initialise stimuli with some values
         # abbreviate parameter names if possible (e.g. rgb = thisMu_trial.rgb)
-        if thisMu_trial != None:
+        if thisMu_trial is not None:
             for paramName in thisMu_trial:
                 exec('{} = thisMu_trial[paramName]'.format(paramName))
 
         for thisMu_trial in mu_trials:
             currentLoop = mu_trials
             # abbreviate parameter names if possible (e.g. rgb = thisMu_trial.rgb)
-            if thisMu_trial != None:
+            if thisMu_trial is not None:
                 for paramName in thisMu_trial:
                     exec('{} = thisMu_trial[paramName]'.format(paramName))
 
