@@ -14,6 +14,7 @@ ms = 10000
 time_left = core.getTime() + ms / 1000.0
 
 all_keys = []
+all_keyboard_keys = []
 
 while core.getTime() < time_left:
     keys = experiment_keyboard.getKeys(keyList=None, clear=True, waitRelease=False)
@@ -21,11 +22,11 @@ while core.getTime() < time_left:
         print('Found esc key!!')
 
     # Get only keys from the key_list
-    if experiment_keyboard.getKeys(keyList=['escape', 'space', 'a', 'm', 'n'], clear=False, waitRelease=False):
-        print('Found key from key_list!!')
+    keyboard_keys = experiment_keyboard.getKeys(keyList=['escape', 'space', 'a', 'm', 'n'], clear=False, waitRelease=False)
 
     all_keys.extend(keys)
-
+    all_keyboard_keys.extend(keyboard_keys)
 
 print('found keys:', all_keys)
+print('found keyboard keys:', all_keyboard_keys)
 win.close()
