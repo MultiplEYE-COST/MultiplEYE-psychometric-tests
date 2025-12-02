@@ -1,6 +1,6 @@
 import pandas as pd
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QMainWindow
+from PyQt6 import QtCore, QtGui, QtWidgets
+from PyQt6.QtWidgets import QMainWindow
 
 
 class MyResultWindow(QMainWindow):
@@ -40,7 +40,7 @@ class MyResultWindow(QMainWindow):
         self.resultLabel.setGeometry(QtCore.QRect(center_x - 500, 50, 1000, 400))  # Adjusted to full width
         self.resultLabel.setFont(font)
         self.resultLabel.setStyleSheet("color: rgb(0, 0, 0);")
-        self.resultLabel.setAlignment(QtCore.Qt.AlignCenter)  # Center the text
+        self.resultLabel.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)  # Center the text
         self.resultLabel.setObjectName("result")
 
         # Set the text with formatted result

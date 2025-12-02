@@ -135,6 +135,7 @@ def parse_args():
         required=True,
         gooey_options={'visible': False}
     )
+
     # participants.add_argument(
     #     '--random_seed',
     #     metavar='Random Seed',
@@ -208,8 +209,8 @@ def parse_args():
 
 def run_script(script_path, part_folder=None):
     try:
-        result = subprocess.run(['python', script_path, '--participant_folder', part_folder],
-                                check=True, text=True, capture_output=False)
+        command = ['python', script_path, '--participant_folder', part_folder]
+        result = subprocess.run(command, check=True, text=True, capture_output=False)
         print("Output:", result.stdout)
         print("Errors:", result.stderr)
 
@@ -291,7 +292,7 @@ if __name__ == '__main__':
 
     if arguments['plab']:
         print("Running PLAB")
-        run_script('tasks/PLAB/plab.py', participant_folder_relative)
+        run_script('tasks/PLAB/plab.py', part_folder=participant_folder_relative)
         arguments['run_plab'] = 'success'
 
         with open(participant_config_path, 'w') as file:
@@ -299,7 +300,7 @@ if __name__ == '__main__':
 
     if arguments['wiki_vocab']:
         print("Running WikiVocab")
-        run_script('tasks/WikiVocab/app.py', participant_folder_relative)
+        run_script('tasks/WikiVocab/app.py', part_folder=participant_folder_relative)
         arguments['run_wiki_vocab'] = 'success'
 
         with open(participant_config_path, 'w') as file:

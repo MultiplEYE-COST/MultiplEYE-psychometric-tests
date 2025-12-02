@@ -35,6 +35,7 @@ parser.add_argument('--participant_folder', type=str, required=True, help="Path 
 args = parser.parse_args()
 results_folder = args.participant_folder
 
+
 date = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')  # add a simple timestamp
 
 # Path to the YAML file contains the language and experiment configurations
@@ -94,11 +95,13 @@ filename = f"{output_path}" \
            f"_{participant_id}_PT{expInfo['session_id']}_{date}"
 
 # An ExperimentHandler isn't essential but helps with data saving
-thisExp = data.ExperimentHandler(name='WMC', version='',
-                                 extraInfo=expInfo, runtimeInfo=None,
-                                 # originPath='C:\\Users\\danie\\Documents\\workspace\\wmc-battery\\wmc_lastrun.py',
-                                 savePickle=True, saveWideText=True,
-                                 dataFileName=filename)
+thisExp = data.ExperimentHandler(
+    name='WMC', version='',
+    extraInfo=expInfo, runtimeInfo=None,
+    # originPath='C:\\Users\\danie\\Documents\\workspace\\wmc-battery\\wmc_lastrun.py',
+    savePickle=True, saveWideText=True,
+    dataFileName=filename
+    )
 # save a log file for detail verbose info
 logFile = logging.LogFile(filename + '.log', level=logging.EXP)
 logging.console.setLevel(logging.WARNING)  # this outputs to the screen, not a file
@@ -112,10 +115,11 @@ win = visual.Window(
     winType='pyglet', allowGUI=False, allowStencil=True,
     monitor='testMonitor', color='white', colorSpace='rgb',
     blendMode='avg', useFBO=True,
-    units='height')
+    units='height'
+)
 # store frame rate of monitor if we can measure it
 expInfo['frameRate'] = win.getActualFrameRate()
-if expInfo['frameRate'] != None:
+if expInfo['frameRate'] is not None:
     frameDur = 1.0 / round(expInfo['frameRate'])
 else:
     frameDur = 1.0 / 60.0  # could not measure, so guess
@@ -141,8 +145,10 @@ assert subject_id != '', 'Please specify a participant id'
 language = thisExp.extraInfo['language']
 
 config = WMCConfig(language=language)
-expmsgs = ExperimentMessages(language=language,
-                             encoding=config.experiment_messages.encoding)
+expmsgs = ExperimentMessages(
+    language=language,
+    encoding=config.experiment_messages.encoding
+    )
 instructions = Instructions(language)
 
 do_mu_task = thisExp.extraInfo['Memory Update']
@@ -165,11 +171,13 @@ base_image_instruction = visual.ImageStim(
     ori=0, pos=(0, 0), size=1.0,
     color=[1, 1, 1], colorSpace='rgb', opacity=1,
     flipHoriz=False, flipVert=False,
-    texRes=128, interpolate=True, depth=-1.0)
+    texRes=128, interpolate=True, depth=-1.0
+)
 base_key_resp_instruction = keyboard.Keyboard()
 base_aperture_instruction = visual.Aperture(
     win=win, name='base_aperture_instruction',
-    units='height', size=10, pos=(0, 0))
+    units='height', size=10, pos=(0, 0)
+)
 base_aperture_instruction.disable()  # disable until its actually used
 
 # Initialize components for Routine "mu_init"
@@ -184,23 +192,27 @@ base_image_instruction = visual.ImageStim(
     ori=0, pos=(0, 0), size=1.0,
     color=[1, 1, 1], colorSpace='rgb', opacity=1,
     flipHoriz=False, flipVert=False,
-    texRes=128, interpolate=True, depth=-1.0)
+    texRes=128, interpolate=True, depth=-1.0
+)
 base_key_resp_instruction = keyboard.Keyboard()
 base_aperture_instruction = visual.Aperture(
     win=win, name='base_aperture_instruction',
-    units='height', size=10, pos=(0, 0))
+    units='height', size=10, pos=(0, 0)
+)
 base_aperture_instruction.disable()  # disable until its actually used
 
 # Initialize components for Routine "base_init_task"
 base_init_taskClock = core.Clock()
-base_text_begin_task = visual.TextStim(win=win, name='base_text_begin_task',
-                                       text='',
-                                       font=config.experiment_messages.font,
-                                       units='height', pos=(0, 0), height=config.experiment_messages.size,
-                                       wrapWidth=text_wrap_width, ori=0,
-                                       color='black', colorSpace='rgb', opacity=1,
-                                       languageStyle='LTR',
-                                       depth=-1.0);
+base_text_begin_task = visual.TextStim(
+    win=win, name='base_text_begin_task',
+    text='',
+    font=config.experiment_messages.font,
+    units='height', pos=(0, 0), height=config.experiment_messages.size,
+    wrapWidth=text_wrap_width, ori=0,
+    color='black', colorSpace='rgb', opacity=1,
+    languageStyle='LTR',
+    depth=-1.0
+    );
 base_key_resp_task_begin = keyboard.Keyboard()
 
 # Initialize components for Routine "base_init_trial"
@@ -208,113 +220,133 @@ base_init_trialClock = core.Clock()
 
 # Initialize components for Routine "mu_init_trial"
 mu_init_trialClock = core.Clock()
-mu_text_blank = visual.TextStim(win=win, name='mu_text_blank',
-                                text=None,
-                                font=font,
-                                units='height', pos=(0, 0), height=config.experiment_messages.size, wrapWidth=None,
-                                ori=0,
-                                color='white', colorSpace='rgb', opacity=1,
-                                languageStyle='LTR',
-                                depth=-1.0);
+mu_text_blank = visual.TextStim(
+    win=win, name='mu_text_blank',
+    text=None,
+    font=font,
+    units='height', pos=(0, 0), height=config.experiment_messages.size, wrapWidth=None,
+    ori=0,
+    color='white', colorSpace='rgb', opacity=1,
+    languageStyle='LTR',
+    depth=-1.0
+    );
 
 # Initialize components for Routine "mu_display_digit"
 mu_display_digitClock = core.Clock()
-mu_text_digit = visual.TextStim(win=win, name='mu_text_digit',
-                                text='',
-                                font=config.memory_update.text.font,
-                                units='height', pos=[0, 0], height=config.memory_update.text.size, wrapWidth=None,
-                                ori=0,
-                                color='black', colorSpace='rgb', opacity=1,
-                                languageStyle='LTR',
-                                depth=-1.0);
+mu_text_digit = visual.TextStim(
+    win=win, name='mu_text_digit',
+    text='',
+    font=config.memory_update.text.font,
+    units='height', pos=[0, 0], height=config.memory_update.text.size, wrapWidth=None,
+    ori=0,
+    color='black', colorSpace='rgb', opacity=1,
+    languageStyle='LTR',
+    depth=-1.0
+    );
 
 # Initialize components for Routine "mu_empty_cells"
 mu_empty_cellsClock = core.Clock()
-mu_text_blank_2 = visual.TextStim(win=win, name='mu_text_blank_2',
-                                  text=None,
-                                  font=config.memory_update.text.font,
-                                  units='height', pos=(0, 0), height=config.memory_update.text.size, wrapWidth=None,
-                                  ori=0,
-                                  color='black', colorSpace='rgb', opacity=1,
-                                  languageStyle='LTR',
-                                  depth=-1.0);
+mu_text_blank_2 = visual.TextStim(
+    win=win, name='mu_text_blank_2',
+    text=None,
+    font=config.memory_update.text.font,
+    units='height', pos=(0, 0), height=config.memory_update.text.size, wrapWidth=None,
+    ori=0,
+    color='black', colorSpace='rgb', opacity=1,
+    languageStyle='LTR',
+    depth=-1.0
+    );
 
 # Initialize components for Routine "mu_display_operation"
 mu_display_operationClock = core.Clock()
-mu_text_operation = visual.TextStim(win=win, name='mu_text_operation',
-                                    text='',
-                                    font=config.memory_update.text.font,
-                                    units='height', pos=[0, 0], height=config.memory_update.text.size, wrapWidth=None,
-                                    ori=0,
-                                    color='black', colorSpace='rgb', opacity=1,
-                                    languageStyle='LTR',
-                                    depth=-1.0);
+mu_text_operation = visual.TextStim(
+    win=win, name='mu_text_operation',
+    text='',
+    font=config.memory_update.text.font,
+    units='height', pos=[0, 0], height=config.memory_update.text.size, wrapWidth=None,
+    ori=0,
+    color='black', colorSpace='rgb', opacity=1,
+    languageStyle='LTR',
+    depth=-1.0
+    );
 
 # Initialize components for Routine "mu_empty_cells"
 mu_empty_cellsClock = core.Clock()
-mu_text_blank_2 = visual.TextStim(win=win, name='mu_text_blank_2',
-                                  text=None,
-                                  font=config.memory_update.text.font,
-                                  units='height', pos=(0, 0), height=config.memory_update.text.size, wrapWidth=None,
-                                  ori=0,
-                                  color='black', colorSpace='rgb', opacity=1,
-                                  languageStyle='LTR',
-                                  depth=-1.0);
+mu_text_blank_2 = visual.TextStim(
+    win=win, name='mu_text_blank_2',
+    text=None,
+    font=config.memory_update.text.font,
+    units='height', pos=(0, 0), height=config.memory_update.text.size, wrapWidth=None,
+    ori=0,
+    color='black', colorSpace='rgb', opacity=1,
+    languageStyle='LTR',
+    depth=-1.0
+    );
 
 # Initialize components for Routine "mu_recall"
 mu_recallClock = core.Clock()
-mu_text_question_mark = visual.TextStim(win=win, name='mu_text_question_mark',
-                                        text='?',
-                                        font=config.memory_update.text.font,
-                                        units='height', pos=[0, 0], height=config.memory_update.text.size,
-                                        wrapWidth=None, ori=0,
-                                        color='black', colorSpace='rgb', opacity=1,
-                                        languageStyle='LTR',
-                                        depth=-1.0);
+mu_text_question_mark = visual.TextStim(
+    win=win, name='mu_text_question_mark',
+    text='?',
+    font=config.memory_update.text.font,
+    units='height', pos=[0, 0], height=config.memory_update.text.size,
+    wrapWidth=None, ori=0,
+    color='black', colorSpace='rgb', opacity=1,
+    languageStyle='LTR',
+    depth=-1.0
+    );
 mu_key_resp_recall = keyboard.Keyboard()
 
 # Initialize components for Routine "mu_display_recall"
 mu_display_recallClock = core.Clock()
-mu_text_recall = visual.TextStim(win=win, name='mu_text_recall',
-                                 text='',
-                                 font=config.memory_update.text.font,
-                                 pos=[0, 0], height=config.memory_update.text.size, wrapWidth=None, ori=0,
-                                 color='black', colorSpace='rgb', opacity=1,
-                                 languageStyle='LTR',
-                                 depth=-1.0);
+mu_text_recall = visual.TextStim(
+    win=win, name='mu_text_recall',
+    text='',
+    font=config.memory_update.text.font,
+    pos=[0, 0], height=config.memory_update.text.size, wrapWidth=None, ori=0,
+    color='black', colorSpace='rgb', opacity=1,
+    languageStyle='LTR',
+    depth=-1.0
+    );
 
 # Initialize components for Routine "base_next_trial"
 base_next_trialClock = core.Clock()
-base_text_next_trial = visual.TextStim(win=win, name='base_text_next_trial',
-                                       text='',
-                                       font=config.experiment_messages.font,
-                                       pos=(0, 0), height=config.experiment_messages.size, wrapWidth=None, ori=0,
-                                       color='black', colorSpace='rgb', opacity=1,
-                                       languageStyle='LTR',
-                                       depth=-1.0);
+base_text_next_trial = visual.TextStim(
+    win=win, name='base_text_next_trial',
+    text='',
+    font=config.experiment_messages.font,
+    pos=(0, 0), height=config.experiment_messages.size, wrapWidth=None, ori=0,
+    color='black', colorSpace='rgb', opacity=1,
+    languageStyle='LTR',
+    depth=-1.0
+    );
 base_next_trial_key_resp = keyboard.Keyboard()
 
 # Initialize components for Routine "base_intertrial"
 base_intertrialClock = core.Clock()
-base_text_intertrial = visual.TextStim(win=win, name='base_text_intertrial',
-                                       text=None,
-                                       font=font,
-                                       units='height', pos=(0, 0), height=config.experiment_messages.size,
-                                       wrapWidth=None, ori=0,
-                                       color='white', colorSpace='rgb', opacity=1,
-                                       languageStyle='LTR',
-                                       depth=-1.0);
+base_text_intertrial = visual.TextStim(
+    win=win, name='base_text_intertrial',
+    text=None,
+    font=font,
+    units='height', pos=(0, 0), height=config.experiment_messages.size,
+    wrapWidth=None, ori=0,
+    color='white', colorSpace='rgb', opacity=1,
+    languageStyle='LTR',
+    depth=-1.0
+    );
 
 # Initialize components for Routine "base_task_end"
 base_task_endClock = core.Clock()
-base_text_task_end = visual.TextStim(win=win, name='base_text_task_end',
-                                     text='',
-                                     font=config.experiment_messages.font,
-                                     units='height', pos=(0, 0), height=config.experiment_messages.size,
-                                     wrapWidth=text_wrap_width, ori=0,
-                                     color='black', colorSpace='rgb', opacity=1,
-                                     languageStyle='LTR',
-                                     depth=-1.0);
+base_text_task_end = visual.TextStim(
+    win=win, name='base_text_task_end',
+    text='',
+    font=config.experiment_messages.font,
+    units='height', pos=(0, 0), height=config.experiment_messages.size,
+    wrapWidth=text_wrap_width, ori=0,
+    color='black', colorSpace='rgb', opacity=1,
+    languageStyle='LTR',
+    depth=-1.0
+    );
 base_key_resp_task_end = keyboard.Keyboard()
 
 # Initialize components for Routine "os_init"
@@ -329,23 +361,27 @@ base_image_instruction = visual.ImageStim(
     ori=0, pos=(0, 0), size=1.0,
     color=[1, 1, 1], colorSpace='rgb', opacity=1,
     flipHoriz=False, flipVert=False,
-    texRes=128, interpolate=True, depth=-1.0)
+    texRes=128, interpolate=True, depth=-1.0
+)
 base_key_resp_instruction = keyboard.Keyboard()
 base_aperture_instruction = visual.Aperture(
     win=win, name='base_aperture_instruction',
-    units='height', size=10, pos=(0, 0))
+    units='height', size=10, pos=(0, 0)
+)
 base_aperture_instruction.disable()  # disable until its actually used
 
 # Initialize components for Routine "base_init_task"
 base_init_taskClock = core.Clock()
-base_text_begin_task = visual.TextStim(win=win, name='base_text_begin_task',
-                                       text='',
-                                       font=config.experiment_messages.font,
-                                       units='height', pos=(0, 0), height=config.experiment_messages.size,
-                                       wrapWidth=text_wrap_width, ori=0,
-                                       color='black', colorSpace='rgb', opacity=1,
-                                       languageStyle='LTR',
-                                       depth=-1.0);
+base_text_begin_task = visual.TextStim(
+    win=win, name='base_text_begin_task',
+    text='',
+    font=config.experiment_messages.font,
+    units='height', pos=(0, 0), height=config.experiment_messages.size,
+    wrapWidth=text_wrap_width, ori=0,
+    color='black', colorSpace='rgb', opacity=1,
+    languageStyle='LTR',
+    depth=-1.0
+    );
 base_key_resp_task_begin = keyboard.Keyboard()
 
 # Initialize components for Routine "base_init_trial"
@@ -353,116 +389,136 @@ base_init_trialClock = core.Clock()
 
 # Initialize components for Routine "os_init_trial"
 os_init_trialClock = core.Clock()
-os_text_fixation_cross = visual.TextStim(win=win, name='os_text_fixation_cross',
-                                         text='+',
-                                         font=config.operation_span.text.fixation_cross.font,
-                                         units='height', pos=(0, 0),
-                                         height=config.operation_span.text.fixation_cross.size, wrapWidth=None, ori=0,
-                                         color='black', colorSpace='rgb', opacity=1,
-                                         languageStyle='LTR',
-                                         depth=-1.0);
+os_text_fixation_cross = visual.TextStim(
+    win=win, name='os_text_fixation_cross',
+    text='+',
+    font=config.operation_span.text.fixation_cross.font,
+    units='height', pos=(0, 0),
+    height=config.operation_span.text.fixation_cross.size, wrapWidth=None, ori=0,
+    color='black', colorSpace='rgb', opacity=1,
+    languageStyle='LTR',
+    depth=-1.0
+    );
 
 # Initialize components for Routine "os_equation"
 os_equationClock = core.Clock()
-os_text_equation = visual.TextStim(win=win, name='os_text_equation',
-                                   text='',
-                                   font=config.operation_span.text.letters.font,
-                                   units='height', pos=(0, 0), height=config.operation_span.text.equations.size,
-                                   wrapWidth=None, ori=0,
-                                   color='black', colorSpace='rgb', opacity=1,
-                                   languageStyle='LTR',
-                                   depth=-1.0);
+os_text_equation = visual.TextStim(
+    win=win, name='os_text_equation',
+    text='',
+    font=config.operation_span.text.letters.font,
+    units='height', pos=(0, 0), height=config.operation_span.text.equations.size,
+    wrapWidth=None, ori=0,
+    color='black', colorSpace='rgb', opacity=1,
+    languageStyle='LTR',
+    depth=-1.0
+    );
 os_key_resp_equation = keyboard.Keyboard()
 
 # Initialize components for Routine "os_letter"
 os_letterClock = core.Clock()
-os_text_letter = visual.TextStim(win=win, name='os_text_letter',
-                                 text='',
-                                 font=config.operation_span.text.letters.font,
-                                 units='height', pos=(0, 0), height=config.operation_span.text.letters.size,
-                                 wrapWidth=None, ori=0,
-                                 color='black', colorSpace='rgb', opacity=1,
-                                 languageStyle='LTR',
-                                 depth=-1.0);
+os_text_letter = visual.TextStim(
+    win=win, name='os_text_letter',
+    text='',
+    font=config.operation_span.text.letters.font,
+    units='height', pos=(0, 0), height=config.operation_span.text.letters.size,
+    wrapWidth=None, ori=0,
+    color='black', colorSpace='rgb', opacity=1,
+    languageStyle='LTR',
+    depth=-1.0
+    );
 
 # Initialize components for Routine "os_blank"
 os_blankClock = core.Clock()
-os_text_blank = visual.TextStim(win=win, name='os_text_blank',
-                                text=None,
-                                font=font,
-                                units='height', pos=(0, 0), height=config.experiment_messages.size, wrapWidth=None,
-                                ori=0,
-                                color='white', colorSpace='rgb', opacity=1,
-                                languageStyle='LTR',
-                                depth=-1.0);
+os_text_blank = visual.TextStim(
+    win=win, name='os_text_blank',
+    text=None,
+    font=font,
+    units='height', pos=(0, 0), height=config.experiment_messages.size, wrapWidth=None,
+    ori=0,
+    color='white', colorSpace='rgb', opacity=1,
+    languageStyle='LTR',
+    depth=-1.0
+    );
 
 # Initialize components for Routine "os_recall"
 os_recallClock = core.Clock()
-os_text_question_mark = visual.TextStim(win=win, name='os_text_question_mark',
-                                        text='?',
-                                        font=config.operation_span.text.letters.font,
-                                        units='height', pos=(0, 0), height=config.operation_span.text.letters.size,
-                                        wrapWidth=None, ori=0,
-                                        color='black', colorSpace='rgb', opacity=1,
-                                        languageStyle='LTR',
-                                        depth=-1.0);
+os_text_question_mark = visual.TextStim(
+    win=win, name='os_text_question_mark',
+    text='?',
+    font=config.operation_span.text.letters.font,
+    units='height', pos=(0, 0), height=config.operation_span.text.letters.size,
+    wrapWidth=None, ori=0,
+    color='black', colorSpace='rgb', opacity=1,
+    languageStyle='LTR',
+    depth=-1.0
+    );
 os_key_resp_recall = keyboard.Keyboard()
 
 # Initialize components for Routine "os_display_recall"
 os_display_recallClock = core.Clock()
-os_text_recall = visual.TextStim(win=win, name='os_text_recall',
-                                 text='',
-                                 font=config.operation_span.text.letters.font,
-                                 units='height', pos=(0.075, 0), height=config.operation_span.text.letters.size,
-                                 wrapWidth=None, ori=0,
-                                 color='black', colorSpace='rgb', opacity=1,
-                                 languageStyle='LTR',
-                                 depth=-1.0);
+os_text_recall = visual.TextStim(
+    win=win, name='os_text_recall',
+    text='',
+    font=config.operation_span.text.letters.font,
+    units='height', pos=(0.075, 0), height=config.operation_span.text.letters.size,
+    wrapWidth=None, ori=0,
+    color='black', colorSpace='rgb', opacity=1,
+    languageStyle='LTR',
+    depth=-1.0
+    );
 
 # Initialize components for Routine "base_intertrial"
 base_intertrialClock = core.Clock()
-base_text_intertrial = visual.TextStim(win=win, name='base_text_intertrial',
-                                       text=None,
-                                       font=font,
-                                       units='height', pos=(0, 0), height=config.experiment_messages.size,
-                                       wrapWidth=None, ori=0,
-                                       color='white', colorSpace='rgb', opacity=1,
-                                       languageStyle='LTR',
-                                       depth=-1.0);
+base_text_intertrial = visual.TextStim(
+    win=win, name='base_text_intertrial',
+    text=None,
+    font=font,
+    units='height', pos=(0, 0), height=config.experiment_messages.size,
+    wrapWidth=None, ori=0,
+    color='white', colorSpace='rgb', opacity=1,
+    languageStyle='LTR',
+    depth=-1.0
+    );
 
 # Initialize components for Routine "base_self_paced_break"
 base_self_paced_breakClock = core.Clock()
-base_text_self_paced_break = visual.TextStim(win=win, name='base_text_self_paced_break',
-                                             text='',
-                                             font=config.experiment_messages.font,
-                                             units='height', pos=(0, 0), height=config.experiment_messages.size,
-                                             wrapWidth=text_wrap_width, ori=0,
-                                             color='black', colorSpace='rgb', opacity=1,
-                                             languageStyle='LTR',
-                                             depth=-1.0);
+base_text_self_paced_break = visual.TextStim(
+    win=win, name='base_text_self_paced_break',
+    text='',
+    font=config.experiment_messages.font,
+    units='height', pos=(0, 0), height=config.experiment_messages.size,
+    wrapWidth=text_wrap_width, ori=0,
+    color='black', colorSpace='rgb', opacity=1,
+    languageStyle='LTR',
+    depth=-1.0
+    );
 base_key_resp_self_paced_break = keyboard.Keyboard()
 
 # Initialize components for Routine "base_after_break_pause"
 base_after_break_pauseClock = core.Clock()
-base_text_pause_after_break = visual.TextStim(win=win, name='base_text_pause_after_break',
-                                              text=None,
-                                              font=font,
-                                              units='height', pos=(0, 0), height=config.experiment_messages.size,
-                                              wrapWidth=None, ori=0,
-                                              color='white', colorSpace='rgb', opacity=1,
-                                              languageStyle='LTR',
-                                              depth=-1.0);
+base_text_pause_after_break = visual.TextStim(
+    win=win, name='base_text_pause_after_break',
+    text=None,
+    font=font,
+    units='height', pos=(0, 0), height=config.experiment_messages.size,
+    wrapWidth=None, ori=0,
+    color='white', colorSpace='rgb', opacity=1,
+    languageStyle='LTR',
+    depth=-1.0
+    );
 
 # Initialize components for Routine "base_task_end"
 base_task_endClock = core.Clock()
-base_text_task_end = visual.TextStim(win=win, name='base_text_task_end',
-                                     text='',
-                                     font=config.experiment_messages.font,
-                                     units='height', pos=(0, 0), height=config.experiment_messages.size,
-                                     wrapWidth=text_wrap_width, ori=0,
-                                     color='black', colorSpace='rgb', opacity=1,
-                                     languageStyle='LTR',
-                                     depth=-1.0);
+base_text_task_end = visual.TextStim(
+    win=win, name='base_text_task_end',
+    text='',
+    font=config.experiment_messages.font,
+    units='height', pos=(0, 0), height=config.experiment_messages.size,
+    wrapWidth=text_wrap_width, ori=0,
+    color='black', colorSpace='rgb', opacity=1,
+    languageStyle='LTR',
+    depth=-1.0
+    );
 base_key_resp_task_end = keyboard.Keyboard()
 
 # Initialize components for Routine "ss_init"
@@ -477,23 +533,27 @@ base_image_instruction = visual.ImageStim(
     ori=0, pos=(0, 0), size=1.0,
     color=[1, 1, 1], colorSpace='rgb', opacity=1,
     flipHoriz=False, flipVert=False,
-    texRes=128, interpolate=True, depth=-1.0)
+    texRes=128, interpolate=True, depth=-1.0
+)
 base_key_resp_instruction = keyboard.Keyboard()
 base_aperture_instruction = visual.Aperture(
     win=win, name='base_aperture_instruction',
-    units='height', size=10, pos=(0, 0))
+    units='height', size=10, pos=(0, 0)
+)
 base_aperture_instruction.disable()  # disable until its actually used
 
 # Initialize components for Routine "base_init_task"
 base_init_taskClock = core.Clock()
-base_text_begin_task = visual.TextStim(win=win, name='base_text_begin_task',
-                                       text='',
-                                       font=config.experiment_messages.font,
-                                       units='height', pos=(0, 0), height=config.experiment_messages.size,
-                                       wrapWidth=text_wrap_width, ori=0,
-                                       color='black', colorSpace='rgb', opacity=1,
-                                       languageStyle='LTR',
-                                       depth=-1.0);
+base_text_begin_task = visual.TextStim(
+    win=win, name='base_text_begin_task',
+    text='',
+    font=config.experiment_messages.font,
+    units='height', pos=(0, 0), height=config.experiment_messages.size,
+    wrapWidth=text_wrap_width, ori=0,
+    color='black', colorSpace='rgb', opacity=1,
+    languageStyle='LTR',
+    depth=-1.0
+    );
 base_key_resp_task_begin = keyboard.Keyboard()
 
 # Initialize components for Routine "base_init_trial"
@@ -501,116 +561,136 @@ base_init_trialClock = core.Clock()
 
 # Initialize components for Routine "ss_init_trial"
 ss_init_trialClock = core.Clock()
-ss_text_fixation_cross = visual.TextStim(win=win, name='ss_text_fixation_cross',
-                                         text='+',
-                                         font=config.sentence_span.text.fixation_cross.font,
-                                         units='height', pos=(0, 0),
-                                         height=config.sentence_span.text.fixation_cross.size, wrapWidth=None, ori=0,
-                                         color='black', colorSpace='rgb', opacity=1,
-                                         languageStyle='LTR',
-                                         depth=-1.0);
+ss_text_fixation_cross = visual.TextStim(
+    win=win, name='ss_text_fixation_cross',
+    text='+',
+    font=config.sentence_span.text.fixation_cross.font,
+    units='height', pos=(0, 0),
+    height=config.sentence_span.text.fixation_cross.size, wrapWidth=None, ori=0,
+    color='black', colorSpace='rgb', opacity=1,
+    languageStyle='LTR',
+    depth=-1.0
+    );
 
 # Initialize components for Routine "ss_sentence"
 ss_sentenceClock = core.Clock()
-ss_text_sentence = visual.TextStim(win=win, name='ss_text_sentence',
-                                   text='',
-                                   font=config.sentence_span.text.sentences.font,
-                                   units='height', pos=(0, 0), height=config.sentence_span.text.sentences.size,
-                                   wrapWidth=text_wrap_width, ori=0,
-                                   color='black', colorSpace='rgb', opacity=1,
-                                   languageStyle='LTR',
-                                   depth=-1.0);
+ss_text_sentence = visual.TextStim(
+    win=win, name='ss_text_sentence',
+    text='',
+    font=config.sentence_span.text.sentences.font,
+    units='height', pos=(0, 0), height=config.sentence_span.text.sentences.size,
+    wrapWidth=text_wrap_width, ori=0,
+    color='black', colorSpace='rgb', opacity=1,
+    languageStyle='LTR',
+    depth=-1.0
+    );
 ss_key_resp_sentence = keyboard.Keyboard()
 
 # Initialize components for Routine "ss_letter"
 ss_letterClock = core.Clock()
-ss_text_letter = visual.TextStim(win=win, name='ss_text_letter',
-                                 text='',
-                                 font=config.sentence_span.text.letters.font,
-                                 units='height', pos=(0, 0), height=config.sentence_span.text.letters.size,
-                                 wrapWidth=None, ori=0,
-                                 color='black', colorSpace='rgb', opacity=1,
-                                 languageStyle='LTR',
-                                 depth=-1.0);
+ss_text_letter = visual.TextStim(
+    win=win, name='ss_text_letter',
+    text='',
+    font=config.sentence_span.text.letters.font,
+    units='height', pos=(0, 0), height=config.sentence_span.text.letters.size,
+    wrapWidth=None, ori=0,
+    color='black', colorSpace='rgb', opacity=1,
+    languageStyle='LTR',
+    depth=-1.0
+    );
 
 # Initialize components for Routine "ss_blank"
 ss_blankClock = core.Clock()
-ss_text_blank = visual.TextStim(win=win, name='ss_text_blank',
-                                text=None,
-                                font=font,
-                                units='height', pos=(0, 0), height=config.experiment_messages.size, wrapWidth=None,
-                                ori=0,
-                                color='white', colorSpace='rgb', opacity=1,
-                                languageStyle='LTR',
-                                depth=-1.0);
+ss_text_blank = visual.TextStim(
+    win=win, name='ss_text_blank',
+    text=None,
+    font=font,
+    units='height', pos=(0, 0), height=config.experiment_messages.size, wrapWidth=None,
+    ori=0,
+    color='white', colorSpace='rgb', opacity=1,
+    languageStyle='LTR',
+    depth=-1.0
+    );
 
 # Initialize components for Routine "ss_recall"
 ss_recallClock = core.Clock()
-ss_text_question_mark = visual.TextStim(win=win, name='ss_text_question_mark',
-                                        text='?',
-                                        font=config.sentence_span.text.letters.font,
-                                        units='height', pos=(0, 0), height=config.sentence_span.text.letters.size,
-                                        wrapWidth=None, ori=0,
-                                        color='black', colorSpace='rgb', opacity=1,
-                                        languageStyle='LTR',
-                                        depth=-1.0);
+ss_text_question_mark = visual.TextStim(
+    win=win, name='ss_text_question_mark',
+    text='?',
+    font=config.sentence_span.text.letters.font,
+    units='height', pos=(0, 0), height=config.sentence_span.text.letters.size,
+    wrapWidth=None, ori=0,
+    color='black', colorSpace='rgb', opacity=1,
+    languageStyle='LTR',
+    depth=-1.0
+    );
 ss_key_resp_recall = keyboard.Keyboard()
 
 # Initialize components for Routine "ss_display_recall"
 ss_display_recallClock = core.Clock()
-ss_text_display_recall = visual.TextStim(win=win, name='ss_text_display_recall',
-                                         text='',
-                                         font=config.sentence_span.text.letters.font,
-                                         units='height', pos=(0.075, 0), height=config.sentence_span.text.letters.size,
-                                         wrapWidth=None, ori=0,
-                                         color='black', colorSpace='rgb', opacity=1,
-                                         languageStyle='LTR',
-                                         depth=-1.0);
+ss_text_display_recall = visual.TextStim(
+    win=win, name='ss_text_display_recall',
+    text='',
+    font=config.sentence_span.text.letters.font,
+    units='height', pos=(0.075, 0), height=config.sentence_span.text.letters.size,
+    wrapWidth=None, ori=0,
+    color='black', colorSpace='rgb', opacity=1,
+    languageStyle='LTR',
+    depth=-1.0
+    );
 
 # Initialize components for Routine "base_intertrial"
 base_intertrialClock = core.Clock()
-base_text_intertrial = visual.TextStim(win=win, name='base_text_intertrial',
-                                       text=None,
-                                       font=font,
-                                       units='height', pos=(0, 0), height=config.experiment_messages.size,
-                                       wrapWidth=None, ori=0,
-                                       color='white', colorSpace='rgb', opacity=1,
-                                       languageStyle='LTR',
-                                       depth=-1.0);
+base_text_intertrial = visual.TextStim(
+    win=win, name='base_text_intertrial',
+    text=None,
+    font=font,
+    units='height', pos=(0, 0), height=config.experiment_messages.size,
+    wrapWidth=None, ori=0,
+    color='white', colorSpace='rgb', opacity=1,
+    languageStyle='LTR',
+    depth=-1.0
+    );
 
 # Initialize components for Routine "base_self_paced_break"
 base_self_paced_breakClock = core.Clock()
-base_text_self_paced_break = visual.TextStim(win=win, name='base_text_self_paced_break',
-                                             text='',
-                                             font=config.experiment_messages.font,
-                                             units='height', pos=(0, 0), height=config.experiment_messages.size,
-                                             wrapWidth=text_wrap_width, ori=0,
-                                             color='black', colorSpace='rgb', opacity=1,
-                                             languageStyle='LTR',
-                                             depth=-1.0);
+base_text_self_paced_break = visual.TextStim(
+    win=win, name='base_text_self_paced_break',
+    text='',
+    font=config.experiment_messages.font,
+    units='height', pos=(0, 0), height=config.experiment_messages.size,
+    wrapWidth=text_wrap_width, ori=0,
+    color='black', colorSpace='rgb', opacity=1,
+    languageStyle='LTR',
+    depth=-1.0
+    );
 base_key_resp_self_paced_break = keyboard.Keyboard()
 
 # Initialize components for Routine "base_after_break_pause"
 base_after_break_pauseClock = core.Clock()
-base_text_pause_after_break = visual.TextStim(win=win, name='base_text_pause_after_break',
-                                              text=None,
-                                              font=font,
-                                              units='height', pos=(0, 0), height=config.experiment_messages.size,
-                                              wrapWidth=None, ori=0,
-                                              color='white', colorSpace='rgb', opacity=1,
-                                              languageStyle='LTR',
-                                              depth=-1.0);
+base_text_pause_after_break = visual.TextStim(
+    win=win, name='base_text_pause_after_break',
+    text=None,
+    font=font,
+    units='height', pos=(0, 0), height=config.experiment_messages.size,
+    wrapWidth=None, ori=0,
+    color='white', colorSpace='rgb', opacity=1,
+    languageStyle='LTR',
+    depth=-1.0
+    );
 
 # Initialize components for Routine "base_task_end"
 base_task_endClock = core.Clock()
-base_text_task_end = visual.TextStim(win=win, name='base_text_task_end',
-                                     text='',
-                                     font=config.experiment_messages.font,
-                                     units='height', pos=(0, 0), height=config.experiment_messages.size,
-                                     wrapWidth=text_wrap_width, ori=0,
-                                     color='black', colorSpace='rgb', opacity=1,
-                                     languageStyle='LTR',
-                                     depth=-1.0);
+base_text_task_end = visual.TextStim(
+    win=win, name='base_text_task_end',
+    text='',
+    font=config.experiment_messages.font,
+    units='height', pos=(0, 0), height=config.experiment_messages.size,
+    wrapWidth=text_wrap_width, ori=0,
+    color='black', colorSpace='rgb', opacity=1,
+    languageStyle='LTR',
+    depth=-1.0
+    );
 base_key_resp_task_end = keyboard.Keyboard()
 
 # Initialize components for Routine "sstm_init"
@@ -625,23 +705,27 @@ base_image_instruction = visual.ImageStim(
     ori=0, pos=(0, 0), size=1.0,
     color=[1, 1, 1], colorSpace='rgb', opacity=1,
     flipHoriz=False, flipVert=False,
-    texRes=128, interpolate=True, depth=-1.0)
+    texRes=128, interpolate=True, depth=-1.0
+)
 base_key_resp_instruction = keyboard.Keyboard()
 base_aperture_instruction = visual.Aperture(
     win=win, name='base_aperture_instruction',
-    units='height', size=10, pos=(0, 0))
+    units='height', size=10, pos=(0, 0)
+)
 base_aperture_instruction.disable()  # disable until its actually used
 
 # Initialize components for Routine "base_init_task"
 base_init_taskClock = core.Clock()
-base_text_begin_task = visual.TextStim(win=win, name='base_text_begin_task',
-                                       text='',
-                                       font=config.experiment_messages.font,
-                                       units='height', pos=(0, 0), height=config.experiment_messages.size,
-                                       wrapWidth=text_wrap_width, ori=0,
-                                       color='black', colorSpace='rgb', opacity=1,
-                                       languageStyle='LTR',
-                                       depth=-1.0);
+base_text_begin_task = visual.TextStim(
+    win=win, name='base_text_begin_task',
+    text='',
+    font=config.experiment_messages.font,
+    units='height', pos=(0, 0), height=config.experiment_messages.size,
+    wrapWidth=text_wrap_width, ori=0,
+    color='black', colorSpace='rgb', opacity=1,
+    languageStyle='LTR',
+    depth=-1.0
+    );
 base_key_resp_task_begin = keyboard.Keyboard()
 
 # Initialize components for Routine "base_init_trial"
@@ -649,26 +733,30 @@ base_init_trialClock = core.Clock()
 
 # Initialize components for Routine "sstm_init_trial"
 sstm_init_trialClock = core.Clock()
-sstm_text_fixation_cross = visual.TextStim(win=win, name='sstm_text_fixation_cross',
-                                           text='+',
-                                           font=config.spatial_short_term_memory.text.fixation_cross.font,
-                                           units='height', pos=(0, 0),
-                                           height=config.spatial_short_term_memory.text.fixation_cross.size,
-                                           wrapWidth=None, ori=0,
-                                           color='black', colorSpace='rgb', opacity=1,
-                                           languageStyle='LTR',
-                                           depth=-1.0);
+sstm_text_fixation_cross = visual.TextStim(
+    win=win, name='sstm_text_fixation_cross',
+    text='+',
+    font=config.spatial_short_term_memory.text.fixation_cross.font,
+    units='height', pos=(0, 0),
+    height=config.spatial_short_term_memory.text.fixation_cross.size,
+    wrapWidth=None, ori=0,
+    color='black', colorSpace='rgb', opacity=1,
+    languageStyle='LTR',
+    depth=-1.0
+    );
 
 # Initialize components for Routine "sstm_empty_grid"
 sstm_empty_gridClock = core.Clock()
-sstm_text_blank = visual.TextStim(win=win, name='sstm_text_blank',
-                                  text=None,
-                                  font=font,
-                                  units='height', pos=(0, 0), height=config.experiment_messages.size, wrapWidth=None,
-                                  ori=0,
-                                  color='white', colorSpace='rgb', opacity=1,
-                                  languageStyle='LTR',
-                                  depth=-1.0);
+sstm_text_blank = visual.TextStim(
+    win=win, name='sstm_text_blank',
+    text=None,
+    font=font,
+    units='height', pos=(0, 0), height=config.experiment_messages.size, wrapWidth=None,
+    ori=0,
+    color='white', colorSpace='rgb', opacity=1,
+    languageStyle='LTR',
+    depth=-1.0
+    );
 
 # Initialize components for Routine "sstm_display_dot"
 sstm_display_dotClock = core.Clock()
@@ -677,97 +765,114 @@ sstm_polygon_display_dot = visual.ShapeStim(
     size=[1.0, 1.0],
     ori=0, pos=[0, 0],
     lineWidth=1, colorSpace='rgb', lineColor=[1, 1, 1], fillColor='black',
-    opacity=1, depth=-1.0, interpolate=True)
+    opacity=1, depth=-1.0, interpolate=True
+)
 
 # Initialize components for Routine "sstm_after_display_dot"
 sstm_after_display_dotClock = core.Clock()
-sstm_text_after_display_dot = visual.TextStim(win=win, name='sstm_text_after_display_dot',
-                                              text=None,
-                                              font=font,
-                                              units='height', pos=(0, 0), height=0.1, wrapWidth=None, ori=0,
-                                              color='white', colorSpace='rgb', opacity=1,
-                                              languageStyle='LTR',
-                                              depth=-1.0);
+sstm_text_after_display_dot = visual.TextStim(
+    win=win, name='sstm_text_after_display_dot',
+    text=None,
+    font=font,
+    units='height', pos=(0, 0), height=0.1, wrapWidth=None, ori=0,
+    color='white', colorSpace='rgb', opacity=1,
+    languageStyle='LTR',
+    depth=-1.0
+    );
 
 # Initialize components for Routine "sstm_draw_request"
 sstm_draw_requestClock = core.Clock()
-text_sstm_draw_dots = visual.TextStim(win=win, name='text_sstm_draw_dots',
-                                      text='',
-                                      font=config.spatial_short_term_memory.text.draw_text.font,
-                                      units='height', pos=(0, -0.075),
-                                      height=config.spatial_short_term_memory.text.draw_text.size,
-                                      wrapWidth=text_wrap_width, ori=0,
-                                      color='black', colorSpace='rgb', opacity=1,
-                                      languageStyle='LTR',
-                                      depth=-1.0);
-text_sstm_presentation_end = visual.TextStim(win=win, name='text_sstm_presentation_end',
-                                             text='',
-                                             font=config.spatial_short_term_memory.text.end_text.font,
-                                             pos=(0, 0.075), height=config.spatial_short_term_memory.text.end_text.size,
-                                             wrapWidth=None, ori=0,
-                                             color='black', colorSpace='rgb', opacity=1,
-                                             languageStyle='LTR',
-                                             depth=-2.0);
+text_sstm_draw_dots = visual.TextStim(
+    win=win, name='text_sstm_draw_dots',
+    text='',
+    font=config.spatial_short_term_memory.text.draw_text.font,
+    units='height', pos=(0, -0.075),
+    height=config.spatial_short_term_memory.text.draw_text.size,
+    wrapWidth=text_wrap_width, ori=0,
+    color='black', colorSpace='rgb', opacity=1,
+    languageStyle='LTR',
+    depth=-1.0
+    );
+text_sstm_presentation_end = visual.TextStim(
+    win=win, name='text_sstm_presentation_end',
+    text='',
+    font=config.spatial_short_term_memory.text.end_text.font,
+    pos=(0, 0.075), height=config.spatial_short_term_memory.text.end_text.size,
+    wrapWidth=None, ori=0,
+    color='black', colorSpace='rgb', opacity=1,
+    languageStyle='LTR',
+    depth=-2.0
+    );
 
 # Initialize components for Routine "sstm_recall"
 sstm_recallClock = core.Clock()
-sstm_text_next = visual.TextStim(win=win, name='sstm_text_next',
-                                 text='',
-                                 font=config.spatial_short_term_memory.text.next_button.font,
-                                 units='height', pos=(10, 10),
-                                 height=config.spatial_short_term_memory.text.next_button.size,
-                                 wrapWidth=text_wrap_width, ori=0,
-                                 color='black', colorSpace='rgb', opacity=1,
-                                 languageStyle='LTR',
-                                 depth=-1.0);
+sstm_text_next = visual.TextStim(
+    win=win, name='sstm_text_next',
+    text='',
+    font=config.spatial_short_term_memory.text.next_button.font,
+    units='height', pos=(10, 10),
+    height=config.spatial_short_term_memory.text.next_button.size,
+    wrapWidth=text_wrap_width, ori=0,
+    color='black', colorSpace='rgb', opacity=1,
+    languageStyle='LTR',
+    depth=-1.0
+    );
 sstm_mouse = event.Mouse(win=win)
 x, y = [None, None]
 sstm_mouse.mouseClock = core.Clock()
 
 # Initialize components for Routine "base_next_trial"
 base_next_trialClock = core.Clock()
-base_text_next_trial = visual.TextStim(win=win, name='base_text_next_trial',
-                                       text='',
-                                       font=config.experiment_messages.font,
-                                       pos=(0, 0), height=config.experiment_messages.size, wrapWidth=None, ori=0,
-                                       color='black', colorSpace='rgb', opacity=1,
-                                       languageStyle='LTR',
-                                       depth=-1.0);
+base_text_next_trial = visual.TextStim(
+    win=win, name='base_text_next_trial',
+    text='',
+    font=config.experiment_messages.font,
+    pos=(0, 0), height=config.experiment_messages.size, wrapWidth=None, ori=0,
+    color='black', colorSpace='rgb', opacity=1,
+    languageStyle='LTR',
+    depth=-1.0
+    );
 base_next_trial_key_resp = keyboard.Keyboard()
 
 # Initialize components for Routine "base_intertrial"
 base_intertrialClock = core.Clock()
-base_text_intertrial = visual.TextStim(win=win, name='base_text_intertrial',
-                                       text=None,
-                                       font=font,
-                                       units='height', pos=(0, 0), height=config.experiment_messages.size,
-                                       wrapWidth=None, ori=0,
-                                       color='white', colorSpace='rgb', opacity=1,
-                                       languageStyle='LTR',
-                                       depth=-1.0);
+base_text_intertrial = visual.TextStim(
+    win=win, name='base_text_intertrial',
+    text=None,
+    font=font,
+    units='height', pos=(0, 0), height=config.experiment_messages.size,
+    wrapWidth=None, ori=0,
+    color='white', colorSpace='rgb', opacity=1,
+    languageStyle='LTR',
+    depth=-1.0
+    );
 
 # Initialize components for Routine "sstm_task_end"
 sstm_task_endClock = core.Clock()
-text_sstm_task_end = visual.TextStim(win=win, name='text_sstm_task_end',
-                                     text=expmsgs.task_over,
-                                     font=config.experiment_messages.font,
-                                     units='height', pos=(0, 0), height=config.experiment_messages.size,
-                                     wrapWidth=text_wrap_width, ori=0,
-                                     color='black', colorSpace='rgb', opacity=1,
-                                     languageStyle='LTR',
-                                     depth=-1.0);
+text_sstm_task_end = visual.TextStim(
+    win=win, name='text_sstm_task_end',
+    text=expmsgs.task_over,
+    font=config.experiment_messages.font,
+    units='height', pos=(0, 0), height=config.experiment_messages.size,
+    wrapWidth=text_wrap_width, ori=0,
+    color='black', colorSpace='rgb', opacity=1,
+    languageStyle='LTR',
+    depth=-1.0
+    );
 sstm_key_resp_task_end = keyboard.Keyboard()
 
 # Initialize components for Routine "base_end"
 base_endClock = core.Clock()
-base_text_end = visual.TextStim(win=win, name='base_text_end',
-                                text='',
-                                font=config.experiment_messages.font,
-                                units='height', pos=(0, 0), height=config.experiment_messages.size,
-                                wrapWidth=text_wrap_width, ori=0,
-                                color='black', colorSpace='rgb', opacity=1,
-                                languageStyle='LTR',
-                                depth=-1.0);
+base_text_end = visual.TextStim(
+    win=win, name='base_text_end',
+    text='',
+    font=config.experiment_messages.font,
+    units='height', pos=(0, 0), height=config.experiment_messages.size,
+    wrapWidth=text_wrap_width, ori=0,
+    color='black', colorSpace='rgb', opacity=1,
+    languageStyle='LTR',
+    depth=-1.0
+    );
 base_key_resp_end = keyboard.Keyboard()
 
 # Create some handy timers
@@ -786,8 +891,10 @@ sstm_mouse.setVisible(False)
 if do_sstm_task:
     from tasks.spatial_short_term_memory import SpatialShortTermMemoryTask
 
-    sstm_task = SpatialShortTermMemoryTask(window=win, seed=random_seed, experiment_data=thisExp,
-                                           config=config.spatial_short_term_memory)
+    sstm_task = SpatialShortTermMemoryTask(
+        window=win, seed=random_seed, experiment_data=thisExp,
+        config=config.spatial_short_term_memory
+        )
 
 # keep track of which components have finished
 base_initComponents = []
@@ -974,10 +1081,12 @@ thisExp.addData('base_aperture_instruction.stopped', base_aperture_instruction.t
 routineTimer.reset()
 
 # set up handler to look after randomisation of conditions etc
-do_memory_update_dummy = data.TrialHandler(nReps=1 if do_mu_task else 0, method='random',
-                                           extraInfo=expInfo, originPath=-1,
-                                           trialList=[None],
-                                           seed=None, name='do_memory_update_dummy')
+do_memory_update_dummy = data.TrialHandler(
+    nReps=1 if do_mu_task else 0, method='random',
+    extraInfo=expInfo, originPath=-1,
+    trialList=[None],
+    seed=None, name='do_memory_update_dummy'
+    )
 thisExp.addLoop(do_memory_update_dummy)  # add the loop to the experiment
 thisDo_memory_update_dummy = do_memory_update_dummy.trialList[0]  # so we can initialise stimuli with some values
 # abbreviate parameter names if possible (e.g. rgb = thisDo_memory_update_dummy.rgb)
@@ -1048,10 +1157,12 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
     routineTimer.reset()
 
     # set up handler to look after randomisation of conditions etc
-    mu_instruction_pages = data.TrialHandler(nReps=n_instruction_pages, method='sequential',
-                                             extraInfo=expInfo, originPath=-1,
-                                             trialList=[None],
-                                             seed=None, name='mu_instruction_pages')
+    mu_instruction_pages = data.TrialHandler(
+        nReps=n_instruction_pages, method='sequential',
+        extraInfo=expInfo, originPath=-1,
+        trialList=[None],
+        seed=None, name='mu_instruction_pages'
+        )
     thisExp.addLoop(mu_instruction_pages)  # add the loop to the experiment
     thisMu_instruction_page = mu_instruction_pages.trialList[0]  # so we can initialise stimuli with some values
     # abbreviate parameter names if possible (e.g. rgb = thisMu_instruction_page.rgb)
@@ -1150,8 +1261,10 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
                 # keyboard checking is just starting
                 waitOnFlip = True
                 win.callOnFlip(base_key_resp_instruction.clock.reset)  # t=0 on next screen flip
-                win.callOnFlip(base_key_resp_instruction.clearEvents,
-                               eventType='keyboard')  # clear events on next screen flip
+                win.callOnFlip(
+                    base_key_resp_instruction.clearEvents,
+                    eventType='keyboard'
+                    )  # clear events on next screen flip
             if base_key_resp_instruction.status == STARTED and not waitOnFlip:
                 theseKeys = base_key_resp_instruction.getKeys(keyList=None, waitRelease=False)
                 _base_key_resp_instruction_allKeys.extend(theseKeys)
@@ -1209,10 +1322,12 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
     # completed n_instruction_pages repeats of 'mu_instruction_pages'
 
     # set up handler to look after randomisation of conditions etc
-    mu_practice_dummy = data.TrialHandler(nReps=2, method='random',
-                                          extraInfo=expInfo, originPath=-1,
-                                          trialList=[None],
-                                          seed=None, name='mu_practice_dummy')
+    mu_practice_dummy = data.TrialHandler(
+        nReps=2, method='random',
+        extraInfo=expInfo, originPath=-1,
+        trialList=[None],
+        seed=None, name='mu_practice_dummy'
+        )
     thisExp.addLoop(mu_practice_dummy)  # add the loop to the experiment
     thisMu_practice_dummy = mu_practice_dummy.trialList[0]  # so we can initialise stimuli with some values
     # abbreviate parameter names if possible (e.g. rgb = thisMu_practice_dummy.rgb)
@@ -1288,21 +1403,19 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
                 # keyboard checking is just starting
                 waitOnFlip = True
                 win.callOnFlip(base_key_resp_task_begin.clock.reset)  # t=0 on next screen flip
-                win.callOnFlip(base_key_resp_task_begin.clearEvents,
-                               eventType='keyboard')  # clear events on next screen flip
+                win.callOnFlip(
+                    base_key_resp_task_begin.clearEvents,
+                    eventType='keyboard'
+                    )  # clear events on next screen flip
             if base_key_resp_task_begin.status == STARTED and not waitOnFlip:
-                theseKeys = base_key_resp_task_begin.getKeys(keyList=None, waitRelease=False)
-                if theseKeys != [] and theseKeys[-1].value[0] == 'space':
-                    _base_key_resp_task_begin_allKeys.extend(theseKeys)
-                    if len(_base_key_resp_task_begin_allKeys):
-                        base_key_resp_task_begin.keys = _base_key_resp_task_begin_allKeys[
-                            -1].name  # just the last key pressed
-                        base_key_resp_task_begin.rt = _base_key_resp_task_begin_allKeys[-1].rt
-                        # a response ends the routine
-                        continueRoutine = False
-                else:
-                    base_key_resp_task_begin.keys = []
-                    base_key_resp_task_begin.rt = []
+                theseKeys = base_key_resp_task_begin.getKeys(keyList=['space'], waitRelease=False)
+                _base_key_resp_task_begin_allKeys.extend(theseKeys)
+                if len(_base_key_resp_task_begin_allKeys):
+                    base_key_resp_task_begin.keys = _base_key_resp_task_begin_allKeys[
+                        -1].name  # just the last key pressed
+                    base_key_resp_task_begin.rt = _base_key_resp_task_begin_allKeys[-1].rt
+                    # a response ends the routine
+                    continueRoutine = False
 
             # check if all components have finished
             if not continueRoutine:  # a component has requested a forced-end of Routine
@@ -1327,7 +1440,7 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
         if base_key_resp_task_begin.keys in ['', [], None]:  # No response was made
             base_key_resp_task_begin.keys = None
         mu_practice_dummy.addData('base_key_resp_task_begin.keys', base_key_resp_task_begin.keys)
-        if base_key_resp_task_begin.keys != None:  # we had a response
+        if base_key_resp_task_begin.keys is not None:  # we had a response
             mu_practice_dummy.addData('base_key_resp_task_begin.rt', base_key_resp_task_begin.rt)
         mu_practice_dummy.addData('base_key_resp_task_begin.started', base_key_resp_task_begin.tStartRefresh)
         mu_practice_dummy.addData('base_key_resp_task_begin.stopped', base_key_resp_task_begin.tStopRefresh)
@@ -1335,10 +1448,12 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
         routineTimer.reset()
 
         # set up handler to look after randomisation of conditions etc
-        mu_trials = data.TrialHandler(nReps=n_trials, method='random',
-                                      extraInfo=expInfo, originPath=-1,
-                                      trialList=[None],
-                                      seed=None, name='mu_trials')
+        mu_trials = data.TrialHandler(
+            nReps=n_trials, method='random',
+            extraInfo=expInfo, originPath=-1,
+            trialList=[None],
+            seed=None, name='mu_trials'
+            )
         thisExp.addLoop(mu_trials)  # add the loop to the experiment
         thisMu_trial = mu_trials.trialList[0]  # so we can initialise stimuli with some values
         # abbreviate parameter names if possible (e.g. rgb = thisMu_trial.rgb)
@@ -1475,10 +1590,12 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
             routineTimer.reset()
 
             # set up handler to look after randomisation of conditions etc
-            mu_presentations = data.TrialHandler(nReps=n_digits, method='random',
-                                                 extraInfo=expInfo, originPath=-1,
-                                                 trialList=[None],
-                                                 seed=None, name='mu_presentations')
+            mu_presentations = data.TrialHandler(
+                nReps=n_digits, method='random',
+                extraInfo=expInfo, originPath=-1,
+                trialList=[None],
+                seed=None, name='mu_presentations'
+                )
             thisExp.addLoop(mu_presentations)  # add the loop to the experiment
             thisMu_presentation = mu_presentations.trialList[0]  # so we can initialise stimuli with some values
             # abbreviate parameter names if possible (e.g. rgb = thisMu_presentation.rgb)
@@ -1636,10 +1753,12 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
             # completed n_digits repeats of 'mu_presentations'
 
             # set up handler to look after randomisation of conditions etc
-            mu_operations = data.TrialHandler(nReps=n_operations, method='random',
-                                              extraInfo=expInfo, originPath=-1,
-                                              trialList=[None],
-                                              seed=None, name='mu_operations')
+            mu_operations = data.TrialHandler(
+                nReps=n_operations, method='random',
+                extraInfo=expInfo, originPath=-1,
+                trialList=[None],
+                seed=None, name='mu_operations'
+                )
             thisExp.addLoop(mu_operations)  # add the loop to the experiment
             thisMu_operation = mu_operations.trialList[0]  # so we can initialise stimuli with some values
             # abbreviate parameter names if possible (e.g. rgb = thisMu_operation.rgb)
@@ -1797,10 +1916,12 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
             # completed n_operations repeats of 'mu_operations'
 
             # set up handler to look after randomisation of conditions etc
-            mu_recalls = data.TrialHandler(nReps=n_digits, method='random',
-                                           extraInfo=expInfo, originPath=-1,
-                                           trialList=[None],
-                                           seed=None, name='mu_recalls')
+            mu_recalls = data.TrialHandler(
+                nReps=n_digits, method='random',
+                extraInfo=expInfo, originPath=-1,
+                trialList=[None],
+                seed=None, name='mu_recalls'
+                )
             thisExp.addLoop(mu_recalls)  # add the loop to the experiment
             thisMu_recall = mu_recalls.trialList[0]  # so we can initialise stimuli with some values
             # abbreviate parameter names if possible (e.g. rgb = thisMu_recall.rgb)
@@ -1880,8 +2001,10 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
                         # keyboard checking is just starting
                         waitOnFlip = True
                         win.callOnFlip(mu_key_resp_recall.clock.reset)  # t=0 on next screen flip
-                        win.callOnFlip(mu_key_resp_recall.clearEvents,
-                                       eventType='keyboard')  # clear events on next screen flip
+                        win.callOnFlip(
+                            mu_key_resp_recall.clearEvents,
+                            eventType='keyboard'
+                            )  # clear events on next screen flip
                     if mu_key_resp_recall.status == STARTED and not waitOnFlip:
                         theseKeys = mu_key_resp_recall.getKeys(keyList=None, waitRelease=False)
                         _mu_key_resp_recall_allKeys.extend(theseKeys)
@@ -2012,10 +2135,12 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
             # completed n_digits repeats of 'mu_recalls'
 
             # set up handler to look after randomisation of conditions etc
-            mu_base_next_trial_dummy = data.TrialHandler(nReps=current_task.get_left_trials() > 0, method='random',
-                                                         extraInfo=expInfo, originPath=-1,
-                                                         trialList=[None],
-                                                         seed=None, name='mu_base_next_trial_dummy')
+            mu_base_next_trial_dummy = data.TrialHandler(
+                nReps=current_task.get_left_trials() > 0, method='random',
+                extraInfo=expInfo, originPath=-1,
+                trialList=[None],
+                seed=None, name='mu_base_next_trial_dummy'
+                )
             thisExp.addLoop(mu_base_next_trial_dummy)  # add the loop to the experiment
             thisMu_base_next_trial_dummy = mu_base_next_trial_dummy.trialList[
                 0]  # so we can initialise stimuli with some values
@@ -2085,21 +2210,19 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
                         # keyboard checking is just starting
                         waitOnFlip = True
                         win.callOnFlip(base_next_trial_key_resp.clock.reset)  # t=0 on next screen flip
-                        win.callOnFlip(base_next_trial_key_resp.clearEvents,
-                                       eventType='keyboard')  # clear events on next screen flip
+                        win.callOnFlip(
+                            base_next_trial_key_resp.clearEvents,
+                            eventType='keyboard'
+                            )  # clear events on next screen flip
                     if base_next_trial_key_resp.status == STARTED and not waitOnFlip:
-                        theseKeys = base_next_trial_key_resp.getKeys(keyList=None, waitRelease=False)
-                        if theseKeys != [] and theseKeys[-1].value[0] == 'space':
-                            _base_next_trial_key_resp_allKeys.extend(theseKeys)
-                            if len(_base_next_trial_key_resp_allKeys):
-                                base_next_trial_key_resp.keys = _base_next_trial_key_resp_allKeys[
-                                    -1].name  # just the last key pressed
-                                base_next_trial_key_resp.rt = _base_next_trial_key_resp_allKeys[-1].rt
-                                # a response ends the routine
-                                continueRoutine = False
-                        else:
-                            base_next_trial_key_resp.keys = []
-                            base_next_trial_key_resp.rt = []
+                        theseKeys = base_next_trial_key_resp.getKeys(keyList=['space'], waitRelease=False)
+                        _base_next_trial_key_resp_allKeys.extend(theseKeys)
+                        if len(_base_next_trial_key_resp_allKeys):
+                            base_next_trial_key_resp.keys = _base_next_trial_key_resp_allKeys[
+                                -1].name  # just the last key pressed
+                            base_next_trial_key_resp.rt = _base_next_trial_key_resp_allKeys[-1].rt
+                            # a response ends the routine
+                            continueRoutine = False
 
                     # check if all components have finished
                     if not continueRoutine:  # a component has requested a forced-end of Routine
@@ -2124,12 +2247,16 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
                 if base_next_trial_key_resp.keys in ['', [], None]:  # No response was made
                     base_next_trial_key_resp.keys = None
                 mu_base_next_trial_dummy.addData('base_next_trial_key_resp.keys', base_next_trial_key_resp.keys)
-                if base_next_trial_key_resp.keys != None:  # we had a response
+                if base_next_trial_key_resp.keys is not None:  # we had a response
                     mu_base_next_trial_dummy.addData('base_next_trial_key_resp.rt', base_next_trial_key_resp.rt)
-                mu_base_next_trial_dummy.addData('base_next_trial_key_resp.started',
-                                                 base_next_trial_key_resp.tStartRefresh)
-                mu_base_next_trial_dummy.addData('base_next_trial_key_resp.stopped',
-                                                 base_next_trial_key_resp.tStopRefresh)
+                mu_base_next_trial_dummy.addData(
+                    'base_next_trial_key_resp.started',
+                    base_next_trial_key_resp.tStartRefresh
+                    )
+                mu_base_next_trial_dummy.addData(
+                    'base_next_trial_key_resp.stopped',
+                    base_next_trial_key_resp.tStopRefresh
+                    )
                 # the Routine "base_next_trial" was not non-slip safe, so reset the non-slip timer
                 routineTimer.reset()
                 thisExp.nextEntry()
@@ -2210,7 +2337,7 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
 
         thisExp.nextEntry()
 
-    # completed 2 repeats of 'mu_practice_dummy'
+        # completed 2 repeats of 'mu_practice_dummy'
 
     # ------Prepare to start Routine "base_task_end"-------
     continueRoutine = True
@@ -2278,9 +2405,6 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
                     base_key_resp_task_end.rt = _base_key_resp_task_end_allKeys[-1].rt
                     # a response ends the routine
                     continueRoutine = False
-            else:
-                base_key_resp_task_end.keys = []
-                base_key_resp_task_end.rt = []
 
         # check if all components have finished
         if not continueRoutine:  # a component has requested a forced-end of Routine
@@ -2313,14 +2437,15 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
     routineTimer.reset()
     thisExp.nextEntry()
 
-# completed do_mu_task repeats of 'do_memory_update_dummy'
-
+    # completed do_mu_task repeats of 'do_memory_update_dummy'
 
 # set up handler to look after randomisation of conditions etc
-do_operation_span_dummy = data.TrialHandler(nReps=do_os_task, method='random',
-                                            extraInfo=expInfo, originPath=-1,
-                                            trialList=[None],
-                                            seed=None, name='do_operation_span_dummy')
+do_operation_span_dummy = data.TrialHandler(
+    nReps=do_os_task, method='random',
+    extraInfo=expInfo, originPath=-1,
+    trialList=[None],
+    seed=None, name='do_operation_span_dummy'
+    )
 thisExp.addLoop(do_operation_span_dummy)  # add the loop to the experiment
 thisDo_operation_span_dummy = do_operation_span_dummy.trialList[0]  # so we can initialise stimuli with some values
 # abbreviate parameter names if possible (e.g. rgb = thisDo_operation_span_dummy.rgb)
@@ -2392,10 +2517,12 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
     routineTimer.reset()
 
     # set up handler to look after randomisation of conditions etc
-    os_instruction_pages = data.TrialHandler(nReps=n_instruction_pages, method='random',
-                                             extraInfo=expInfo, originPath=-1,
-                                             trialList=[None],
-                                             seed=None, name='os_instruction_pages')
+    os_instruction_pages = data.TrialHandler(
+        nReps=n_instruction_pages, method='random',
+        extraInfo=expInfo, originPath=-1,
+        trialList=[None],
+        seed=None, name='os_instruction_pages'
+        )
     thisExp.addLoop(os_instruction_pages)  # add the loop to the experiment
     thisOs_instruction_page = os_instruction_pages.trialList[0]  # so we can initialise stimuli with some values
     # abbreviate parameter names if possible (e.g. rgb = thisOs_instruction_page.rgb)
@@ -2494,8 +2621,10 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
                 # keyboard checking is just starting
                 waitOnFlip = True
                 win.callOnFlip(base_key_resp_instruction.clock.reset)  # t=0 on next screen flip
-                win.callOnFlip(base_key_resp_instruction.clearEvents,
-                               eventType='keyboard')  # clear events on next screen flip
+                win.callOnFlip(
+                    base_key_resp_instruction.clearEvents,
+                    eventType='keyboard'
+                    )  # clear events on next screen flip
             if base_key_resp_instruction.status == STARTED and not waitOnFlip:
                 theseKeys = base_key_resp_instruction.getKeys(keyList=None, waitRelease=False)
                 _base_key_resp_instruction_allKeys.extend(theseKeys)
@@ -2539,7 +2668,7 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
         if base_key_resp_instruction.keys in ['', [], None]:  # No response was made
             base_key_resp_instruction.keys = None
         os_instruction_pages.addData('base_key_resp_instruction.keys', base_key_resp_instruction.keys)
-        if base_key_resp_instruction.keys != None:  # we had a response
+        if base_key_resp_instruction.keys is not None:  # we had a response
             os_instruction_pages.addData('base_key_resp_instruction.rt', base_key_resp_instruction.rt)
         os_instruction_pages.addData('base_key_resp_instruction.started', base_key_resp_instruction.tStartRefresh)
         os_instruction_pages.addData('base_key_resp_instruction.stopped', base_key_resp_instruction.tStopRefresh)
@@ -2553,10 +2682,12 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
     # completed n_instruction_pages repeats of 'os_instruction_pages'
 
     # set up handler to look after randomisation of conditions etc
-    os_practice_dummy = data.TrialHandler(nReps=2, method='sequential',
-                                          extraInfo=expInfo, originPath=-1,
-                                          trialList=[None],
-                                          seed=None, name='os_practice_dummy')
+    os_practice_dummy = data.TrialHandler(
+        nReps=2, method='sequential',
+        extraInfo=expInfo, originPath=-1,
+        trialList=[None],
+        seed=None, name='os_practice_dummy'
+        )
     thisExp.addLoop(os_practice_dummy)  # add the loop to the experiment
     thisOs_practice_dummy = os_practice_dummy.trialList[0]  # so we can initialise stimuli with some values
     # abbreviate parameter names if possible (e.g. rgb = thisOs_practice_dummy.rgb)
@@ -2632,21 +2763,19 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
                 # keyboard checking is just starting
                 waitOnFlip = True
                 win.callOnFlip(base_key_resp_task_begin.clock.reset)  # t=0 on next screen flip
-                win.callOnFlip(base_key_resp_task_begin.clearEvents,
-                               eventType='keyboard')  # clear events on next screen flip
+                win.callOnFlip(
+                    base_key_resp_task_begin.clearEvents,
+                    eventType='keyboard'
+                    )  # clear events on next screen flip
             if base_key_resp_task_begin.status == STARTED and not waitOnFlip:
-                theseKeys = base_key_resp_task_begin.getKeys(keyList=None, waitRelease=False)
-                if theseKeys != [] and theseKeys[-1].value[0] == 'space':
-                    _base_key_resp_task_begin_allKeys.extend(theseKeys)
-                    if len(_base_key_resp_task_begin_allKeys):
-                        base_key_resp_task_begin.keys = _base_key_resp_task_begin_allKeys[
-                            -1].name  # just the last key pressed
-                        base_key_resp_task_begin.rt = _base_key_resp_task_begin_allKeys[-1].rt
-                        # a response ends the routine
-                        continueRoutine = False
-                else:
-                    base_key_resp_task_begin.keys = []
-                    base_key_resp_task_begin.rt = []
+                theseKeys = base_key_resp_task_begin.getKeys(keyList=['space'], waitRelease=False)
+                _base_key_resp_task_begin_allKeys.extend(theseKeys)
+                if len(_base_key_resp_task_begin_allKeys):
+                    base_key_resp_task_begin.keys = _base_key_resp_task_begin_allKeys[
+                        -1].name  # just the last key pressed
+                    base_key_resp_task_begin.rt = _base_key_resp_task_begin_allKeys[-1].rt
+                    # a response ends the routine
+                    continueRoutine = False
 
             # check if all components have finished
             if not continueRoutine:  # a component has requested a forced-end of Routine
@@ -2671,7 +2800,7 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
         if base_key_resp_task_begin.keys in ['', [], None]:  # No response was made
             base_key_resp_task_begin.keys = None
         os_practice_dummy.addData('base_key_resp_task_begin.keys', base_key_resp_task_begin.keys)
-        if base_key_resp_task_begin.keys != None:  # we had a response
+        if base_key_resp_task_begin.keys is not None:  # we had a response
             os_practice_dummy.addData('base_key_resp_task_begin.rt', base_key_resp_task_begin.rt)
         os_practice_dummy.addData('base_key_resp_task_begin.started', base_key_resp_task_begin.tStartRefresh)
         os_practice_dummy.addData('base_key_resp_task_begin.stopped', base_key_resp_task_begin.tStopRefresh)
@@ -2679,21 +2808,23 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
         routineTimer.reset()
 
         # set up handler to look after randomisation of conditions etc
-        os_trials = data.TrialHandler(nReps=n_trials, method='random',
-                                      extraInfo=expInfo, originPath=-1,
-                                      trialList=[None],
-                                      seed=None, name='os_trials')
+        os_trials = data.TrialHandler(
+            nReps=n_trials, method='random',
+            extraInfo=expInfo, originPath=-1,
+            trialList=[None],
+            seed=None, name='os_trials'
+            )
         thisExp.addLoop(os_trials)  # add the loop to the experiment
         thisOs_trial = os_trials.trialList[0]  # so we can initialise stimuli with some values
         # abbreviate parameter names if possible (e.g. rgb = thisOs_trial.rgb)
-        if thisOs_trial != None:
+        if thisOs_trial is not None:
             for paramName in thisOs_trial:
                 exec('{} = thisOs_trial[paramName]'.format(paramName))
 
         for thisOs_trial in os_trials:
             currentLoop = os_trials
             # abbreviate parameter names if possible (e.g. rgb = thisOs_trial.rgb)
-            if thisOs_trial != None:
+            if thisOs_trial is not None:
                 for paramName in thisOs_trial:
                     exec('{} = thisOs_trial[paramName]'.format(paramName))
 
@@ -2818,10 +2949,12 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
             routineTimer.reset()
 
             # set up handler to look after randomisation of conditions etc
-            os_presentations = data.TrialHandler(nReps=n_presentations, method='random',
-                                                 extraInfo=expInfo, originPath=-1,
-                                                 trialList=[None],
-                                                 seed=None, name='os_presentations')
+            os_presentations = data.TrialHandler(
+                nReps=n_presentations, method='random',
+                extraInfo=expInfo, originPath=-1,
+                trialList=[None],
+                seed=None, name='os_presentations'
+                )
             thisExp.addLoop(os_presentations)  # add the loop to the experiment
             thisOs_presentation = os_presentations.trialList[0]  # so we can initialise stimuli with some values
             # abbreviate parameter names if possible (e.g. rgb = thisOs_presentation.rgb)
@@ -2916,8 +3049,10 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
                         # keyboard checking is just starting
                         waitOnFlip = True
                         win.callOnFlip(os_key_resp_equation.clock.reset)  # t=0 on next screen flip
-                        win.callOnFlip(os_key_resp_equation.clearEvents,
-                                       eventType='keyboard')  # clear events on next screen flip
+                        win.callOnFlip(
+                            os_key_resp_equation.clearEvents,
+                            eventType='keyboard'
+                            )  # clear events on next screen flip
                     if os_key_resp_equation.status == STARTED:
                         # is it time to stop? (based on global clock, using actual start)
                         if tThisFlipGlobal > os_key_resp_equation.tStartRefresh + current_task.config.timing.equation - frameTolerance:
@@ -3133,10 +3268,12 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
             # completed n_presentations repeats of 'os_presentations'
 
             # set up handler to look after randomisation of conditions etc
-            os_recalls = data.TrialHandler(nReps=n_presentations, method='random',
-                                           extraInfo=expInfo, originPath=-1,
-                                           trialList=[None],
-                                           seed=None, name='os_recalls')
+            os_recalls = data.TrialHandler(
+                nReps=n_presentations, method='random',
+                extraInfo=expInfo, originPath=-1,
+                trialList=[None],
+                seed=None, name='os_recalls'
+                )
             thisExp.addLoop(os_recalls)  # add the loop to the experiment
             thisOs_recall = os_recalls.trialList[0]  # so we can initialise stimuli with some values
             # abbreviate parameter names if possible (e.g. rgb = thisOs_recall.rgb)
@@ -3219,8 +3356,10 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
                         # keyboard checking is just starting
                         waitOnFlip = True
                         win.callOnFlip(os_key_resp_recall.clock.reset)  # t=0 on next screen flip
-                        win.callOnFlip(os_key_resp_recall.clearEvents,
-                                       eventType='keyboard')  # clear events on next screen flip
+                        win.callOnFlip(
+                            os_key_resp_recall.clearEvents,
+                            eventType='keyboard'
+                            )  # clear events on next screen flip
                     if os_key_resp_recall.status == STARTED and not waitOnFlip:
                         theseKeys = os_key_resp_recall.getKeys(keyList=list(os_allowed_keys), waitRelease=False)
                         _os_key_resp_recall_allKeys.extend(theseKeys)
@@ -3420,10 +3559,12 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
             routineTimer.reset()
 
             # set up handler to look after randomisation of conditions etc
-            os_break_dummy = data.TrialHandler(nReps=do_break, method='random',
-                                               extraInfo=expInfo, originPath=-1,
-                                               trialList=[None],
-                                               seed=None, name='os_break_dummy')
+            os_break_dummy = data.TrialHandler(
+                nReps=do_break, method='random',
+                extraInfo=expInfo, originPath=-1,
+                trialList=[None],
+                seed=None, name='os_break_dummy'
+                )
             thisExp.addLoop(os_break_dummy)  # add the loop to the experiment
             thisOs_break_dummy = os_break_dummy.trialList[0]  # so we can initialise stimuli with some values
             # abbreviate parameter names if possible (e.g. rgb = thisOs_break_dummy.rgb)
@@ -3492,21 +3633,19 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
                         # keyboard checking is just starting
                         waitOnFlip = True
                         win.callOnFlip(base_key_resp_self_paced_break.clock.reset)  # t=0 on next screen flip
-                        win.callOnFlip(base_key_resp_self_paced_break.clearEvents,
-                                       eventType='keyboard')  # clear events on next screen flip
+                        win.callOnFlip(
+                            base_key_resp_self_paced_break.clearEvents,
+                            eventType='keyboard'
+                            )  # clear events on next screen flip
                     if base_key_resp_self_paced_break.status == STARTED and not waitOnFlip:
-                        theseKeys = base_key_resp_self_paced_break.getKeys(keyList=None, waitRelease=False)
-                        if theseKeys != [] and theseKeys[-1].value[0] == 'space':
-                            _base_key_resp_self_paced_break_allKeys.extend(theseKeys)
-                            if len(_base_key_resp_self_paced_break_allKeys):
-                                base_key_resp_self_paced_break.keys = _base_key_resp_self_paced_break_allKeys[
-                                    -1].name  # just the last key pressed
-                                base_key_resp_self_paced_break.rt = _base_key_resp_self_paced_break_allKeys[-1].rt
-                                # a response ends the routine
-                                continueRoutine = False
-                        else:
-                            base_key_resp_self_paced_break.keys = []
-                            base_key_resp_self_paced_break.rt = []
+                        theseKeys = base_key_resp_self_paced_break.getKeys(keyList=['space'], waitRelease=False)
+                        _base_key_resp_self_paced_break_allKeys.extend(theseKeys)
+                        if len(_base_key_resp_self_paced_break_allKeys):
+                            base_key_resp_self_paced_break.keys = _base_key_resp_self_paced_break_allKeys[
+                                -1].name  # just the last key pressed
+                            base_key_resp_self_paced_break.rt = _base_key_resp_self_paced_break_allKeys[-1].rt
+                            # a response ends the routine
+                            continueRoutine = False
 
                     # check if all components have finished
                     if not continueRoutine:  # a component has requested a forced-end of Routine
@@ -3533,10 +3672,14 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
                 os_break_dummy.addData('base_key_resp_self_paced_break.keys', base_key_resp_self_paced_break.keys)
                 if base_key_resp_self_paced_break.keys is not None:  # we had a response
                     os_break_dummy.addData('base_key_resp_self_paced_break.rt', base_key_resp_self_paced_break.rt)
-                os_break_dummy.addData('base_key_resp_self_paced_break.started',
-                                       base_key_resp_self_paced_break.tStartRefresh)
-                os_break_dummy.addData('base_key_resp_self_paced_break.stopped',
-                                       base_key_resp_self_paced_break.tStopRefresh)
+                os_break_dummy.addData(
+                    'base_key_resp_self_paced_break.started',
+                    base_key_resp_self_paced_break.tStartRefresh
+                    )
+                os_break_dummy.addData(
+                    'base_key_resp_self_paced_break.stopped',
+                    base_key_resp_self_paced_break.tStopRefresh
+                    )
                 # the Routine "base_self_paced_break" was not non-slip safe, so reset the non-slip timer
                 routineTimer.reset()
 
@@ -3677,17 +3820,13 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
             win.callOnFlip(base_key_resp_task_end.clock.reset)  # t=0 on next screen flip
             win.callOnFlip(base_key_resp_task_end.clearEvents, eventType='keyboard')  # clear events on next screen flip
         if base_key_resp_task_end.status == STARTED and not waitOnFlip:
-            theseKeys = base_key_resp_task_end.getKeys(keyList=None, waitRelease=False)
-            if theseKeys != [] and theseKeys[-1].value[0] == 'space':
-                _base_key_resp_task_end_allKeys.extend(theseKeys)
-                if len(_base_key_resp_task_end_allKeys):
-                    base_key_resp_task_end.keys = _base_key_resp_task_end_allKeys[-1].name  # just the last key pressed
-                    base_key_resp_task_end.rt = _base_key_resp_task_end_allKeys[-1].rt
-                    # a response ends the routine
-                    continueRoutine = False
-            else:
-                base_key_resp_task_end.keys = []
-                base_key_resp_task_end.rt = []
+            theseKeys = base_key_resp_task_end.getKeys(keyList=['space'], waitRelease=False)
+            _base_key_resp_task_end_allKeys.extend(theseKeys)
+            if len(_base_key_resp_task_end_allKeys):
+                base_key_resp_task_end.keys = _base_key_resp_task_end_allKeys[-1].name  # just the last key pressed
+                base_key_resp_task_end.rt = _base_key_resp_task_end_allKeys[-1].rt
+                # a response ends the routine
+                continueRoutine = False
 
         # check if all components have finished
         if not continueRoutine:  # a component has requested a forced-end of Routine
@@ -3712,7 +3851,7 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
     if base_key_resp_task_end.keys in ['', [], None]:  # No response was made
         base_key_resp_task_end.keys = None
     do_operation_span_dummy.addData('base_key_resp_task_end.keys', base_key_resp_task_end.keys)
-    if base_key_resp_task_end.keys != None:  # we had a response
+    if base_key_resp_task_end.keys is not None:  # we had a response
         do_operation_span_dummy.addData('base_key_resp_task_end.rt', base_key_resp_task_end.rt)
     do_operation_span_dummy.addData('base_key_resp_task_end.started', base_key_resp_task_end.tStartRefresh)
     do_operation_span_dummy.addData('base_key_resp_task_end.stopped', base_key_resp_task_end.tStopRefresh)
@@ -3724,21 +3863,23 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
 
 
 # set up handler to look after randomisation of conditions etc
-do_sentence_span_dummy = data.TrialHandler(nReps=do_ss_task, method='random',
-                                           extraInfo=expInfo, originPath=-1,
-                                           trialList=[None],
-                                           seed=None, name='do_sentence_span_dummy')
+do_sentence_span_dummy = data.TrialHandler(
+    nReps=do_ss_task, method='random',
+    extraInfo=expInfo, originPath=-1,
+    trialList=[None],
+    seed=None, name='do_sentence_span_dummy'
+    )
 thisExp.addLoop(do_sentence_span_dummy)  # add the loop to the experiment
 thisDo_sentence_span_dummy = do_sentence_span_dummy.trialList[0]  # so we can initialise stimuli with some values
 # abbreviate parameter names if possible (e.g. rgb = thisDo_sentence_span_dummy.rgb)
-if thisDo_sentence_span_dummy != None:
+if thisDo_sentence_span_dummy is not None:
     for paramName in thisDo_sentence_span_dummy:
         exec('{} = thisDo_sentence_span_dummy[paramName]'.format(paramName))
 
 for thisDo_sentence_span_dummy in do_sentence_span_dummy:
     currentLoop = do_sentence_span_dummy
     # abbreviate parameter names if possible (e.g. rgb = thisDo_sentence_span_dummy.rgb)
-    if thisDo_sentence_span_dummy != None:
+    if thisDo_sentence_span_dummy is not None:
         for paramName in thisDo_sentence_span_dummy:
             exec('{} = thisDo_sentence_span_dummy[paramName]'.format(paramName))
 
@@ -3799,21 +3940,23 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
     routineTimer.reset()
 
     # set up handler to look after randomisation of conditions etc
-    ss_instruction_pages = data.TrialHandler(nReps=n_instruction_pages, method='random',
-                                             extraInfo=expInfo, originPath=-1,
-                                             trialList=[None],
-                                             seed=None, name='ss_instruction_pages')
+    ss_instruction_pages = data.TrialHandler(
+        nReps=n_instruction_pages, method='random',
+        extraInfo=expInfo, originPath=-1,
+        trialList=[None],
+        seed=None, name='ss_instruction_pages'
+        )
     thisExp.addLoop(ss_instruction_pages)  # add the loop to the experiment
     thisSs_instruction_page = ss_instruction_pages.trialList[0]  # so we can initialise stimuli with some values
     # abbreviate parameter names if possible (e.g. rgb = thisSs_instruction_page.rgb)
-    if thisSs_instruction_page != None:
+    if thisSs_instruction_page is not None:
         for paramName in thisSs_instruction_page:
             exec('{} = thisSs_instruction_page[paramName]'.format(paramName))
 
     for thisSs_instruction_page in ss_instruction_pages:
         currentLoop = ss_instruction_pages
         # abbreviate parameter names if possible (e.g. rgb = thisSs_instruction_page.rgb)
-        if thisSs_instruction_page != None:
+        if thisSs_instruction_page is not None:
             for paramName in thisSs_instruction_page:
                 exec('{} = thisSs_instruction_page[paramName]'.format(paramName))
 
@@ -3901,8 +4044,10 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
                 # keyboard checking is just starting
                 waitOnFlip = True
                 win.callOnFlip(base_key_resp_instruction.clock.reset)  # t=0 on next screen flip
-                win.callOnFlip(base_key_resp_instruction.clearEvents,
-                               eventType='keyboard')  # clear events on next screen flip
+                win.callOnFlip(
+                    base_key_resp_instruction.clearEvents,
+                    eventType='keyboard'
+                    )  # clear events on next screen flip
             if base_key_resp_instruction.status == STARTED and not waitOnFlip:
                 theseKeys = base_key_resp_instruction.getKeys(keyList=None, waitRelease=False)
                 _base_key_resp_instruction_allKeys.extend(theseKeys)
@@ -3960,10 +4105,12 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
     # completed n_instruction_pages repeats of 'ss_instruction_pages'
 
     # set up handler to look after randomisation of conditions etc
-    ss_practice_dummy = data.TrialHandler(nReps=2, method='random',
-                                          extraInfo=expInfo, originPath=-1,
-                                          trialList=[None],
-                                          seed=None, name='ss_practice_dummy')
+    ss_practice_dummy = data.TrialHandler(
+        nReps=2, method='random',
+        extraInfo=expInfo, originPath=-1,
+        trialList=[None],
+        seed=None, name='ss_practice_dummy'
+        )
     thisExp.addLoop(ss_practice_dummy)  # add the loop to the experiment
     thisSs_practice_dummy = ss_practice_dummy.trialList[0]  # so we can initialise stimuli with some values
     # abbreviate parameter names if possible (e.g. rgb = thisSs_practice_dummy.rgb)
@@ -4039,21 +4186,19 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
                 # keyboard checking is just starting
                 waitOnFlip = True
                 win.callOnFlip(base_key_resp_task_begin.clock.reset)  # t=0 on next screen flip
-                win.callOnFlip(base_key_resp_task_begin.clearEvents,
-                               eventType='keyboard')  # clear events on next screen flip
+                win.callOnFlip(
+                    base_key_resp_task_begin.clearEvents,
+                    eventType='keyboard'
+                    )  # clear events on next screen flip
             if base_key_resp_task_begin.status == STARTED and not waitOnFlip:
-                theseKeys = base_key_resp_task_begin.getKeys(keyList=None, waitRelease=False)
-                if theseKeys != [] and theseKeys[-1].value[0] == 'space':
-                    _base_key_resp_task_begin_allKeys.extend(theseKeys)
-                    if len(_base_key_resp_task_begin_allKeys):
-                        base_key_resp_task_begin.keys = _base_key_resp_task_begin_allKeys[
-                            -1].name  # just the last key pressed
-                        base_key_resp_task_begin.rt = _base_key_resp_task_begin_allKeys[-1].rt
-                        # a response ends the routine
-                        continueRoutine = False
-                else:
-                    base_key_resp_task_begin.keys = []
-                    base_key_resp_task_begin.rt = []
+                theseKeys = base_key_resp_task_begin.getKeys(keyList=['space'], waitRelease=False)
+                _base_key_resp_task_begin_allKeys.extend(theseKeys)
+                if len(_base_key_resp_task_begin_allKeys):
+                    base_key_resp_task_begin.keys = _base_key_resp_task_begin_allKeys[
+                        -1].name  # just the last key pressed
+                    base_key_resp_task_begin.rt = _base_key_resp_task_begin_allKeys[-1].rt
+                    # a response ends the routine
+                    continueRoutine = False
 
             # check if all components have finished
             if not continueRoutine:  # a component has requested a forced-end of Routine
@@ -4086,10 +4231,12 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
         routineTimer.reset()
 
         # set up handler to look after randomisation of conditions etc
-        ss_trials = data.TrialHandler(nReps=n_trials, method='random',
-                                      extraInfo=expInfo, originPath=-1,
-                                      trialList=[None],
-                                      seed=None, name='ss_trials')
+        ss_trials = data.TrialHandler(
+            nReps=n_trials, method='random',
+            extraInfo=expInfo, originPath=-1,
+            trialList=[None],
+            seed=None, name='ss_trials'
+            )
         thisExp.addLoop(ss_trials)  # add the loop to the experiment
         thisSs_trial = ss_trials.trialList[0]  # so we can initialise stimuli with some values
         # abbreviate parameter names if possible (e.g. rgb = thisSs_trial.rgb)
@@ -4225,21 +4372,23 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
             routineTimer.reset()
 
             # set up handler to look after randomisation of conditions etc
-            ss_presentations = data.TrialHandler(nReps=n_presentations, method='random',
-                                                 extraInfo=expInfo, originPath=-1,
-                                                 trialList=[None],
-                                                 seed=None, name='ss_presentations')
+            ss_presentations = data.TrialHandler(
+                nReps=n_presentations, method='random',
+                extraInfo=expInfo, originPath=-1,
+                trialList=[None],
+                seed=None, name='ss_presentations'
+                )
             thisExp.addLoop(ss_presentations)  # add the loop to the experiment
             thisSs_presentation = ss_presentations.trialList[0]  # so we can initialise stimuli with some values
             # abbreviate parameter names if possible (e.g. rgb = thisSs_presentation.rgb)
-            if thisSs_presentation != None:
+            if thisSs_presentation is not None:
                 for paramName in thisSs_presentation:
                     exec('{} = thisSs_presentation[paramName]'.format(paramName))
 
             for thisSs_presentation in ss_presentations:
                 currentLoop = ss_presentations
                 # abbreviate parameter names if possible (e.g. rgb = thisSs_presentation.rgb)
-                if thisSs_presentation != None:
+                if thisSs_presentation is not None:
                     for paramName in thisSs_presentation:
                         exec('{} = thisSs_presentation[paramName]'.format(paramName))
 
@@ -4323,8 +4472,10 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
                         # keyboard checking is just starting
                         waitOnFlip = True
                         win.callOnFlip(ss_key_resp_sentence.clock.reset)  # t=0 on next screen flip
-                        win.callOnFlip(ss_key_resp_sentence.clearEvents,
-                                       eventType='keyboard')  # clear events on next screen flip
+                        win.callOnFlip(
+                            ss_key_resp_sentence.clearEvents,
+                            eventType='keyboard'
+                            )  # clear events on next screen flip
                     if ss_key_resp_sentence.status == STARTED:
                         # is it time to stop? (based on global clock, using actual start)
                         if tThisFlipGlobal > ss_key_resp_sentence.tStartRefresh + current_task.config.timing.sentence - frameTolerance:
@@ -4391,7 +4542,7 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
                 # store data for ss_presentations (TrialHandler)
                 ss_presentations.addData('ss_key_resp_sentence.keys', ss_key_resp_sentence.keys)
                 ss_presentations.addData('ss_key_resp_sentence.corr', ss_key_resp_sentence.corr)
-                if ss_key_resp_sentence.keys != None:  # we had a response
+                if ss_key_resp_sentence.keys is not None:  # we had a response
                     ss_presentations.addData('ss_key_resp_sentence.rt', ss_key_resp_sentence.rt)
                 ss_presentations.addData('ss_key_resp_sentence.started', ss_key_resp_sentence.tStartRefresh)
                 ss_presentations.addData('ss_key_resp_sentence.stopped', ss_key_resp_sentence.tStopRefresh)
@@ -4540,21 +4691,23 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
             # completed n_presentations repeats of 'ss_presentations'
 
             # set up handler to look after randomisation of conditions etc
-            ss_recalls = data.TrialHandler(nReps=n_presentations, method='random',
-                                           extraInfo=expInfo, originPath=-1,
-                                           trialList=[None],
-                                           seed=None, name='ss_recalls')
+            ss_recalls = data.TrialHandler(
+                nReps=n_presentations, method='random',
+                extraInfo=expInfo, originPath=-1,
+                trialList=[None],
+                seed=None, name='ss_recalls'
+                )
             thisExp.addLoop(ss_recalls)  # add the loop to the experiment
             thisSs_recall = ss_recalls.trialList[0]  # so we can initialise stimuli with some values
             # abbreviate parameter names if possible (e.g. rgb = thisSs_recall.rgb)
-            if thisSs_recall != None:
+            if thisSs_recall is not None:
                 for paramName in thisSs_recall:
                     exec('{} = thisSs_recall[paramName]'.format(paramName))
 
             for thisSs_recall in ss_recalls:
                 currentLoop = ss_recalls
                 # abbreviate parameter names if possible (e.g. rgb = thisSs_recall.rgb)
-                if thisSs_recall != None:
+                if thisSs_recall is not None:
                     for paramName in thisSs_recall:
                         exec('{} = thisSs_recall[paramName]'.format(paramName))
 
@@ -4626,8 +4779,10 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
                         # keyboard checking is just starting
                         waitOnFlip = True
                         win.callOnFlip(ss_key_resp_recall.clock.reset)  # t=0 on next screen flip
-                        win.callOnFlip(ss_key_resp_recall.clearEvents,
-                                       eventType='keyboard')  # clear events on next screen flip
+                        win.callOnFlip(
+                            ss_key_resp_recall.clearEvents,
+                            eventType='keyboard'
+                            )  # clear events on next screen flip
                     if ss_key_resp_recall.status == STARTED and not waitOnFlip:
                         theseKeys = ss_key_resp_recall.getKeys(keyList=None, waitRelease=False)
                         key = theseKeys[-1].name[0]
@@ -4675,7 +4830,7 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
                 # store data for ss_recalls (TrialHandler)
                 ss_recalls.addData('ss_key_resp_recall.keys', ss_key_resp_recall.keys)
                 ss_recalls.addData('ss_key_resp_recall.corr', ss_key_resp_recall.corr)
-                if ss_key_resp_recall.keys != None:  # we had a response
+                if ss_key_resp_recall.keys is not None:  # we had a response
                     ss_recalls.addData('ss_key_resp_recall.rt', ss_key_resp_recall.rt)
                 ss_recalls.addData('ss_key_resp_recall.started', ss_key_resp_recall.tStartRefresh)
                 ss_recalls.addData('ss_key_resp_recall.stopped', ss_key_resp_recall.tStopRefresh)
@@ -4828,21 +4983,23 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
             routineTimer.reset()
 
             # set up handler to look after randomisation of conditions etc
-            ss_break_dummy = data.TrialHandler(nReps=do_break, method='random',
-                                               extraInfo=expInfo, originPath=-1,
-                                               trialList=[None],
-                                               seed=None, name='ss_break_dummy')
+            ss_break_dummy = data.TrialHandler(
+                nReps=do_break, method='random',
+                extraInfo=expInfo, originPath=-1,
+                trialList=[None],
+                seed=None, name='ss_break_dummy'
+                )
             thisExp.addLoop(ss_break_dummy)  # add the loop to the experiment
             thisSs_break_dummy = ss_break_dummy.trialList[0]  # so we can initialise stimuli with some values
             # abbreviate parameter names if possible (e.g. rgb = thisSs_break_dummy.rgb)
-            if thisSs_break_dummy != None:
+            if thisSs_break_dummy is not None:
                 for paramName in thisSs_break_dummy:
                     exec('{} = thisSs_break_dummy[paramName]'.format(paramName))
 
             for thisSs_break_dummy in ss_break_dummy:
                 currentLoop = ss_break_dummy
                 # abbreviate parameter names if possible (e.g. rgb = thisSs_break_dummy.rgb)
-                if thisSs_break_dummy != None:
+                if thisSs_break_dummy is not None:
                     for paramName in thisSs_break_dummy:
                         exec('{} = thisSs_break_dummy[paramName]'.format(paramName))
 
@@ -4900,21 +5057,19 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
                         # keyboard checking is just starting
                         waitOnFlip = True
                         win.callOnFlip(base_key_resp_self_paced_break.clock.reset)  # t=0 on next screen flip
-                        win.callOnFlip(base_key_resp_self_paced_break.clearEvents,
-                                       eventType='keyboard')  # clear events on next screen flip
+                        win.callOnFlip(
+                            base_key_resp_self_paced_break.clearEvents,
+                            eventType='keyboard'
+                            )  # clear events on next screen flip
                     if base_key_resp_self_paced_break.status == STARTED and not waitOnFlip:
-                        theseKeys = base_key_resp_self_paced_break.getKeys(keyList=None, waitRelease=False)
-                        if theseKeys and theseKeys[-1].value[0] == 'space':
-                            _base_key_resp_self_paced_break_allKeys.extend(theseKeys)
-                            if len(_base_key_resp_self_paced_break_allKeys):
-                                base_key_resp_self_paced_break.keys = _base_key_resp_self_paced_break_allKeys[
-                                    -1].name  # just the last key pressed
-                                base_key_resp_self_paced_break.rt = _base_key_resp_self_paced_break_allKeys[-1].rt
-                                # a response ends the routine
-                                continueRoutine = False
-                        else:
-                            base_key_resp_self_paced_break.keys = []
-                            base_key_resp_self_paced_break.rt = []
+                        theseKeys = base_key_resp_self_paced_break.getKeys(keyList=['space'], waitRelease=False)
+                        _base_key_resp_self_paced_break_allKeys.extend(theseKeys)
+                        if len(_base_key_resp_self_paced_break_allKeys):
+                            base_key_resp_self_paced_break.keys = _base_key_resp_self_paced_break_allKeys[
+                                -1].name  # just the last key pressed
+                            base_key_resp_self_paced_break.rt = _base_key_resp_self_paced_break_allKeys[-1].rt
+                            # a response ends the routine
+                            continueRoutine = False
 
                     # check if all components have finished
                     if not continueRoutine:  # a component has requested a forced-end of Routine
@@ -4939,12 +5094,16 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
                 if base_key_resp_self_paced_break.keys in ['', [], None]:  # No response was made
                     base_key_resp_self_paced_break.keys = None
                 ss_break_dummy.addData('base_key_resp_self_paced_break.keys', base_key_resp_self_paced_break.keys)
-                if base_key_resp_self_paced_break.keys != None:  # we had a response
+                if base_key_resp_self_paced_break.keys is not None:  # we had a response
                     ss_break_dummy.addData('base_key_resp_self_paced_break.rt', base_key_resp_self_paced_break.rt)
-                ss_break_dummy.addData('base_key_resp_self_paced_break.started',
-                                       base_key_resp_self_paced_break.tStartRefresh)
-                ss_break_dummy.addData('base_key_resp_self_paced_break.stopped',
-                                       base_key_resp_self_paced_break.tStopRefresh)
+                ss_break_dummy.addData(
+                    'base_key_resp_self_paced_break.started',
+                    base_key_resp_self_paced_break.tStartRefresh
+                    )
+                ss_break_dummy.addData(
+                    'base_key_resp_self_paced_break.stopped',
+                    base_key_resp_self_paced_break.tStopRefresh
+                    )
                 # the Routine "base_self_paced_break" was not non-slip safe, so reset the non-slip timer
                 routineTimer.reset()
 
@@ -5085,17 +5244,13 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
             win.callOnFlip(base_key_resp_task_end.clock.reset)  # t=0 on next screen flip
             win.callOnFlip(base_key_resp_task_end.clearEvents, eventType='keyboard')  # clear events on next screen flip
         if base_key_resp_task_end.status == STARTED and not waitOnFlip:
-            theseKeys = base_key_resp_task_end.getKeys(keyList=None, waitRelease=False)
-            if theseKeys and theseKeys[-1].value[0] == 'space':
-                _base_key_resp_task_end_allKeys.extend(theseKeys)
-                if len(_base_key_resp_task_end_allKeys):
-                    base_key_resp_task_end.keys = _base_key_resp_task_end_allKeys[-1].name  # just the last key pressed
-                    base_key_resp_task_end.rt = _base_key_resp_task_end_allKeys[-1].rt
-                    # a response ends the routine
-                    continueRoutine = False
-            else:
-                base_key_resp_task_end.keys = []
-                base_key_resp_task_end.rt = []
+            theseKeys = base_key_resp_task_end.getKeys(keyList=['space'], waitRelease=False)
+            _base_key_resp_task_end_allKeys.extend(theseKeys)
+            if len(_base_key_resp_task_end_allKeys):
+                base_key_resp_task_end.keys = _base_key_resp_task_end_allKeys[-1].name  # just the last key pressed
+                base_key_resp_task_end.rt = _base_key_resp_task_end_allKeys[-1].rt
+                # a response ends the routine
+                continueRoutine = False
 
         # check if all components have finished
         if not continueRoutine:  # a component has requested a forced-end of Routine
@@ -5120,7 +5275,7 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
     if base_key_resp_task_end.keys in ['', [], None]:  # No response was made
         base_key_resp_task_end.keys = None
     do_sentence_span_dummy.addData('base_key_resp_task_end.keys', base_key_resp_task_end.keys)
-    if base_key_resp_task_end.keys != None:  # we had a response
+    if base_key_resp_task_end.keys is not None:  # we had a response
         do_sentence_span_dummy.addData('base_key_resp_task_end.rt', base_key_resp_task_end.rt)
     do_sentence_span_dummy.addData('base_key_resp_task_end.started', base_key_resp_task_end.tStartRefresh)
     do_sentence_span_dummy.addData('base_key_resp_task_end.stopped', base_key_resp_task_end.tStopRefresh)
@@ -5132,22 +5287,24 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
 
 
 # set up handler to look after randomisation of conditions etc
-do_spatial_short_term_memory_dummy = data.TrialHandler(nReps=do_sstm_task, method='random',
-                                                       extraInfo=expInfo, originPath=-1,
-                                                       trialList=[None],
-                                                       seed=None, name='do_spatial_short_term_memory_dummy')
+do_spatial_short_term_memory_dummy = data.TrialHandler(
+    nReps=do_sstm_task, method='random',
+    extraInfo=expInfo, originPath=-1,
+    trialList=[None],
+    seed=None, name='do_spatial_short_term_memory_dummy'
+    )
 thisExp.addLoop(do_spatial_short_term_memory_dummy)  # add the loop to the experiment
 thisDo_spatial_short_term_memory_dummy = do_spatial_short_term_memory_dummy.trialList[
     0]  # so we can initialise stimuli with some values
 # abbreviate parameter names if possible (e.g. rgb = thisDo_spatial_short_term_memory_dummy.rgb)
-if thisDo_spatial_short_term_memory_dummy != None:
+if thisDo_spatial_short_term_memory_dummy is not None:
     for paramName in thisDo_spatial_short_term_memory_dummy:
         exec('{} = thisDo_spatial_short_term_memory_dummy[paramName]'.format(paramName))
 
 for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy:
     currentLoop = do_spatial_short_term_memory_dummy
     # abbreviate parameter names if possible (e.g. rgb = thisDo_spatial_short_term_memory_dummy.rgb)
-    if thisDo_spatial_short_term_memory_dummy != None:
+    if thisDo_spatial_short_term_memory_dummy is not None:
         for paramName in thisDo_spatial_short_term_memory_dummy:
             exec('{} = thisDo_spatial_short_term_memory_dummy[paramName]'.format(paramName))
 
@@ -5207,21 +5364,23 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
     routineTimer.reset()
 
     # set up handler to look after randomisation of conditions etc
-    sstm_instruction_pages = data.TrialHandler(nReps=n_instruction_pages, method='sequential',
-                                               extraInfo=expInfo, originPath=-1,
-                                               trialList=[None],
-                                               seed=None, name='sstm_instruction_pages')
+    sstm_instruction_pages = data.TrialHandler(
+        nReps=n_instruction_pages, method='sequential',
+        extraInfo=expInfo, originPath=-1,
+        trialList=[None],
+        seed=None, name='sstm_instruction_pages'
+        )
     thisExp.addLoop(sstm_instruction_pages)  # add the loop to the experiment
     thisSstm_instruction_page = sstm_instruction_pages.trialList[0]  # so we can initialise stimuli with some values
     # abbreviate parameter names if possible (e.g. rgb = thisSstm_instruction_page.rgb)
-    if thisSstm_instruction_page != None:
+    if thisSstm_instruction_page is not None:
         for paramName in thisSstm_instruction_page:
             exec('{} = thisSstm_instruction_page[paramName]'.format(paramName))
 
     for thisSstm_instruction_page in sstm_instruction_pages:
         currentLoop = sstm_instruction_pages
         # abbreviate parameter names if possible (e.g. rgb = thisSstm_instruction_page.rgb)
-        if thisSstm_instruction_page != None:
+        if thisSstm_instruction_page is not None:
             for paramName in thisSstm_instruction_page:
                 exec('{} = thisSstm_instruction_page[paramName]'.format(paramName))
 
@@ -5309,8 +5468,10 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
                 # keyboard checking is just starting
                 waitOnFlip = True
                 win.callOnFlip(base_key_resp_instruction.clock.reset)  # t=0 on next screen flip
-                win.callOnFlip(base_key_resp_instruction.clearEvents,
-                               eventType='keyboard')  # clear events on next screen flip
+                win.callOnFlip(
+                    base_key_resp_instruction.clearEvents,
+                    eventType='keyboard'
+                    )  # clear events on next screen flip
             if base_key_resp_instruction.status == STARTED and not waitOnFlip:
                 theseKeys = base_key_resp_instruction.getKeys(keyList=None, waitRelease=False)
                 _base_key_resp_instruction_allKeys.extend(theseKeys)
@@ -5354,7 +5515,7 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
         if base_key_resp_instruction.keys in ['', [], None]:  # No response was made
             base_key_resp_instruction.keys = None
         sstm_instruction_pages.addData('base_key_resp_instruction.keys', base_key_resp_instruction.keys)
-        if base_key_resp_instruction.keys != None:  # we had a response
+        if base_key_resp_instruction.keys is not None:  # we had a response
             sstm_instruction_pages.addData('base_key_resp_instruction.rt', base_key_resp_instruction.rt)
         sstm_instruction_pages.addData('base_key_resp_instruction.started', base_key_resp_instruction.tStartRefresh)
         sstm_instruction_pages.addData('base_key_resp_instruction.stopped', base_key_resp_instruction.tStopRefresh)
@@ -5368,21 +5529,23 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
     # completed n_instruction_pages repeats of 'sstm_instruction_pages'
 
     # set up handler to look after randomisation of conditions etc
-    sstm_practice_dummy = data.TrialHandler(nReps=2, method='sequential',
-                                            extraInfo=expInfo, originPath=-1,
-                                            trialList=[None],
-                                            seed=None, name='sstm_practice_dummy')
+    sstm_practice_dummy = data.TrialHandler(
+        nReps=2, method='sequential',
+        extraInfo=expInfo, originPath=-1,
+        trialList=[None],
+        seed=None, name='sstm_practice_dummy'
+        )
     thisExp.addLoop(sstm_practice_dummy)  # add the loop to the experiment
     thisSstm_practice_dummy = sstm_practice_dummy.trialList[0]  # so we can initialise stimuli with some values
     # abbreviate parameter names if possible (e.g. rgb = thisSstm_practice_dummy.rgb)
-    if thisSstm_practice_dummy != None:
+    if thisSstm_practice_dummy is not None:
         for paramName in thisSstm_practice_dummy:
             exec('{} = thisSstm_practice_dummy[paramName]'.format(paramName))
 
     for thisSstm_practice_dummy in sstm_practice_dummy:
         currentLoop = sstm_practice_dummy
         # abbreviate parameter names if possible (e.g. rgb = thisSstm_practice_dummy.rgb)
-        if thisSstm_practice_dummy != None:
+        if thisSstm_practice_dummy is not None:
             for paramName in thisSstm_practice_dummy:
                 exec('{} = thisSstm_practice_dummy[paramName]'.format(paramName))
 
@@ -5447,21 +5610,19 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
                 # keyboard checking is just starting
                 waitOnFlip = True
                 win.callOnFlip(base_key_resp_task_begin.clock.reset)  # t=0 on next screen flip
-                win.callOnFlip(base_key_resp_task_begin.clearEvents,
-                               eventType='keyboard')  # clear events on next screen flip
+                win.callOnFlip(
+                    base_key_resp_task_begin.clearEvents,
+                    eventType='keyboard'
+                    )  # clear events on next screen flip
             if base_key_resp_task_begin.status == STARTED and not waitOnFlip:
-                theseKeys = base_key_resp_task_begin.getKeys(keyList=None, waitRelease=False)
-                if theseKeys and theseKeys[-1].value[0] == 'space':
-                    _base_key_resp_task_begin_allKeys.extend(theseKeys)
-                    if len(_base_key_resp_task_begin_allKeys):
-                        base_key_resp_task_begin.keys = _base_key_resp_task_begin_allKeys[
-                            -1].name  # just the last key pressed
-                        base_key_resp_task_begin.rt = _base_key_resp_task_begin_allKeys[-1].rt
-                        # a response ends the routine
-                        continueRoutine = False
-                else:
-                    base_key_resp_task_begin.keys = []
-                    base_key_resp_task_begin.rt = []
+                theseKeys = base_key_resp_task_begin.getKeys(keyList=['space'], waitRelease=False)
+                _base_key_resp_task_begin_allKeys.extend(theseKeys)
+                if len(_base_key_resp_task_begin_allKeys):
+                    base_key_resp_task_begin.keys = _base_key_resp_task_begin_allKeys[
+                        -1].name  # just the last key pressed
+                    base_key_resp_task_begin.rt = _base_key_resp_task_begin_allKeys[-1].rt
+                    # a response ends the routine
+                    continueRoutine = False
 
             # check if all components have finished
             if not continueRoutine:  # a component has requested a forced-end of Routine
@@ -5486,7 +5647,7 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
         if base_key_resp_task_begin.keys in ['', [], None]:  # No response was made
             base_key_resp_task_begin.keys = None
         sstm_practice_dummy.addData('base_key_resp_task_begin.keys', base_key_resp_task_begin.keys)
-        if base_key_resp_task_begin.keys != None:  # we had a response
+        if base_key_resp_task_begin.keys is not None:  # we had a response
             sstm_practice_dummy.addData('base_key_resp_task_begin.rt', base_key_resp_task_begin.rt)
         sstm_practice_dummy.addData('base_key_resp_task_begin.started', base_key_resp_task_begin.tStartRefresh)
         sstm_practice_dummy.addData('base_key_resp_task_begin.stopped', base_key_resp_task_begin.tStopRefresh)
@@ -5494,21 +5655,23 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
         routineTimer.reset()
 
         # set up handler to look after randomisation of conditions etc
-        sstm_trials = data.TrialHandler(nReps=n_trials, method='sequential',
-                                        extraInfo=expInfo, originPath=-1,
-                                        trialList=[None],
-                                        seed=None, name='sstm_trials')
+        sstm_trials = data.TrialHandler(
+            nReps=n_trials, method='sequential',
+            extraInfo=expInfo, originPath=-1,
+            trialList=[None],
+            seed=None, name='sstm_trials'
+            )
         thisExp.addLoop(sstm_trials)  # add the loop to the experiment
         thisSstm_trial = sstm_trials.trialList[0]  # so we can initialise stimuli with some values
         # abbreviate parameter names if possible (e.g. rgb = thisSstm_trial.rgb)
-        if thisSstm_trial != None:
+        if thisSstm_trial is not None:
             for paramName in thisSstm_trial:
                 exec('{} = thisSstm_trial[paramName]'.format(paramName))
 
         for thisSstm_trial in sstm_trials:
             currentLoop = sstm_trials
             # abbreviate parameter names if possible (e.g. rgb = thisSstm_trial.rgb)
-            if thisSstm_trial != None:
+            if thisSstm_trial is not None:
                 for paramName in thisSstm_trial:
                     exec('{} = thisSstm_trial[paramName]'.format(paramName))
 
@@ -5703,21 +5866,23 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
             routineTimer.reset()
 
             # set up handler to look after randomisation of conditions etc
-            sstm_presentations = data.TrialHandler(nReps=n_presentations, method='sequential',
-                                                   extraInfo=expInfo, originPath=-1,
-                                                   trialList=[None],
-                                                   seed=None, name='sstm_presentations')
+            sstm_presentations = data.TrialHandler(
+                nReps=n_presentations, method='sequential',
+                extraInfo=expInfo, originPath=-1,
+                trialList=[None],
+                seed=None, name='sstm_presentations'
+                )
             thisExp.addLoop(sstm_presentations)  # add the loop to the experiment
             thisSstm_presentation = sstm_presentations.trialList[0]  # so we can initialise stimuli with some values
             # abbreviate parameter names if possible (e.g. rgb = thisSstm_presentation.rgb)
-            if thisSstm_presentation != None:
+            if thisSstm_presentation is not None:
                 for paramName in thisSstm_presentation:
                     exec('{} = thisSstm_presentation[paramName]'.format(paramName))
 
             for thisSstm_presentation in sstm_presentations:
                 currentLoop = sstm_presentations
                 # abbreviate parameter names if possible (e.g. rgb = thisSstm_presentation.rgb)
-                if thisSstm_presentation != None:
+                if thisSstm_presentation is not None:
                     for paramName in thisSstm_presentation:
                         exec('{} = thisSstm_presentation[paramName]'.format(paramName))
 
@@ -5855,10 +6020,14 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
                 for thisComponent in sstm_after_display_dotComponents:
                     if hasattr(thisComponent, "setAutoDraw"):
                         thisComponent.setAutoDraw(False)
-                sstm_presentations.addData('sstm_text_after_display_dot.started',
-                                           sstm_text_after_display_dot.tStartRefresh)
-                sstm_presentations.addData('sstm_text_after_display_dot.stopped',
-                                           sstm_text_after_display_dot.tStopRefresh)
+                sstm_presentations.addData(
+                    'sstm_text_after_display_dot.started',
+                    sstm_text_after_display_dot.tStartRefresh
+                    )
+                sstm_presentations.addData(
+                    'sstm_text_after_display_dot.stopped',
+                    sstm_text_after_display_dot.tStopRefresh
+                    )
                 # the Routine "sstm_after_display_dot" was not non-slip safe, so reset the non-slip timer
                 routineTimer.reset()
                 thisExp.nextEntry()
@@ -6095,22 +6264,24 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
             routineTimer.reset()
 
             # set up handler to look after randomisation of conditions etc
-            sstm_next_trial_dummy = data.TrialHandler(nReps=current_task.get_left_trials() > 0, method='random',
-                                                      extraInfo=expInfo, originPath=-1,
-                                                      trialList=[None],
-                                                      seed=None, name='sstm_next_trial_dummy')
+            sstm_next_trial_dummy = data.TrialHandler(
+                nReps=current_task.get_left_trials() > 0, method='random',
+                extraInfo=expInfo, originPath=-1,
+                trialList=[None],
+                seed=None, name='sstm_next_trial_dummy'
+                )
             thisExp.addLoop(sstm_next_trial_dummy)  # add the loop to the experiment
             thisSstm_next_trial_dummy = sstm_next_trial_dummy.trialList[
                 0]  # so we can initialise stimuli with some values
             # abbreviate parameter names if possible (e.g. rgb = thisSstm_next_trial_dummy.rgb)
-            if thisSstm_next_trial_dummy != None:
+            if thisSstm_next_trial_dummy is not None:
                 for paramName in thisSstm_next_trial_dummy:
                     exec('{} = thisSstm_next_trial_dummy[paramName]'.format(paramName))
 
             for thisSstm_next_trial_dummy in sstm_next_trial_dummy:
                 currentLoop = sstm_next_trial_dummy
                 # abbreviate parameter names if possible (e.g. rgb = thisSstm_next_trial_dummy.rgb)
-                if thisSstm_next_trial_dummy != None:
+                if thisSstm_next_trial_dummy is not None:
                     for paramName in thisSstm_next_trial_dummy:
                         exec('{} = thisSstm_next_trial_dummy[paramName]'.format(paramName))
 
@@ -6168,21 +6339,19 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
                         # keyboard checking is just starting
                         waitOnFlip = True
                         win.callOnFlip(base_next_trial_key_resp.clock.reset)  # t=0 on next screen flip
-                        win.callOnFlip(base_next_trial_key_resp.clearEvents,
-                                       eventType='keyboard')  # clear events on next screen flip
+                        win.callOnFlip(
+                            base_next_trial_key_resp.clearEvents,
+                            eventType='keyboard'
+                            )  # clear events on next screen flip
                     if base_next_trial_key_resp.status == STARTED and not waitOnFlip:
-                        theseKeys = base_next_trial_key_resp.getKeys(keyList=None, waitRelease=False)
-                        if theseKeys and theseKeys[-1].value[0] == 'space':
-                            _base_next_trial_key_resp_allKeys.extend(theseKeys)
-                            if len(_base_next_trial_key_resp_allKeys):
-                                base_next_trial_key_resp.keys = _base_next_trial_key_resp_allKeys[
-                                    -1].name  # just the last key pressed
-                                base_next_trial_key_resp.rt = _base_next_trial_key_resp_allKeys[-1].rt
-                                # a response ends the routine
-                                continueRoutine = False
-                        else:
-                            base_next_trial_key_resp.keys = []
-                            base_next_trial_key_resp.rt = []
+                        theseKeys = base_next_trial_key_resp.getKeys(keyList=['space'], waitRelease=False)
+                        _base_next_trial_key_resp_allKeys.extend(theseKeys)
+                        if len(_base_next_trial_key_resp_allKeys):
+                            base_next_trial_key_resp.keys = _base_next_trial_key_resp_allKeys[
+                                -1].name  # just the last key pressed
+                            base_next_trial_key_resp.rt = _base_next_trial_key_resp_allKeys[-1].rt
+                            # a response ends the routine
+                            continueRoutine = False
 
                     # check if all components have finished
                     if not continueRoutine:  # a component has requested a forced-end of Routine
@@ -6207,10 +6376,12 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
                 if base_next_trial_key_resp.keys in ['', [], None]:  # No response was made
                     base_next_trial_key_resp.keys = None
                 sstm_next_trial_dummy.addData('base_next_trial_key_resp.keys', base_next_trial_key_resp.keys)
-                if base_next_trial_key_resp.keys != None:  # we had a response
+                if base_next_trial_key_resp.keys is not None:  # we had a response
                     sstm_next_trial_dummy.addData('base_next_trial_key_resp.rt', base_next_trial_key_resp.rt)
-                sstm_next_trial_dummy.addData('base_next_trial_key_resp.started',
-                                              base_next_trial_key_resp.tStartRefresh)
+                sstm_next_trial_dummy.addData(
+                    'base_next_trial_key_resp.started',
+                    base_next_trial_key_resp.tStartRefresh
+                    )
                 sstm_next_trial_dummy.addData('base_next_trial_key_resp.stopped', base_next_trial_key_resp.tStopRefresh)
                 # the Routine "base_next_trial" was not non-slip safe, so reset the non-slip timer
                 routineTimer.reset()
@@ -6354,17 +6525,13 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
             win.callOnFlip(sstm_key_resp_task_end.clock.reset)  # t=0 on next screen flip
             win.callOnFlip(sstm_key_resp_task_end.clearEvents, eventType='keyboard')  # clear events on next screen flip
         if sstm_key_resp_task_end.status == STARTED and not waitOnFlip:
-            theseKeys = sstm_key_resp_task_end.getKeys(keyList=None, waitRelease=False)
-            if theseKeys and theseKeys[-1].value[0] == 'space':
-                _sstm_key_resp_task_end_allKeys.extend(theseKeys)
-                if len(_sstm_key_resp_task_end_allKeys):
-                    sstm_key_resp_task_end.keys = _sstm_key_resp_task_end_allKeys[-1].name  # just the last key pressed
-                    sstm_key_resp_task_end.rt = _sstm_key_resp_task_end_allKeys[-1].rt
-                    # a response ends the routine
-                    continueRoutine = False
-            else:
-                sstm_key_resp_task_end.keys = []
-                sstm_key_resp_task_end.rt = []
+            theseKeys = sstm_key_resp_task_end.getKeys(keyList=['space'], waitRelease=False)
+            _sstm_key_resp_task_end_allKeys.extend(theseKeys)
+            if len(_sstm_key_resp_task_end_allKeys):
+                sstm_key_resp_task_end.keys = _sstm_key_resp_task_end_allKeys[-1].name  # just the last key pressed
+                sstm_key_resp_task_end.rt = _sstm_key_resp_task_end_allKeys[-1].rt
+                # a response ends the routine
+                continueRoutine = False
 
         # check if all components have finished
         if not continueRoutine:  # a component has requested a forced-end of Routine
@@ -6389,7 +6556,7 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
     if sstm_key_resp_task_end.keys in ['', [], None]:  # No response was made
         sstm_key_resp_task_end.keys = None
     do_spatial_short_term_memory_dummy.addData('sstm_key_resp_task_end.keys', sstm_key_resp_task_end.keys)
-    if sstm_key_resp_task_end.keys != None:  # we had a response
+    if sstm_key_resp_task_end.keys is not None:  # we had a response
         do_spatial_short_term_memory_dummy.addData('sstm_key_resp_task_end.rt', sstm_key_resp_task_end.rt)
     do_spatial_short_term_memory_dummy.addData('sstm_key_resp_task_end.started', sstm_key_resp_task_end.tStartRefresh)
     do_spatial_short_term_memory_dummy.addData('sstm_key_resp_task_end.stopped', sstm_key_resp_task_end.tStopRefresh)

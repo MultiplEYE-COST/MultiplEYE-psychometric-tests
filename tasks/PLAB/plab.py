@@ -102,7 +102,8 @@ else:
     frameDur = 1.0 / 60.0  # could not measure, so guess
 
 # create a default keyboard (e.g. to check for escape)
-default_keyboard = keyboard.Keyboard()
+defaultKeyboard = keyboard.Keyboard()
+
 
 # Initialize components for Routine "Blank500"
 Blank500Clock = core.Clock()
@@ -133,6 +134,7 @@ done_text = visual.TextStim(win=win, name='done_text',
                             color='black', colorSpace='rgb', opacity=None,
                             languageStyle='LTR',
                             depth=0.0)
+done_key = keyboard.Keyboard()
 
 # Initialize components for Routine "PLABInstruction"
 PLABInstructionClock = core.Clock()
@@ -143,6 +145,7 @@ PLAB_instructions = visual.TextStim(win=win, name='PLAB_instructions',
                                     color='black', colorSpace='rgb', opacity=None,
                                     languageStyle='LTR',
                                     depth=0.0)
+PLAB_instruction_key = keyboard.Keyboard()
 
 # Initialize components for Routine "PLAB Task1 Trials"
 PLABTask1Clock = core.Clock()
@@ -165,6 +168,7 @@ PLAB_task1 = visual.TextStim(win=win, name='PLAB_task1',
                              color='black', colorSpace='rgb', opacity=None,
                              languageStyle='LTR',
                              depth=0.0)
+PLAB_task1_key = keyboard.Keyboard()
 
 # Rectangles for highlighting options
 highlight_rects = []
@@ -200,6 +204,7 @@ PLAB_task2 = visual.TextStim(win=win, name='PLAB_task2',
                              color='black', colorSpace='rgb', opacity=None,
                              languageStyle='LTR',
                              depth=0.0)
+PLAB_task2_key = keyboard.Keyboard()
 
 # Initialize components for Routine "GoodbyeScreen"
 GoodbyeScreenClock = core.Clock()
@@ -227,11 +232,11 @@ event.waitKeys()
 # ------Prepare to start Routine "PLABInstruction"-------
 continueRoutine = True
 # update component parameters for each repeat
-default_keyboard.keys = []
-default_keyboard.rt = []
-_default_keyboard_allKeys = []
+PLAB_instruction_key.keys = []
+PLAB_instruction_key.rt = []
+_PLAB_instruction_key_allKeys = []
 # keep track of which components have finished
-PLABInstructionComponents = [PLAB_instructions, default_keyboard]
+PLABInstructionComponents = [PLAB_instructions, PLAB_instruction_key]
 for thisComponent in PLABInstructionComponents:
     thisComponent.tStart = None
     thisComponent.tStop = None
@@ -265,38 +270,29 @@ while continueRoutine:
 
     # *default_keyboard* updates
     waitOnFlip = False
-    if default_keyboard.status == NOT_STARTED and tThisFlip >= 0.0 - frameTolerance:
+    if PLAB_instruction_key.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
         # keep track of start time/frame for later
-        default_keyboard.frameNStart = frameN  # exact frame index
-        default_keyboard.tStart = t  # local t and not account for scr refresh
-        default_keyboard.tStartRefresh = tThisFlipGlobal  # on global time
-        win.timeOnFlip(default_keyboard, 'tStartRefresh')  # time at next scr refresh
-        default_keyboard.status = STARTED
-        # default_keyboard checking is just starting
+        PLAB_instruction_key.frameNStart = frameN  # exact frame index
+        PLAB_instruction_key.tStart = t  # local t and not account for scr refresh
+        PLAB_instruction_key.tStartRefresh = tThisFlipGlobal  # on global time
+        win.timeOnFlip(PLAB_instruction_key, 'tStartRefresh')  # time at next scr refresh
+        PLAB_instruction_key.status = STARTED
+        # keyboard checking is just starting
         waitOnFlip = True
-        win.callOnFlip(default_keyboard.clock.reset)  # t=0 on next screen flip
-        win.callOnFlip(default_keyboard.clearEvents, eventType='default_keyboard')  # clear events on next screen flip
-    if default_keyboard.status == STARTED and not waitOnFlip:
-        theseKeys = default_keyboard.getKeys(keyList=None, waitRelease=False)
-        if theseKeys != [] and theseKeys[-1].value[0] == 'space':
-            _default_keyboard_allKeys.extend(theseKeys)
-            if len(_default_keyboard_allKeys):
-                default_keyboard.keys = _default_keyboard_allKeys[-1].name  # just the last key pressed
-                default_keyboard.rt = _default_keyboard_allKeys[-1].rt
-                # a response ends the routine
-                continueRoutine = False
-        else:
-            default_keyboard.keys = []
-            default_keyboard.rt = []
+        win.callOnFlip(PLAB_instruction_key.clock.reset)  # t=0 on next screen flip
+        win.callOnFlip(PLAB_instruction_key.clearEvents, eventType='keyboard')  # clear events on next screen flip
+    if PLAB_instruction_key.status == STARTED and not waitOnFlip:
+        theseKeys = PLAB_instruction_key.getKeys(keyList=['space'], waitRelease=False)
+        _PLAB_instruction_key_allKeys.extend(theseKeys)
+        if len(_PLAB_instruction_key_allKeys):
+            PLAB_instruction_key.keys = _PLAB_instruction_key_allKeys[-1].name  # just the last key pressed
+            PLAB_instruction_key.rt = _PLAB_instruction_key_allKeys[-1].rt
+            # a response ends the routine
+            continueRoutine = False
 
     # check for quit (typically the Esc key)
-    keys = default_keyboard.getKeys(keyList=None, waitRelease=False, clear=False)
-    keys_pressed = [k.name[0] for k in keys]
-    if endExpNow or 'escape' in keys_pressed:
+    if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
         core.quit()
-
-    default_keyboard.keys = []
-    default_keyboard.rt = []
 
     # check if all components have finished
     if not continueRoutine:  # a component has requested a forced-end of Routine
@@ -318,20 +314,20 @@ for thisComponent in PLABInstructionComponents:
 thisExp.addData('PLAB_instructions.started', PLAB_instructions.tStartRefresh)
 thisExp.addData('PLAB_instructions.stopped', PLAB_instructions.tStopRefresh)
 # check responses
-if default_keyboard.keys in ['', [], None]:  # No response was made
-    default_keyboard.keys = None
-thisExp.addData('default_keyboard.keys', default_keyboard.keys)
-if default_keyboard.keys is not None:  # we had a response
-    thisExp.addData('default_keyboard.rt', default_keyboard.rt)
-thisExp.addData('default_keyboard.started', default_keyboard.tStartRefresh)
-thisExp.addData('default_keyboard.stopped', default_keyboard.tStopRefresh)
+if PLAB_instruction_key.keys in ['', [], None]:  # No response was made
+    PLAB_instruction_key.keys = None
+thisExp.addData('PLAB_instruction_key.keys',PLAB_instruction_key.keys)
+if PLAB_instruction_key.keys != None:  # we had a response
+    thisExp.addData('PLAB_instruction_key.rt', PLAB_instruction_key.rt)
+thisExp.addData('PLAB_instruction_key.started', PLAB_instruction_key.tStartRefresh)
+thisExp.addData('PLAB_instruction_key.stopped', PLAB_instruction_key.tStopRefresh)
 thisExp.nextEntry()
 # the Routine "PLABInstruction" was not non-slip safe, so reset the non-slip timer
 routineTimer.reset()
 
 # ------Prepare to start Routine "Blank500"-------
 continueRoutine = True
-routineTimer.add(0.500000)
+routineTimer.addTime(0.500000)
 # update component parameters for each repeat
 # keep track of which components have finished
 Blank500Components = [blank]
@@ -375,7 +371,7 @@ while continueRoutine and routineTimer.getTime() > 0:
             blank.setAutoDraw(False)
 
     # check for quit (typically the Esc key)
-    if endExpNow or default_keyboard.getKeys(keyList=["escape"]):
+    if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
         core.quit()
 
     # check if all components have finished
@@ -429,9 +425,9 @@ for thisPLAB_task1_trial in PLAB_task1_trials:
     PLAB_task1.setText(display_text)
     PLAB_task1_Components = [PLAB_task1] + highlight_rects  # Add rectangles to the components list
     # Reset keyboard
-    default_keyboard.keys = []
-    default_keyboard.rt = []
-    _default_keyboard_allKeys = []
+    PLAB_task1_key.keys = []
+    PLAB_task1_key.rt = []
+    _PLAB_task1_key_allKeys = []
     task_start_time = globalClock.getTime()
 
     # -------Run Routine "PLAB Task1 Trials"-------
@@ -440,23 +436,23 @@ for thisPLAB_task1_trial in PLAB_task1_trials:
         PLAB_task1.draw()
 
         # *PLAB_practice_key* updates
-        theseKeys = default_keyboard.getKeys(keyList=None, waitRelease=False)
+        theseKeys = PLAB_task1_key.getKeys(keyList=['1', '2', '3', '4', 'space', 'escape'], waitRelease=False)
         for key in theseKeys:
-            if theseKeys != [] and theseKeys[-1].value[0] in ['1', '2', '3', '4']:
+            if key.name in ['1', '2', '3', '4']:
                 valid_answer = True
-                chosen_key = key.name[0]
+                chosen_key = key.name
                 # Highlight the selected option
-                selected_option_index = int(key.name[0]) - 1
+                selected_option_index = int(key.name) - 1
                 for i, rect in enumerate(highlight_rects):
                     if i == selected_option_index:
                         rect.setAutoDraw(True)  # Draw the selected rectangle
                     else:
                         rect.setAutoDraw(False)  # Hide other rectangles
 
-            if theseKeys != [] and theseKeys[-1].value[0] in ['space'] and valid_answer:
+            if key.name == 'space' and valid_answer:
                 # A valid key was pressed, store the key name and reaction time
-                default_keyboard.keys = chosen_key
-                default_keyboard.rt = key.rt - task_start_time
+                PLAB_task1_key.keys = chosen_key
+                PLAB_task1_key.rt = key.rt - task_start_time
                 # Clear all components
                 PLAB_task1.setAutoDraw(False)
                 for rect in highlight_rects:
@@ -464,11 +460,8 @@ for thisPLAB_task1_trial in PLAB_task1_trials:
                 continueRoutine = False  # End the routine after the space key is pressed
                 break  # Exit the loop after handling the valid response
 
-            if theseKeys != [] and theseKeys[-1].value[0] in ['escape']:
+            if key.name == 'escape':
                 core.quit()  # Exit the experiment if the escape key was pressed
-            else:
-                default_keyboard.keys = []
-                default_keyboard.rt = []
 
         # check if all components have finished
         if not continueRoutine:  # a component has requested a forced-end of Routine
@@ -485,17 +478,17 @@ for thisPLAB_task1_trial in PLAB_task1_trials:
 
     # -------Ending Routine "PLAB Task1 Trials"-------
     # check responses
-    if default_keyboard.keys in ['', [], None]:  # No response was made
-        default_keyboard.keys = None
-        default_keyboard.corr = int(str(correct_key).lower() == 'none')
+    if PLAB_task1_key.keys in ['', [], None]:  # No response was made
+        PLAB_task1_key.keys = None
+        PLAB_task1_key.corr = int(str(correct_key).lower() == 'none')
     else:  # we had a response
-        default_keyboard.corr = int(default_keyboard.keys == str(correct_key))
+        PLAB_task1_key.corr = int(PLAB_task1_key.keys == str(correct_key))
 
     # Save trial data
-    thisExp.addData('chosen_key', default_keyboard.keys)
+    thisExp.addData('chosen_key', PLAB_task1_key.keys)
     # thisExp.addData('correct_key', correct_key)
-    thisExp.addData('correctness', default_keyboard.corr)
-    thisExp.addData('rt', default_keyboard.rt)
+    thisExp.addData('correctness', PLAB_task1_key.corr)
+    thisExp.addData('rt', PLAB_task1_key.rt)
 
     routineTimer.reset()
     thisExp.nextEntry()
@@ -507,12 +500,12 @@ for thisPLAB_task1_trial in PLAB_task1_trials:
     fix_cross.tStartRefresh = None
     fix_cross.tStopRefresh = None
     routineTimer.reset()
-    routineTimer.add(0.5)  # display fixation cross for 500 ms
+    routineTimer.addTime(0.5)  # display fixation cross for 500 ms
 
     while continueRoutine and routineTimer.getTime() > 0:
         fix_cross.draw()
         win.flip()
-        if endExpNow or default_keyboard.getKeys(keyList=["escape"]):
+        if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
             core.quit()
 # completed 'PLAB task 1 trials'
 
@@ -538,9 +531,9 @@ for thisPLAB_task2_trial in PLAB_task2_trials:
     PLAB_task2.setText(display_text)
     PLAB_task2_Components = [PLAB_task1]
     # Reset keyboard
-    default_keyboard.keys = []
-    default_keyboard.rt = []
-    _default_keyboard_allKeys = []
+    PLAB_task2_key.keys = []
+    PLAB_task2_key.rt = []
+    _PLAB_task2_key_allKeys = []
     task_start_time = globalClock.getTime()
 
     # -------Run Routine "PLAB Task2 Trials"-------
@@ -549,22 +542,22 @@ for thisPLAB_task2_trial in PLAB_task2_trials:
         PLAB_task2.draw()
 
         # *PLAB_practice_key* updates
-        theseKeys = default_keyboard.getKeys(keyList=None, waitRelease=False)
+        theseKeys = PLAB_task2_key.getKeys(keyList=['1', '2', '3', '4', 'space', 'escape'], waitRelease=False)
         for key in theseKeys:
-            if theseKeys != [] and theseKeys[-1].value[0] in ['1', '2', '3', '4']:
+            if key.name in ['1', '2', '3', '4']:
                 valid_answer = True
-                chosen_key = key.name[0]
+                chosen_key = key.name
                 # Highlight the selected option
-                selected_option_index = int(key.name[0]) - 1
+                selected_option_index = int(key.name) - 1
                 for i, rect in enumerate(highlight_rects):
                     if i == selected_option_index:
                         rect.setAutoDraw(True)  # Draw the selected rectangle
                     else:
                         rect.setAutoDraw(False)  # Hide other rectangles
-            if theseKeys != [] and theseKeys[-1].value[0] in ['space'] and valid_answer:
+            if key.name == 'space' and valid_answer:
                 # A valid key was pressed, store the key name and reaction time
-                default_keyboard.keys = chosen_key
-                default_keyboard.rt = key.rt - task_start_time
+                PLAB_task2_key.keys = chosen_key
+                PLAB_task2_key.rt = key.rt - task_start_time
                 # Clear all components
                 PLAB_task2.setAutoDraw(False)
                 for rect in highlight_rects:
@@ -572,11 +565,8 @@ for thisPLAB_task2_trial in PLAB_task2_trials:
                 continueRoutine = False  # End the routine after the space key is pressed
                 break  # Exit the loop after handling the valid response
 
-            if theseKeys != [] and theseKeys[-1].value[0] in ['escape']:
+            if key.name == 'escape':
                 core.quit()  # Exit the experiment if the escape key was pressed
-            else:
-                default_keyboard.keys = []
-                default_keyboard.rt = []
 
         # check if all components have finished
         if not continueRoutine:  # a component has requested a forced-end of Routine
@@ -593,17 +583,17 @@ for thisPLAB_task2_trial in PLAB_task2_trials:
 
     # -------Ending Routine "PLAB Task2 Trials"-------
     # check responses
-    if default_keyboard.keys in ['', [], None]:  # No response was made
-        default_keyboard.keys = None
-        default_keyboard.corr = int(str(correct_key).lower() == 'none')
+    if PLAB_task2_key.keys in ['', [], None]:  # No response was made
+        PLAB_task2_key.keys = None
+        PLAB_task2_key.corr = int(str(correct_key).lower() == 'none')
     else:  # we had a response
-        default_keyboard.corr = int(default_keyboard.keys == str(correct_key))
+        PLAB_task2_key.corr = int(PLAB_task2_key.keys == str(correct_key))
 
     # Save trial data
-    thisExp.addData('chosen_key', default_keyboard.keys)
+    thisExp.addData('chosen_key', PLAB_task2_key.keys)
     # thisExp.addData('correct_key', correct_key)
-    thisExp.addData('correctness', default_keyboard.corr)
-    thisExp.addData('rt', default_keyboard.rt)
+    thisExp.addData('correctness', PLAB_task2_key.corr)
+    thisExp.addData('rt', PLAB_task2_key.rt)
 
     routineTimer.reset()
     thisExp.nextEntry()
@@ -615,12 +605,12 @@ for thisPLAB_task2_trial in PLAB_task2_trials:
     fix_cross.tStartRefresh = None
     fix_cross.tStopRefresh = None
     routineTimer.reset()
-    routineTimer.add(0.5)  # display fixation cross for 500 ms
+    routineTimer.addTime(0.5)  # display fixation cross for 500 ms
 
     while continueRoutine and routineTimer.getTime() > 0:
         fix_cross.draw()
         win.flip()
-        if endExpNow or default_keyboard.getKeys(keyList=["escape"]):
+        if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
             core.quit()
 
 # completed 'PLAB Task2 trials'
@@ -628,11 +618,11 @@ for thisPLAB_task2_trial in PLAB_task2_trials:
 # ------Prepare to start Routine "Done"-------
 continueRoutine = True
 # update component parameters for each repeat
-default_keyboard.keys = []
-default_keyboard.rt = []
+done_key.keys = []
+done_key.rt = []
 _done_key_allKeys = []
 # keep track of which components have finished
-DoneComponents = [done_text, default_keyboard]
+DoneComponents = [done_text, done_key]
 for thisComponent in DoneComponents:
     thisComponent.tStart = None
     thisComponent.tStop = None
@@ -656,7 +646,7 @@ while continueRoutine:
     # update/draw components on each frame
 
     # *done_text* updates
-    if done_text.status == NOT_STARTED and tThisFlip >= 0.0 - frameTolerance:
+    if done_text.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
         # keep track of start time/frame for later
         done_text.frameNStart = frameN  # exact frame index
         done_text.tStart = t  # local t and not account for scr refresh
@@ -666,32 +656,28 @@ while continueRoutine:
 
     # *done_key* updates
     waitOnFlip = False
-    if default_keyboard.status == NOT_STARTED and tThisFlip >= 0.0 - frameTolerance:
+    if done_key.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
         # keep track of start time/frame for later
-        default_keyboard.frameNStart = frameN  # exact frame index
-        default_keyboard.tStart = t  # local t and not account for scr refresh
-        default_keyboard.tStartRefresh = tThisFlipGlobal  # on global time
-        win.timeOnFlip(default_keyboard, 'tStartRefresh')  # time at next scr refresh
-        default_keyboard.status = STARTED
-        # default_keyboard checking is just starting
+        done_key.frameNStart = frameN  # exact frame index
+        done_key.tStart = t  # local t and not account for scr refresh
+        done_key.tStartRefresh = tThisFlipGlobal  # on global time
+        win.timeOnFlip(done_key, 'tStartRefresh')  # time at next scr refresh
+        done_key.status = STARTED
+        # keyboard checking is just starting
         waitOnFlip = True
-        win.callOnFlip(default_keyboard.clock.reset)  # t=0 on next screen flip
-        win.callOnFlip(default_keyboard.clearEvents, eventType='default_keyboard')  # clear events on next screen flip
-    if default_keyboard.status == STARTED and not waitOnFlip:
-        theseKeys = default_keyboard.getKeys(keyList=None, waitRelease=False)
+        win.callOnFlip(done_key.clock.reset)  # t=0 on next screen flip
+        win.callOnFlip(done_key.clearEvents, eventType='keyboard')  # clear events on next screen flip
+    if done_key.status == STARTED and not waitOnFlip:
+        theseKeys = done_key.getKeys(keyList=['space'], waitRelease=False)
         _done_key_allKeys.extend(theseKeys)
-        if theseKeys != [] and theseKeys[-1].value[0] == 'space':
-            if len(_done_key_allKeys):
-                default_keyboard.keys = _done_key_allKeys[-1].name  # just the last key pressed
-                default_keyboard.rt = _done_key_allKeys[-1].rt
-                # a response ends the routine
-                continueRoutine = False
-        else:
-            default_keyboard.keys = []
-            default_keyboard.rt = []
+        if len(_done_key_allKeys):
+            done_key.keys = _done_key_allKeys[-1].name  # just the last key pressed
+            done_key.rt = _done_key_allKeys[-1].rt
+            # a response ends the routine
+            continueRoutine = False
 
     # check for quit (typically the Esc key)
-    if endExpNow or default_keyboard.getKeys(keyList=["escape"]):
+    if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
         core.quit()
 
     # check if all components have finished
@@ -714,13 +700,13 @@ for thisComponent in DoneComponents:
 thisExp.addData('done_text.started', done_text.tStartRefresh)
 thisExp.addData('done_text.stopped', done_text.tStopRefresh)
 # check responses
-if default_keyboard.keys in ['', [], None]:  # No response was made
-    default_keyboard.keys = None
-thisExp.addData('done_key.keys', default_keyboard.keys)
-if default_keyboard.keys is not None:  # we had a response
-    thisExp.addData('done_key.rt', default_keyboard.rt)
-thisExp.addData('done_key.started', default_keyboard.tStartRefresh)
-thisExp.addData('done_key.stopped', default_keyboard.tStopRefresh)
+if done_key.keys in ['', [], None]:  # No response was made
+    done_key.keys = None
+thisExp.addData('done_key.keys',done_key.keys)
+if done_key.keys != None:  # we had a response
+    thisExp.addData('done_key.rt', done_key.rt)
+thisExp.addData('done_key.started', done_key.tStartRefresh)
+thisExp.addData('done_key.stopped', done_key.tStopRefresh)
 thisExp.nextEntry()
 
 # the Routine "Done" was not non-slip safe, so reset the non-slip timer
@@ -728,13 +714,13 @@ routineTimer.reset()
 
 # ------Prepare to start Routine "GoodbyeScreen"-------
 continueRoutine = True
-routineTimer.add(10.000000)
+routineTimer.addTime(10.000000)
 # update component parameters for each repeat
-default_keyboard.keys = []
-default_keyboard.rt = []
-_default_keyboard_allKeys = []
+key_goodbye.keys = []
+key_goodbye.rt = []
+_key_goodbye_allKeys = []
 # keep track of which components have finished
-GoodbyeScreenComponents = [Goodbyetext, default_keyboard]
+GoodbyeScreenComponents = [Goodbyetext, key_goodbye]
 for thisComponent in GoodbyeScreenComponents:
     thisComponent.tStart = None
     thisComponent.tStop = None
@@ -758,7 +744,7 @@ while continueRoutine and routineTimer.getTime() > 0:
     # update/draw components on each frame
 
     # *Goodbyetext* updates
-    if Goodbyetext.status == NOT_STARTED and tThisFlip >= 0.0 - frameTolerance:
+    if Goodbyetext.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
         # keep track of start time/frame for later
         Goodbyetext.frameNStart = frameN  # exact frame index
         Goodbyetext.tStart = t  # local t and not account for scr refresh
@@ -767,55 +753,46 @@ while continueRoutine and routineTimer.getTime() > 0:
         Goodbyetext.setAutoDraw(True)
     if Goodbyetext.status == STARTED:
         # is it time to stop? (based on global clock, using actual start)
-        if tThisFlipGlobal > Goodbyetext.tStartRefresh + 10 - frameTolerance:
+        if tThisFlipGlobal > Goodbyetext.tStartRefresh + 10-frameTolerance:
             # keep track of stop time/frame for later
             Goodbyetext.tStop = t  # not accounting for scr refresh
             Goodbyetext.frameNStop = frameN  # exact frame index
             win.timeOnFlip(Goodbyetext, 'tStopRefresh')  # time at next scr refresh
             Goodbyetext.setAutoDraw(False)
 
-    # *default_keyboard* updates
+    # *key_goodbye* updates
     waitOnFlip = False
-    if default_keyboard.status == NOT_STARTED and tThisFlip >= 0.0 - frameTolerance:
+    if key_goodbye.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
         # keep track of start time/frame for later
-        default_keyboard.frameNStart = frameN  # exact frame index
-        default_keyboard.tStart = t  # local t and not account for scr refresh
-        default_keyboard.tStartRefresh = tThisFlipGlobal  # on global time
-        win.timeOnFlip(default_keyboard, 'tStartRefresh')  # time at next scr refresh
-        default_keyboard.status = STARTED
+        key_goodbye.frameNStart = frameN  # exact frame index
+        key_goodbye.tStart = t  # local t and not account for scr refresh
+        key_goodbye.tStartRefresh = tThisFlipGlobal  # on global time
+        win.timeOnFlip(key_goodbye, 'tStartRefresh')  # time at next scr refresh
+        key_goodbye.status = STARTED
         # keyboard checking is just starting
         waitOnFlip = True
-        win.callOnFlip(default_keyboard.clock.reset)  # t=0 on next screen flip
-        win.callOnFlip(default_keyboard.clearEvents, eventType='keyboard')  # clear events on next screen flip
-    if default_keyboard.status == STARTED:
+        win.callOnFlip(key_goodbye.clock.reset)  # t=0 on next screen flip
+        win.callOnFlip(key_goodbye.clearEvents, eventType='keyboard')  # clear events on next screen flip
+    if key_goodbye.status == STARTED:
         # is it time to stop? (based on global clock, using actual start)
-        if tThisFlipGlobal > default_keyboard.tStartRefresh + 10 - frameTolerance:
+        if tThisFlipGlobal > key_goodbye.tStartRefresh + 10-frameTolerance:
             # keep track of stop time/frame for later
-            default_keyboard.tStop = t  # not accounting for scr refresh
-            default_keyboard.frameNStop = frameN  # exact frame index
-            win.timeOnFlip(default_keyboard, 'tStopRefresh')  # time at next scr refresh
-            default_keyboard.status = FINISHED
-    if default_keyboard.status == STARTED and not waitOnFlip:
-        theseKeys = default_keyboard.getKeys(keyList=None, waitRelease=False)
-        _default_keyboard_allKeys.extend(theseKeys)
-        if theseKeys != [] and theseKeys[-1].value[0] == 'space':
-            if len(_default_keyboard_allKeys):
-                default_keyboard.keys = _default_keyboard_allKeys[-1].name  # just the last key pressed
-                default_keyboard.rt = _default_keyboard_allKeys[-1].rt
-                # a response ends the routine
-                continueRoutine = False
-        else:
-            default_keyboard.keys = []
-            default_keyboard.rt = []
+            key_goodbye.tStop = t  # not accounting for scr refresh
+            key_goodbye.frameNStop = frameN  # exact frame index
+            win.timeOnFlip(key_goodbye, 'tStopRefresh')  # time at next scr refresh
+            key_goodbye.status = FINISHED
+    if key_goodbye.status == STARTED and not waitOnFlip:
+        theseKeys = key_goodbye.getKeys(keyList=['space'], waitRelease=False)
+        _key_goodbye_allKeys.extend(theseKeys)
+        if len(_key_goodbye_allKeys):
+            key_goodbye.keys = _key_goodbye_allKeys[-1].name  # just the last key pressed
+            key_goodbye.rt = _key_goodbye_allKeys[-1].rt
+            # a response ends the routine
+            continueRoutine = False
 
     # check for quit (typically the Esc key)
-    keys = default_keyboard.getKeys(keyList=None, waitRelease=False, clear=False)
-    keys_pressed = [k.name[0] for k in keys]
-    if endExpNow or 'escape' in keys_pressed:
+    if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
         core.quit()
-
-    default_keyboard.keys = []
-    default_keyboard.rt = []
 
     # check if all components have finished
     if not continueRoutine:  # a component has requested a forced-end of Routine
@@ -837,13 +814,13 @@ for thisComponent in GoodbyeScreenComponents:
 thisExp.addData('Goodbyetext.started', Goodbyetext.tStartRefresh)
 thisExp.addData('Goodbyetext.stopped', Goodbyetext.tStopRefresh)
 # check responses
-if default_keyboard.keys in ['', [], None]:  # No response was made
-    default_keyboard.keys = None
-thisExp.addData('default_keyboard.keys', default_keyboard.keys)
-if default_keyboard.keys is not None:  # we had a response
-    thisExp.addData('default_keyboard.rt', default_keyboard.rt)
-thisExp.addData('default_keyboard.started', default_keyboard.tStartRefresh)
-thisExp.addData('default_keyboard.stopped', default_keyboard.tStopRefresh)
+if key_goodbye.keys in ['', [], None]:  # No response was made
+    key_goodbye.keys = None
+thisExp.addData('key_goodbye.keys',key_goodbye.keys)
+if key_goodbye.keys != None:  # we had a response
+    thisExp.addData('key_goodbye.rt', key_goodbye.rt)
+thisExp.addData('key_goodbye.started', key_goodbye.tStartRefresh)
+thisExp.addData('key_goodbye.stopped', key_goodbye.tStopRefresh)
 thisExp.nextEntry()
 
 # Flip one final time so any remaining win.callOnFlip() 

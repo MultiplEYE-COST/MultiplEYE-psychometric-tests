@@ -4,17 +4,15 @@ from datetime import datetime
 
 import pandas as pd
 import yaml
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QMainWindow
+from PyQt6 import QtCore, QtGui, QtWidgets
+from PyQt6.QtWidgets import QMainWindow
 
 from main import MyMainWindow
-# TODO: pass this as an argument, quick fix for now
-from run_multipleye_psychometric_tests import RESULT_FOLDER
-
 
 class MyWelcomeWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, result_folder: str) -> None:
         super(MyWelcomeWindow, self).__init__()
+        self.result_folder = result_folder
         self.initUI()
         self.showFullScreen()
 
@@ -38,10 +36,9 @@ class MyWelcomeWindow(QMainWindow):
         self.psychopyVersion = exp[2]
         self.expName = exp[3]
         self.filename = exp[4]
-        self.output_path = exp[5]
 
         instructions_df = pd.read_excel(
-            f'languages/{self.language.upper()}/instructions/WikiVocab_instructions_{self.language}.xlsx',
+            f'languages/{self.language.upper()}/instructions/WikiVocab_instructions_{self.language.lower()}.xlsx',
             index_col='screen')
         welcome_text = instructions_df.loc['Welcome_text', self.language.upper()]
         welcome_text = welcome_text.replace('\\n', '\n')
@@ -54,10 +51,10 @@ class MyWelcomeWindow(QMainWindow):
         self.mainText = QtWidgets.QLabel(self.centralWidget)
         self.mainText.setFont(font)
         self.mainText.setStyleSheet("color: rgb(0, 0, 0);")  # Set font color to black
-        self.mainText.setAlignment(QtCore.Qt.AlignCenter)
+        self.mainText.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.mainText.setObjectName("mainText")
         self.mainText.setText(self.welcome_instructions)
-        layout.addWidget(self.mainText, alignment=QtCore.Qt.AlignCenter)
+        layout.addWidget(self.mainText, alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
 
         # Define styles for other widgets
         widget_font = QtGui.QFont()
@@ -78,7 +75,7 @@ class MyWelcomeWindow(QMainWindow):
         items = self.get_languages()
         self.comboBox.addItems(items)
         self.comboBox.setCurrentText(self.language)
-        layout.addWidget(self.comboBox, alignment=QtCore.Qt.AlignCenter)
+        layout.addWidget(self.comboBox, alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
 
         # Add the main button
         self.mainButton = QtWidgets.QPushButton(self.centralWidget)
@@ -91,7 +88,7 @@ class MyWelcomeWindow(QMainWindow):
         self.mainButton.setMinimumSize(400, 60)
         self.mainButton.clicked.connect(self.click_main_button)
         self.mainButton.setText(self.start_text)
-        layout.addWidget(self.mainButton, alignment=QtCore.Qt.AlignCenter)
+        layout.addWidget(self.mainButton, alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
 
         self.setCentralWidget(self.centralWidget)
 
@@ -99,7 +96,7 @@ class MyWelcomeWindow(QMainWindow):
         self.main_window = MyMainWindow(
             name=self.participant_id,
             language=self.comboBox.currentText(),
-            result_folder=self.output_path,
+            result_folder=self.result_folder,
             result_filename=self.filename
         )
         self.main_window.show()
@@ -114,7 +111,7 @@ class MyWelcomeWindow(QMainWindow):
                 result.append(m.group(1))
         return result
 
-    def get_exp_info(self):
+    def get_exp_info(self) -> tuple:
         date = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
 
         # Path to the YAML file contains the language and experiment configurations
@@ -153,7 +150,7 @@ class MyWelcomeWindow(QMainWindow):
         expName = 'WikiVocab'  # from the Builder filename that created this script
 
         # Create folder name for the results
-        results_folder = RESULT_FOLDER
+        results_folder = self.result_folder
 
         # Create folder for audio and csv data
         output_path = f'data/{results_folder}/WikiVocab/'
@@ -163,4 +160,4 @@ class MyWelcomeWindow(QMainWindow):
         filename = f"{output_path}" \
                    f"{language}{country_code}{lab_number}" \
                    f"_{participant_id}_PT{expInfo['session_id']}_{date}"
-        return language, participant_id, psychopyVersion, expName, filename, output_path
+        return language, participant_id, psychopyVersion, expName, filename
