@@ -56,6 +56,7 @@ class MyMainWindow(QMainWindow):
         self.result_df = None
         self.current_index = -1
         self.stimulus_shown_time = None  # To capture the time when stimulus is shown
+
         instructions_df = pd.read_excel(
             f'languages/{self.language.upper()}/instructions/WikiVocab_instructions_{self.language}.xlsx',
             index_col='screen'
@@ -102,6 +103,8 @@ class MyMainWindow(QMainWindow):
         self.imageLabel.setObjectName("imageLabel")
         self.load_image()
         self.stimulus_shown_time = time.time()  # Capture the time when stimulus is shown
+
+        self.centralWidget.setFocusPolicy(QtCore.Qt.FocusPolicy.StrongFocus)
 
         self.real = QtWidgets.QPushButton(self.centralWidget)
         self.real.setGeometry(QtCore.QRect(950, 600, 250, 71))  # Align vertically

@@ -2397,14 +2397,13 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
             win.callOnFlip(base_key_resp_task_end.clock.reset)  # t=0 on next screen flip
             win.callOnFlip(base_key_resp_task_end.clearEvents, eventType='keyboard')  # clear events on next screen flip
         if base_key_resp_task_end.status == STARTED and not waitOnFlip:
-            theseKeys = base_key_resp_task_end.getKeys(keyList=None, waitRelease=False)
-            if theseKeys != [] and theseKeys[-1].value[0] == 'space':
-                _base_key_resp_task_end_allKeys.extend(theseKeys)
-                if len(_base_key_resp_task_end_allKeys):
-                    base_key_resp_task_end.keys = _base_key_resp_task_end_allKeys[-1].name  # just the last key pressed
-                    base_key_resp_task_end.rt = _base_key_resp_task_end_allKeys[-1].rt
-                    # a response ends the routine
-                    continueRoutine = False
+            theseKeys = base_key_resp_task_end.getKeys(keyList=['space'], waitRelease=False)
+            _base_key_resp_task_end_allKeys.extend(theseKeys)
+            if len(_base_key_resp_task_end_allKeys):
+                base_key_resp_task_end.keys = _base_key_resp_task_end_allKeys[-1].name  # just the last key pressed
+                base_key_resp_task_end.rt = _base_key_resp_task_end_allKeys[-1].rt
+                # a response ends the routine
+                continueRoutine = False
 
         # check if all components have finished
         if not continueRoutine:  # a component has requested a forced-end of Routine
