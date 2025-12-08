@@ -2440,7 +2440,7 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
 
 # set up handler to look after randomisation of conditions etc
 do_operation_span_dummy = data.TrialHandler(
-    nReps=do_os_task, method='random',
+    nReps=1 if do_os_task else 0, method='random',
     extraInfo=expInfo, originPath=-1,
     trialList=[None],
     seed=None, name='do_operation_span_dummy'
