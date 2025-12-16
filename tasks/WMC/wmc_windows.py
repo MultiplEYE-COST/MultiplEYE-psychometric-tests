@@ -3363,9 +3363,8 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
                         theseKeys = os_key_resp_recall.getKeys(keyList=list(os_allowed_keys), waitRelease=False)
                         _os_key_resp_recall_allKeys.extend(theseKeys)
                         if len(_os_key_resp_recall_allKeys):
-                            os_key_resp_recall.keys = _os_key_resp_recall_allKeys[-1].name[
-                                0]  # just the last key pressed
-                            os_key_resp_recall.rt = _os_key_resp_recall_allKeys[-1].rt[0]
+                            os_key_resp_recall.keys = _os_key_resp_recall_allKeys[-1].name  # just the last key pressed
+                            os_key_resp_recall.rt = _os_key_resp_recall_allKeys[-1].rt
                             # was this correct?
                             if (os_key_resp_recall.keys == str(correct_letter)) or (
                                     os_key_resp_recall.keys == correct_letter):
@@ -4052,8 +4051,8 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
                 _base_key_resp_instruction_allKeys.extend(theseKeys)
                 if len(_base_key_resp_instruction_allKeys):
                     base_key_resp_instruction.keys = _base_key_resp_instruction_allKeys[
-                        -1].name[0]  # just the last key pressed
-                    base_key_resp_instruction.rt = _base_key_resp_instruction_allKeys[-1].rt[0]
+                        -1].name # just the last key pressed
+                    base_key_resp_instruction.rt = _base_key_resp_instruction_allKeys[-1].rt
                     # a response ends the routine
                     continueRoutine = False
 
@@ -4488,8 +4487,8 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
                         _ss_key_resp_sentence_allKeys.extend(theseKeys)
                         if len(_ss_key_resp_sentence_allKeys):
                             ss_key_resp_sentence.keys = _ss_key_resp_sentence_allKeys[
-                                -1].name[0]  # just the last key pressed
-                            ss_key_resp_sentence.rt = _ss_key_resp_sentence_allKeys[-1].rt[0]
+                                -1].name  # just the last key pressed
+                            ss_key_resp_sentence.rt = _ss_key_resp_sentence_allKeys[-1].rt
                             # was this correct?
                             if (ss_key_resp_sentence.keys == str(correct_key)) or (
                                     ss_key_resp_sentence.keys == correct_key):
