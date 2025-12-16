@@ -3558,7 +3558,7 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
 
             # set up handler to look after randomisation of conditions etc
             os_break_dummy = data.TrialHandler(
-                nReps=do_break, method='random',
+                nReps=1 if do_break else 0, method='random',
                 extraInfo=expInfo, originPath=-1,
                 trialList=[None],
                 seed=None, name='os_break_dummy'
@@ -3862,7 +3862,7 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
 
 # set up handler to look after randomisation of conditions etc
 do_sentence_span_dummy = data.TrialHandler(
-    nReps=do_ss_task, method='random',
+    nReps=1 if do_ss_task else 0, method='random',
     extraInfo=expInfo, originPath=-1,
     trialList=[None],
     seed=None, name='do_sentence_span_dummy'
@@ -4783,7 +4783,7 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
                             )  # clear events on next screen flip
                     if ss_key_resp_recall.status == STARTED and not waitOnFlip:
                         theseKeys = ss_key_resp_recall.getKeys(keyList=None, waitRelease=False)
-                        key = theseKeys[-1].name[0]
+                        key = theseKeys[-1].name
                         if key in ss_allowed_keys:
                             _ss_key_resp_recall_allKeys.extend(theseKeys)
                             if len(_ss_key_resp_recall_allKeys):
@@ -4982,7 +4982,7 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
 
             # set up handler to look after randomisation of conditions etc
             ss_break_dummy = data.TrialHandler(
-                nReps=do_break, method='random',
+                nReps=1 if do_break else 0, method='random',
                 extraInfo=expInfo, originPath=-1,
                 trialList=[None],
                 seed=None, name='ss_break_dummy'
@@ -5286,7 +5286,7 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
 
 # set up handler to look after randomisation of conditions etc
 do_spatial_short_term_memory_dummy = data.TrialHandler(
-    nReps=do_sstm_task, method='random',
+    nReps=1 if do_sstm_task else 0, method='random',
     extraInfo=expInfo, originPath=-1,
     trialList=[None],
     seed=None, name='do_spatial_short_term_memory_dummy'
