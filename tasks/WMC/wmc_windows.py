@@ -77,11 +77,8 @@ dlg.addField('Spatial Short Term Memory', True)
 ok_data = dlg.show()
 if dlg.OK:  # The user pressed OK
     user_entered = dlg.data
-    field_names = ['Memory Update', 'Operation Span', 'Sentence Span',
-                   'Spatial Short Term Memory', 'Random Seed']
-    wmcInfo = dict(zip(field_names, user_entered))
-    expInfo.update(wmcInfo)
-    print("User entered:", wmcInfo)
+    expInfo.update(user_entered)
+    print("User entered:", user_entered)
 else:
     core.quit()
 
@@ -570,7 +567,7 @@ ss_text_fixation_cross = visual.TextStim(
     color='black', colorSpace='rgb', opacity=1,
     languageStyle='LTR',
     depth=-1.0
-    );
+    )
 
 # Initialize components for Routine "ss_sentence"
 ss_sentenceClock = core.Clock()
@@ -583,7 +580,7 @@ ss_text_sentence = visual.TextStim(
     color='black', colorSpace='rgb', opacity=1,
     languageStyle='LTR',
     depth=-1.0
-    );
+    )
 ss_key_resp_sentence = keyboard.Keyboard()
 
 # Initialize components for Routine "ss_letter"
@@ -4770,7 +4767,7 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
                             if not isinstance(ss_allowed_keys, str):
                                 logging.error('AllowedKeys variable `ss_allowed_keys` is not string- or list-like.')
                                 core.quit()
-                            elif not ',' in ss_allowed_keys:
+                            elif ',' not in ss_allowed_keys:
                                 ss_allowed_keys = (ss_allowed_keys,)
                             else:
                                 ss_allowed_keys = eval(ss_allowed_keys)
@@ -4783,7 +4780,10 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
                             )  # clear events on next screen flip
                     if ss_key_resp_recall.status == STARTED and not waitOnFlip:
                         theseKeys = ss_key_resp_recall.getKeys(keyList=None, waitRelease=False)
-                        key = theseKeys[-1].name
+                        try:
+                            key = theseKeys[-1].name
+                        except IndexError:
+                            key = None
                         if key in ss_allowed_keys:
                             _ss_key_resp_recall_allKeys.extend(theseKeys)
                             if len(_ss_key_resp_recall_allKeys):

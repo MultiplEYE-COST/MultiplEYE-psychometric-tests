@@ -34,7 +34,7 @@ Please first check whether you have conda installed. If you have installed it, p
 
 1. In the root directory of the repository, create a new environment with the following command:
 ```bash
-conda create --name psychopy python=3.9
+conda create --name psychopy python=3.10
 ```
 
 2. Activate the environment:
