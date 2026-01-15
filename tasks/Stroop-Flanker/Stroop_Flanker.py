@@ -13,20 +13,26 @@ If you publish work using this script the most relevant publication is:
 
 from __future__ import absolute_import, division
 
-import pandas as pd
-from psychopy import sound, gui, visual, core, data, event, logging, clock, colors
-from psychopy.constants import (NOT_STARTED, STARTED, PLAYING, PAUSED,
-                                STOPPED, FINISHED, PRESSED, RELEASED, FOREVER)
+import argparse
 import os  # handy system and path functions
-
-from psychopy.hardware import keyboard
-import yaml
 from datetime import datetime
+
+import pandas as pd
+import yaml
+from psychopy import visual, core, data, logging
+from psychopy.constants import (NOT_STARTED, STARTED, FINISHED)
+from psychopy.hardware import keyboard
 
 # # Ensure that relative paths start from the same directory as this script
 # _thisDir = os.path.dirname(os.path.abspath(__file__))
 
 date = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+
+# Parse command-line arguments
+parser = argparse.ArgumentParser(description="Run the RAN digit test.")
+parser.add_argument('--participant_folder', type=str, required=True, help="Path to the participant folder.")
+args = parser.parse_args()
+results_folder = args.participant_folder
 
 # Path to the YAML file contains the language and experiment configurations
 # Path to the YAML file contains the language and experiment configurations
@@ -53,12 +59,10 @@ if os.path.exists(experiment_config_path):
 else:
     # Set default values if the file does not exist
     expInfo = {'participant_id': 999, 'session_id': 2}
-
-# Create folder name for the results
-results_folder = f"{participant_id}_{language}_{country_code}_{lab_number}_PT{expInfo['session_id']}"
+    participant_id = 999
 
 # Create folder for audio and csv data
-output_path = f'data/psychometric_test_{language}_{country_code}_{lab_number}/Stroop_Flanker/{results_folder}/'
+output_path = f'data/{results_folder}/Stroop_Flanker/'
 os.makedirs(output_path, exist_ok=True)
 # Data file name stem = absolute path + name; later add .psyexp, .csv, .log, etc
 filename = f"{output_path}" \
@@ -66,7 +70,8 @@ filename = f"{output_path}" \
            f"_{participant_id}_PT{expInfo['session_id']}_{date}"
 
 # Load the instruction CSV file
-instructions_df = pd.read_excel(f'languages/{language}/instructions/Stroop_Flanker_instructions_{language.lower()}.xlsx', index_col='screen')
+instructions_df = pd.read_excel(
+    f'languages/{language}/instructions/Stroop_Flanker_instructions_{language.lower()}.xlsx', index_col='screen')
 welcome_text = instructions_df.loc['Welcome_text', language]
 welcome_text = welcome_text.replace('\\n', '\n')
 stroop_instructions = instructions_df.loc['stroop_instructions', language]
@@ -89,6 +94,7 @@ def get_correct_key_for_color(df, color):
     else:
         raise ValueError(f"Not all 'correct_key' values are the same for color '{color}'.")
 
+
 stroop_stimulus = pd.read_excel(f'languages/{language}/Stroop-Flanker/Stroop_practice_trials_{language.lower()}.xlsx')
 stroop_blue_key = get_correct_key_for_color(stroop_stimulus, 'blue')
 stroop_yellow_key = get_correct_key_for_color(stroop_stimulus, 'yellow')
@@ -96,12 +102,12 @@ stroop_red_key = get_correct_key_for_color(stroop_stimulus, 'red')
 
 # An ExperimentHandler isn't essential but helps with data saving
 thisExp = data.ExperimentHandler(name='Stroop_Flanker', version='',
-    extraInfo=expInfo, runtimeInfo=None,
-    # originPath='/Users/cui/Documents/uzh/PhD/Projects/MeRID/Psychometric_Tests/stroop-simon-german/CognControl_lastrun.py',
-    savePickle=True, saveWideText=True,
-    dataFileName=filename)
+                                 extraInfo=expInfo, runtimeInfo=None,
+                                 # originPath='/Users/cui/Documents/uzh/PhD/Projects/MeRID/Psychometric_Tests/stroop-simon-german/CognControl_lastrun.py',
+                                 savePickle=True, saveWideText=True,
+                                 dataFileName=filename)
 # save a log file for detail verbose info
-logFile = logging.LogFile(filename+'.log', level=logging.EXP)
+logFile = logging.LogFile(filename + '.log', level=logging.EXP)
 logging.console.setLevel(logging.WARNING)  # this outputs to the screen, not a file
 
 endExpNow = False  # flag for 'escape' or other condition => quit the exp
@@ -113,8 +119,8 @@ frameTolerance = 0.001  # how close to onset before 'same' frame
 win = visual.Window(
     size=[1440, 900], fullscr=True, screen=0,
     winType='pyglet', allowGUI=False, allowStencil=False,
-    monitor='testMonitor', color=[0,0,0], colorSpace='rgb',
-    blendMode='avg', useFBO=True, 
+    monitor='testMonitor', color=[0, 0, 0], colorSpace='rgb',
+    blendMode='avg', useFBO=True,
     units='height')
 # store frame rate of monitor if we can measure it
 expInfo['frameRate'] = win.getActualFrameRate()
@@ -132,151 +138,151 @@ defaultKeyboard = keyboard.Keyboard()
 # Initialize components for Routine "WelcomeScreen"
 WelcomeScreenClock = core.Clock()
 Welcome_text = visual.TextStim(win=win, name='Welcome_text',
-    text=welcome_text,
-    font=font,
-    pos=(0, 0), height=0.05, wrapWidth=None, ori=0.0,
-    color='black', colorSpace='rgb', opacity=None,
-    languageStyle='LTR',
-    depth=0.0);
+                               text=welcome_text,
+                               font=font,
+                               pos=(0, 0), height=0.05, wrapWidth=None, ori=0.0,
+                               color='black', colorSpace='rgb', opacity=None,
+                               languageStyle='LTR',
+                               depth=0.0);
 Welcome_resp = keyboard.Keyboard()
 
 # Initialize components for Routine "StroopInstructions"
 StroopInstructionsClock = core.Clock()
 stroop_instructions = visual.TextStim(win=win, name='stroop_instructions',
-    text=stroop_instructions,
-    font=font,
-    pos=(0, 0), height=0.035, wrapWidth=1.5, ori=0.0,
-    color='black', colorSpace='rgb', opacity=None, 
-    languageStyle='LTR',
-    depth=0.0,);
+                                      text=stroop_instructions,
+                                      font=font,
+                                      pos=(0, 0), height=0.035, wrapWidth=1.5, ori=0.0,
+                                      color='black', colorSpace='rgb', opacity=None,
+                                      languageStyle='LTR',
+                                      depth=0.0, );
 stroop_instruction_key = keyboard.Keyboard()
 
 # Initialize components for Routine "Blank500"
 Blank500Clock = core.Clock()
 blank = visual.TextStim(win=win, name='blank',
-    text='\n\n',
-    font='Open Sans',
-    pos=(0, 0), height=0.1, wrapWidth=None, ori=0.0, 
-    color='white', colorSpace='rgb', opacity=None, 
-    languageStyle='LTR',
-    depth=0.0);
+                        text='\n\n',
+                        font='Open Sans',
+                        pos=(0, 0), height=0.1, wrapWidth=None, ori=0.0,
+                        color='white', colorSpace='rgb', opacity=None,
+                        languageStyle='LTR',
+                        depth=0.0);
 
 # Initialize components for Routine "FixationCross"
 FixationCrossClock = core.Clock()
 fix_cross = visual.TextStim(win=win, name='fix_cross',
-    text='+',
-    font='Courier New',
-    pos=(0, 0), height=0.1, wrapWidth=None, ori=0.0, 
-    color='white', colorSpace='rgb', opacity=None, 
-    languageStyle='LTR',
-    depth=0.0);
+                            text='+',
+                            font='Courier New',
+                            pos=(0, 0), height=0.1, wrapWidth=None, ori=0.0,
+                            color='white', colorSpace='rgb', opacity=None,
+                            languageStyle='LTR',
+                            depth=0.0);
 
 # Initialize components for Routine "StroopPractice"
 StroopPracticeClock = core.Clock()
 stroop_practice_word = visual.TextStim(win=win, name='stroop_practice_word',
-    text='',
-    font=font,
-    pos=(0, 0), height=0.1, wrapWidth=None, ori=0.0, 
-    color='white', colorSpace='rgb', opacity=None, 
-    languageStyle='LTR',
-    depth=0.0);
+                                       text='',
+                                       font=font,
+                                       pos=(0, 0), height=0.1, wrapWidth=None, ori=0.0,
+                                       color='white', colorSpace='rgb', opacity=None,
+                                       languageStyle='LTR',
+                                       depth=0.0);
 stroop_practice_key = keyboard.Keyboard()
 
 # Initialize components for Routine "stroop_practice_feedback"
 stroop_practice_feedbackClock = core.Clock()
 stroop_feedback_text = visual.TextStim(win=win, name='stroop_feedback_text',
-    text='',
-    font='Arial Unicode MS',
-    pos=(0, 0), height=0.1, wrapWidth=None, ori=0.0, 
-    color='white', colorSpace='rgb', opacity=None, 
-    languageStyle='LTR',
-    depth=-1.0);
+                                       text='',
+                                       font='Arial Unicode MS',
+                                       pos=(0, 0), height=0.1, wrapWidth=None, ori=0.0,
+                                       color='white', colorSpace='rgb', opacity=None,
+                                       languageStyle='LTR',
+                                       depth=-1.0);
 
 # Initialize components for Routine "StartWarning"
 StartWarningClock = core.Clock()
 start_warning_text = visual.TextStim(win=win, name='start_warning_text',
-    text=start_warning_text,
-    font=font,
-    pos=(0, 0), height=0.035, wrapWidth=1.5, ori=0.0,
-    color='black', colorSpace='rgb', opacity=None, 
-    languageStyle='LTR',
-    depth=0.0);
+                                     text=start_warning_text,
+                                     font=font,
+                                     pos=(0, 0), height=0.035, wrapWidth=1.5, ori=0.0,
+                                     color='black', colorSpace='rgb', opacity=None,
+                                     languageStyle='LTR',
+                                     depth=0.0);
 
 # Initialize components for Routine "StroopTrials"
 StroopTrialsClock = core.Clock()
 stroop_word = visual.TextStim(win=win, name='stroop_word',
-    text='',
-    font=font,
-    pos=(0, 0), height=0.1, wrapWidth=None, ori=0.0, 
-    color='white', colorSpace='rgb', opacity=None, 
-    languageStyle='LTR',
-    depth=0.0);
+                              text='',
+                              font=font,
+                              pos=(0, 0), height=0.1, wrapWidth=None, ori=0.0,
+                              color='white', colorSpace='rgb', opacity=None,
+                              languageStyle='LTR',
+                              depth=0.0);
 stroop_key = keyboard.Keyboard()
 
 # Initialize components for Routine "Done"
 DoneClock = core.Clock()
 done_text = visual.TextStim(win=win, name='done_text',
-    text=done_text,
-    font=font,
-    pos=(0, 0), height=0.035, wrapWidth=None, ori=0.0,
-    color='black', colorSpace='rgb', opacity=None, 
-    languageStyle='LTR',
-    depth=0.0);
+                            text=done_text,
+                            font=font,
+                            pos=(0, 0), height=0.035, wrapWidth=None, ori=0.0,
+                            color='black', colorSpace='rgb', opacity=None,
+                            languageStyle='LTR',
+                            depth=0.0);
 done_key = keyboard.Keyboard()
 
 # Initialize components for Routine "FlankerInstruction"
 FlankerInstructionClock = core.Clock()
 Flanker_instructions = visual.TextStim(win=win, name='Flanker_instructions',
-    text=flanker_instructions,
-    font=font,
-    pos=(0, 0), height=0.035, wrapWidth=1.5, ori=0.0,
-    color='black', colorSpace='rgb', opacity=None,
-    languageStyle='LTR',
-    depth=0.0
-    );
+                                       text=flanker_instructions,
+                                       font=font,
+                                       pos=(0, 0), height=0.035, wrapWidth=1.5, ori=0.0,
+                                       color='black', colorSpace='rgb', opacity=None,
+                                       languageStyle='LTR',
+                                       depth=0.0
+                                       );
 Flanker_instruction_key = keyboard.Keyboard()
 
 # Initialize components for Routine "FlankerPractice"
 FlankerPracticeClock = core.Clock()
 Flanker_practice_arrows = visual.TextStim(win=win, name='Flanker_practice_arrows',
-    text='',
-    font='Courier New',
-    pos=(0, 0), height=0.1, wrapWidth=None, ori=0.0,
-    color='white', colorSpace='rgb', opacity=None,
-    languageStyle='LTR',
-    depth=0.0);
+                                          text='',
+                                          font='Courier New',
+                                          pos=(0, 0), height=0.1, wrapWidth=None, ori=0.0,
+                                          color='white', colorSpace='rgb', opacity=None,
+                                          languageStyle='LTR',
+                                          depth=0.0);
 Flanker_practice_key = keyboard.Keyboard()
 
 # Initialize components for Routine "flanker_practice_feedback"
 Flanker_practice_feedbackClock = core.Clock()
 Flanker_feedback_text = visual.TextStim(win=win, name='flanker_feedback_text',
-    text='',
-    font='Arial Unicode MS',
-    pos=(0, 0), height=0.1, wrapWidth=None, ori=0.0,
-    color='white', colorSpace='rgb', opacity=None,
-    languageStyle='LTR',
-    depth=-1.0);
+                                        text='',
+                                        font='Arial Unicode MS',
+                                        pos=(0, 0), height=0.1, wrapWidth=None, ori=0.0,
+                                        color='white', colorSpace='rgb', opacity=None,
+                                        languageStyle='LTR',
+                                        depth=-1.0);
 
 # Initialize components for Routine "FlankerTrials"
 FlankerTrialsClock = core.Clock()
 Flanker_arrows = visual.TextStim(win=win, name='Flanker_arrows',
-    text='',
-    font='Courier New',
-    pos=(0, 0), height=0.1, wrapWidth=None, ori=0.0,
-    color='white', colorSpace='rgb', opacity=None,
-    languageStyle='LTR',
-    depth=0.0);
+                                 text='',
+                                 font='Courier New',
+                                 pos=(0, 0), height=0.1, wrapWidth=None, ori=0.0,
+                                 color='white', colorSpace='rgb', opacity=None,
+                                 languageStyle='LTR',
+                                 depth=0.0);
 Flanker_key = keyboard.Keyboard()
 
 # Initialize components for Routine "GoodbyeScreen"
 GoodbyeScreenClock = core.Clock()
 Goodbyetext = visual.TextStim(win=win, name='Goodbyetext',
-    text=Goodbyetext,
-    font=font,
-    pos=(0, 0), height=0.05, wrapWidth=1.5, ori=0.0,
-    color='black', colorSpace='rgb', opacity=None, 
-    languageStyle='LTR',
-    depth=0.0);
+                              text=Goodbyetext,
+                              font=font,
+                              pos=(0, 0), height=0.05, wrapWidth=1.5, ori=0.0,
+                              color='black', colorSpace='rgb', opacity=None,
+                              languageStyle='LTR',
+                              depth=0.0);
 key_goodbye = keyboard.Keyboard()
 
 # Create some handy timers
@@ -312,19 +318,19 @@ while continueRoutine:
     tThisFlipGlobal = win.getFutureFlipTime(clock=None)
     frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
     # update/draw components on each frame
-    
+
     # *Welcome_text* updates
-    if Welcome_text.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
+    if Welcome_text.status == NOT_STARTED and tThisFlip >= 0.0 - frameTolerance:
         # keep track of start time/frame for later
         Welcome_text.frameNStart = frameN  # exact frame index
         Welcome_text.tStart = t  # local t and not account for scr refresh
         Welcome_text.tStartRefresh = tThisFlipGlobal  # on global time
         win.timeOnFlip(Welcome_text, 'tStartRefresh')  # time at next scr refresh
         Welcome_text.setAutoDraw(True)
-    
+
     # *Welcome_resp* updates
     waitOnFlip = False
-    if Welcome_resp.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
+    if Welcome_resp.status == NOT_STARTED and tThisFlip >= 0.0 - frameTolerance:
         # keep track of start time/frame for later
         Welcome_resp.frameNStart = frameN  # exact frame index
         Welcome_resp.tStart = t  # local t and not account for scr refresh
@@ -343,11 +349,11 @@ while continueRoutine:
             Welcome_resp.rt = _Welcome_resp_allKeys[-1].rt
             # a response ends the routine
             continueRoutine = False
-    
+
     # check for quit (typically the Esc key)
     if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
         core.quit()
-    
+
     # check if all components have finished
     if not continueRoutine:  # a component has requested a forced-end of Routine
         break
@@ -356,7 +362,7 @@ while continueRoutine:
         if hasattr(thisComponent, "status") and thisComponent.status != FINISHED:
             continueRoutine = True
             break  # at least one component has not yet finished
-    
+
     # refresh the screen
     if continueRoutine:  # don't flip if this routine is over or we'll get a blank screen
         win.flip()
@@ -370,7 +376,7 @@ thisExp.addData('Welcome_text.stopped', Welcome_text.tStopRefresh)
 # check responses
 if Welcome_resp.keys in ['', [], None]:  # No response was made
     Welcome_resp.keys = None
-thisExp.addData('Welcome_resp.keys',Welcome_resp.keys)
+thisExp.addData('Welcome_resp.keys', Welcome_resp.keys)
 if Welcome_resp.keys != None:  # we had a response
     thisExp.addData('Welcome_resp.rt', Welcome_resp.rt)
 thisExp.addData('Welcome_resp.started', Welcome_resp.tStartRefresh)
@@ -408,19 +414,19 @@ while continueRoutine:
     tThisFlipGlobal = win.getFutureFlipTime(clock=None)
     frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
     # update/draw components on each frame
-    
+
     # *stroop_instructions* updates
-    if stroop_instructions.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
+    if stroop_instructions.status == NOT_STARTED and tThisFlip >= 0.0 - frameTolerance:
         # keep track of start time/frame for later
         stroop_instructions.frameNStart = frameN  # exact frame index
         stroop_instructions.tStart = t  # local t and not account for scr refresh
         stroop_instructions.tStartRefresh = tThisFlipGlobal  # on global time
         win.timeOnFlip(stroop_instructions, 'tStartRefresh')  # time at next scr refresh
         stroop_instructions.setAutoDraw(True)
-    
+
     # *stroop_instruction_key* updates
     waitOnFlip = False
-    if stroop_instruction_key.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
+    if stroop_instruction_key.status == NOT_STARTED and tThisFlip >= 0.0 - frameTolerance:
         # keep track of start time/frame for later
         stroop_instruction_key.frameNStart = frameN  # exact frame index
         stroop_instruction_key.tStart = t  # local t and not account for scr refresh
@@ -439,11 +445,11 @@ while continueRoutine:
             stroop_instruction_key.rt = _stroop_instruction_key_allKeys[-1].rt
             # a response ends the routine
             continueRoutine = False
-    
+
     # check for quit (typically the Esc key)
     if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
         core.quit()
-    
+
     # check if all components have finished
     if not continueRoutine:  # a component has requested a forced-end of Routine
         break
@@ -452,7 +458,7 @@ while continueRoutine:
         if hasattr(thisComponent, "status") and thisComponent.status != FINISHED:
             continueRoutine = True
             break  # at least one component has not yet finished
-    
+
     # refresh the screen
     if continueRoutine:  # don't flip if this routine is over or we'll get a blank screen
         win.flip()
@@ -466,7 +472,7 @@ thisExp.addData('stroop_instructions.stopped', stroop_instructions.tStopRefresh)
 # check responses
 if stroop_instruction_key.keys in ['', [], None]:  # No response was made
     stroop_instruction_key.keys = None
-thisExp.addData('stroop_instruction_key.keys',stroop_instruction_key.keys)
+thisExp.addData('stroop_instruction_key.keys', stroop_instruction_key.keys)
 if stroop_instruction_key.keys != None:  # we had a response
     thisExp.addData('stroop_instruction_key.rt', stroop_instruction_key.rt)
 thisExp.addData('stroop_instruction_key.started', stroop_instruction_key.tStartRefresh)
@@ -502,9 +508,9 @@ while continueRoutine and routineTimer.getTime() > 0:
     tThisFlipGlobal = win.getFutureFlipTime(clock=None)
     frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
     # update/draw components on each frame
-    
+
     # *blank* updates
-    if blank.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
+    if blank.status == NOT_STARTED and tThisFlip >= 0.0 - frameTolerance:
         # keep track of start time/frame for later
         blank.frameNStart = frameN  # exact frame index
         blank.tStart = t  # local t and not account for scr refresh
@@ -513,17 +519,17 @@ while continueRoutine and routineTimer.getTime() > 0:
         blank.setAutoDraw(True)
     if blank.status == STARTED:
         # is it time to stop? (based on global clock, using actual start)
-        if tThisFlipGlobal > blank.tStartRefresh + .5-frameTolerance:
+        if tThisFlipGlobal > blank.tStartRefresh + .5 - frameTolerance:
             # keep track of stop time/frame for later
             blank.tStop = t  # not accounting for scr refresh
             blank.frameNStop = frameN  # exact frame index
             win.timeOnFlip(blank, 'tStopRefresh')  # time at next scr refresh
             blank.setAutoDraw(False)
-    
+
     # check for quit (typically the Esc key)
     if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
         core.quit()
-    
+
     # check if all components have finished
     if not continueRoutine:  # a component has requested a forced-end of Routine
         break
@@ -532,7 +538,7 @@ while continueRoutine and routineTimer.getTime() > 0:
         if hasattr(thisComponent, "status") and thisComponent.status != FINISHED:
             continueRoutine = True
             break  # at least one component has not yet finished
-    
+
     # refresh the screen
     if continueRoutine:  # don't flip if this routine is over or we'll get a blank screen
         win.flip()
@@ -545,10 +551,11 @@ thisExp.addData('blank.started', blank.tStartRefresh)
 thisExp.addData('blank.stopped', blank.tStopRefresh)
 
 # set up handler to look after randomisation of conditions etc
-stroop_practice_trial = data.TrialHandler(nReps=1.0, method='random', 
-    extraInfo=expInfo, originPath=-1,
-  trialList=data.importConditions(f'languages/{language}/Stroop-Flanker/Stroop_practice_trials_{language.lower()}.xlsx'),
-  seed=None, name='stroop_practice_trial')
+stroop_practice_trial = data.TrialHandler(nReps=1.0, method='random',
+                                          extraInfo=expInfo, originPath=-1,
+                                          trialList=data.importConditions(
+                                              f'languages/{language}/Stroop-Flanker/Stroop_practice_trials_{language.lower()}.xlsx'),
+                                          seed=None, name='stroop_practice_trial')
 thisExp.addLoop(stroop_practice_trial)  # add the loop to the experiment
 thisStroop_practice_trial = stroop_practice_trial.trialList[0]  # so we can initialise stimuli with some values
 # abbreviate parameter names if possible (e.g. rgb = thisStroop_practice_trial.rgb)
@@ -562,7 +569,7 @@ for thisStroop_practice_trial in stroop_practice_trial:
     if thisStroop_practice_trial != None:
         for paramName in thisStroop_practice_trial:
             exec('{} = thisStroop_practice_trial[paramName]'.format(paramName))
-    
+
     # ------Prepare to start Routine "FixationCross"-------
     continueRoutine = True
     routineTimer.add(0.350000)
@@ -581,7 +588,7 @@ for thisStroop_practice_trial in stroop_practice_trial:
     _timeToFirstFrame = win.getFutureFlipTime(clock="now")
     FixationCrossClock.reset(-_timeToFirstFrame)  # t0 is time of first possible flip
     frameN = -1
-    
+
     # -------Run Routine "FixationCross"-------
     while continueRoutine and routineTimer.getTime() > 0:
         # get current time
@@ -590,9 +597,9 @@ for thisStroop_practice_trial in stroop_practice_trial:
         tThisFlipGlobal = win.getFutureFlipTime(clock=None)
         frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
         # update/draw components on each frame
-        
+
         # *fix_cross* updates
-        if fix_cross.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
+        if fix_cross.status == NOT_STARTED and tThisFlip >= 0.0 - frameTolerance:
             # keep track of start time/frame for later
             fix_cross.frameNStart = frameN  # exact frame index
             fix_cross.tStart = t  # local t and not account for scr refresh
@@ -601,17 +608,17 @@ for thisStroop_practice_trial in stroop_practice_trial:
             fix_cross.setAutoDraw(True)
         if fix_cross.status == STARTED:
             # is it time to stop? (based on global clock, using actual start)
-            if tThisFlipGlobal > fix_cross.tStartRefresh + .35-frameTolerance:
+            if tThisFlipGlobal > fix_cross.tStartRefresh + .35 - frameTolerance:
                 # keep track of stop time/frame for later
                 fix_cross.tStop = t  # not accounting for scr refresh
                 fix_cross.frameNStop = frameN  # exact frame index
                 win.timeOnFlip(fix_cross, 'tStopRefresh')  # time at next scr refresh
                 fix_cross.setAutoDraw(False)
-        
+
         # check for quit (typically the Esc key)
         if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
             core.quit()
-        
+
         # check if all components have finished
         if not continueRoutine:  # a component has requested a forced-end of Routine
             break
@@ -620,18 +627,18 @@ for thisStroop_practice_trial in stroop_practice_trial:
             if hasattr(thisComponent, "status") and thisComponent.status != FINISHED:
                 continueRoutine = True
                 break  # at least one component has not yet finished
-        
+
         # refresh the screen
         if continueRoutine:  # don't flip if this routine is over or we'll get a blank screen
             win.flip()
-    
+
     # -------Ending Routine "FixationCross"-------
     for thisComponent in FixationCrossComponents:
         if hasattr(thisComponent, "setAutoDraw"):
             thisComponent.setAutoDraw(False)
     stroop_practice_trial.addData('fix_cross.started', fix_cross.tStartRefresh)
     stroop_practice_trial.addData('fix_cross.stopped', fix_cross.tStopRefresh)
-    
+
     # ------Prepare to start Routine "StroopPractice"-------
     continueRoutine = True
     # update component parameters for each repeat
@@ -654,7 +661,7 @@ for thisStroop_practice_trial in stroop_practice_trial:
     _timeToFirstFrame = win.getFutureFlipTime(clock="now")
     StroopPracticeClock.reset(-_timeToFirstFrame)  # t0 is time of first possible flip
     frameN = -1
-    
+
     # -------Run Routine "StroopPractice"-------
     while continueRoutine:
         # get current time
@@ -663,19 +670,19 @@ for thisStroop_practice_trial in stroop_practice_trial:
         tThisFlipGlobal = win.getFutureFlipTime(clock=None)
         frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
         # update/draw components on each frame
-        
+
         # *stroop_practice_word* updates
-        if stroop_practice_word.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
+        if stroop_practice_word.status == NOT_STARTED and tThisFlip >= 0.0 - frameTolerance:
             # keep track of start time/frame for later
             stroop_practice_word.frameNStart = frameN  # exact frame index
             stroop_practice_word.tStart = t  # local t and not account for scr refresh
             stroop_practice_word.tStartRefresh = tThisFlipGlobal  # on global time
             win.timeOnFlip(stroop_practice_word, 'tStartRefresh')  # time at next scr refresh
             stroop_practice_word.setAutoDraw(True)
-        
+
         # *stroop_practice_key* updates
         waitOnFlip = False
-        if stroop_practice_key.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
+        if stroop_practice_key.status == NOT_STARTED and tThisFlip >= 0.0 - frameTolerance:
             # keep track of start time/frame for later
             stroop_practice_key.frameNStart = frameN  # exact frame index
             stroop_practice_key.tStart = t  # local t and not account for scr refresh
@@ -687,7 +694,8 @@ for thisStroop_practice_trial in stroop_practice_trial:
             win.callOnFlip(stroop_practice_key.clock.reset)  # t=0 on next screen flip
             win.callOnFlip(stroop_practice_key.clearEvents, eventType='keyboard')  # clear events on next screen flip
         if stroop_practice_key.status == STARTED and not waitOnFlip:
-            theseKeys = stroop_practice_key.getKeys(keyList=[stroop_blue_key, stroop_red_key, stroop_yellow_key], waitRelease=False)
+            theseKeys = stroop_practice_key.getKeys(keyList=[stroop_blue_key, stroop_red_key, stroop_yellow_key],
+                                                    waitRelease=False)
             _stroop_practice_key_allKeys.extend(theseKeys)
             if len(_stroop_practice_key_allKeys):
                 stroop_practice_key.keys = _stroop_practice_key_allKeys[-1].name  # just the last key pressed
@@ -699,11 +707,11 @@ for thisStroop_practice_trial in stroop_practice_trial:
                     stroop_practice_key.corr = 0
                 # a response ends the routine
                 continueRoutine = False
-        
+
         # check for quit (typically the Esc key)
         if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
             core.quit()
-        
+
         # check if all components have finished
         if not continueRoutine:  # a component has requested a forced-end of Routine
             break
@@ -712,11 +720,11 @@ for thisStroop_practice_trial in stroop_practice_trial:
             if hasattr(thisComponent, "status") and thisComponent.status != FINISHED:
                 continueRoutine = True
                 break  # at least one component has not yet finished
-        
+
         # refresh the screen
         if continueRoutine:  # don't flip if this routine is over or we'll get a blank screen
             win.flip()
-    
+
     # -------Ending Routine "StroopPractice"-------
     for thisComponent in StroopPracticeComponents:
         if hasattr(thisComponent, "setAutoDraw"):
@@ -728,11 +736,11 @@ for thisStroop_practice_trial in stroop_practice_trial:
         stroop_practice_key.keys = None
         # was no response the correct answer?!
         if str(correct_key).lower() == 'none':
-           stroop_practice_key.corr = 1;  # correct non-response
+            stroop_practice_key.corr = 1;  # correct non-response
         else:
-           stroop_practice_key.corr = 0;  # failed to respond (incorrectly)
+            stroop_practice_key.corr = 0;  # failed to respond (incorrectly)
     # store data for stroop_practice_trial (TrialHandler)
-    stroop_practice_trial.addData('stroop_practice_key.keys',stroop_practice_key.keys)
+    stroop_practice_trial.addData('stroop_practice_key.keys', stroop_practice_key.keys)
     stroop_practice_trial.addData('stroop_practice_key.corr', stroop_practice_key.corr)
     if stroop_practice_key.keys != None:  # we had a response
         stroop_practice_trial.addData('stroop_practice_key.rt', stroop_practice_key.rt)
@@ -740,14 +748,14 @@ for thisStroop_practice_trial in stroop_practice_trial:
     stroop_practice_trial.addData('stroop_practice_key.stopped', stroop_practice_key.tStopRefresh)
     # the Routine "StroopPractice" was not non-slip safe, so reset the non-slip timer
     routineTimer.reset()
-    
+
     # ------Prepare to start Routine "stroop_practice_feedback"-------
     continueRoutine = True
     routineTimer.add(1.000000)
     # update component parameters for each repeat
-    if(stroop_practice_key.corr == 1):
+    if (stroop_practice_key.corr == 1):
         feedback_text = "✓"
-    elif(stroop_practice_key.corr == 0):
+    elif (stroop_practice_key.corr == 0):
         feedback_text = "x"
     stroop_feedback_text.setText(feedback_text)
     # keep track of which components have finished
@@ -764,7 +772,7 @@ for thisStroop_practice_trial in stroop_practice_trial:
     _timeToFirstFrame = win.getFutureFlipTime(clock="now")
     stroop_practice_feedbackClock.reset(-_timeToFirstFrame)  # t0 is time of first possible flip
     frameN = -1
-    
+
     # -------Run Routine "stroop_practice_feedback"-------
     while continueRoutine and routineTimer.getTime() > 0:
         # get current time
@@ -773,9 +781,9 @@ for thisStroop_practice_trial in stroop_practice_trial:
         tThisFlipGlobal = win.getFutureFlipTime(clock=None)
         frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
         # update/draw components on each frame
-        
+
         # *stroop_feedback_text* updates
-        if stroop_feedback_text.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
+        if stroop_feedback_text.status == NOT_STARTED and tThisFlip >= 0.0 - frameTolerance:
             # keep track of start time/frame for later
             stroop_feedback_text.frameNStart = frameN  # exact frame index
             stroop_feedback_text.tStart = t  # local t and not account for scr refresh
@@ -784,17 +792,17 @@ for thisStroop_practice_trial in stroop_practice_trial:
             stroop_feedback_text.setAutoDraw(True)
         if stroop_feedback_text.status == STARTED:
             # is it time to stop? (based on global clock, using actual start)
-            if tThisFlipGlobal > stroop_feedback_text.tStartRefresh + 1.0-frameTolerance:
+            if tThisFlipGlobal > stroop_feedback_text.tStartRefresh + 1.0 - frameTolerance:
                 # keep track of stop time/frame for later
                 stroop_feedback_text.tStop = t  # not accounting for scr refresh
                 stroop_feedback_text.frameNStop = frameN  # exact frame index
                 win.timeOnFlip(stroop_feedback_text, 'tStopRefresh')  # time at next scr refresh
                 stroop_feedback_text.setAutoDraw(False)
-        
+
         # check for quit (typically the Esc key)
         if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
             core.quit()
-        
+
         # check if all components have finished
         if not continueRoutine:  # a component has requested a forced-end of Routine
             break
@@ -803,11 +811,11 @@ for thisStroop_practice_trial in stroop_practice_trial:
             if hasattr(thisComponent, "status") and thisComponent.status != FINISHED:
                 continueRoutine = True
                 break  # at least one component has not yet finished
-        
+
         # refresh the screen
         if continueRoutine:  # don't flip if this routine is over or we'll get a blank screen
             win.flip()
-    
+
     # -------Ending Routine "stroop_practice_feedback"-------
     for thisComponent in stroop_practice_feedbackComponents:
         if hasattr(thisComponent, "setAutoDraw"):
@@ -815,7 +823,7 @@ for thisStroop_practice_trial in stroop_practice_trial:
     stroop_practice_trial.addData('stroop_feedback_text.started', stroop_feedback_text.tStartRefresh)
     stroop_practice_trial.addData('stroop_feedback_text.stopped', stroop_feedback_text.tStopRefresh)
     thisExp.nextEntry()
-    
+
 # completed 1.0 repeats of 'stroop_practice_trial'
 
 
@@ -846,9 +854,9 @@ while continueRoutine and routineTimer.getTime() > 0:
     tThisFlipGlobal = win.getFutureFlipTime(clock=None)
     frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
     # update/draw components on each frame
-    
+
     # *start_warning_text* updates
-    if start_warning_text.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
+    if start_warning_text.status == NOT_STARTED and tThisFlip >= 0.0 - frameTolerance:
         # keep track of start time/frame for later
         start_warning_text.frameNStart = frameN  # exact frame index
         start_warning_text.tStart = t  # local t and not account for scr refresh
@@ -857,17 +865,17 @@ while continueRoutine and routineTimer.getTime() > 0:
         start_warning_text.setAutoDraw(True)
     if start_warning_text.status == STARTED:
         # is it time to stop? (based on global clock, using actual start)
-        if tThisFlipGlobal > start_warning_text.tStartRefresh + 6.0-frameTolerance:
+        if tThisFlipGlobal > start_warning_text.tStartRefresh + 6.0 - frameTolerance:
             # keep track of stop time/frame for later
             start_warning_text.tStop = t  # not accounting for scr refresh
             start_warning_text.frameNStop = frameN  # exact frame index
             win.timeOnFlip(start_warning_text, 'tStopRefresh')  # time at next scr refresh
             start_warning_text.setAutoDraw(False)
-    
+
     # check for quit (typically the Esc key)
     if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
         core.quit()
-    
+
     # check if all components have finished
     if not continueRoutine:  # a component has requested a forced-end of Routine
         break
@@ -876,7 +884,7 @@ while continueRoutine and routineTimer.getTime() > 0:
         if hasattr(thisComponent, "status") and thisComponent.status != FINISHED:
             continueRoutine = True
             break  # at least one component has not yet finished
-    
+
     # refresh the screen
     if continueRoutine:  # don't flip if this routine is over or we'll get a blank screen
         win.flip()
@@ -889,10 +897,11 @@ thisExp.addData('start_warning_text.started', start_warning_text.tStartRefresh)
 thisExp.addData('start_warning_text.stopped', start_warning_text.tStopRefresh)
 
 # set up handler to look after randomisation of conditions etc
-Stroop_trials = data.TrialHandler(nReps=4.0, method='random', 
-    extraInfo=expInfo, originPath=-1,
-    trialList=data.importConditions(f'languages/{language}/Stroop-Flanker/StroopStim_{language.lower()}.xlsx'),
-    seed=None, name='Stroop_trials')
+Stroop_trials = data.TrialHandler(nReps=4.0, method='random',
+                                  extraInfo=expInfo, originPath=-1,
+                                  trialList=data.importConditions(
+                                      f'languages/{language}/Stroop-Flanker/StroopStim_{language.lower()}.xlsx'),
+                                  seed=None, name='Stroop_trials')
 thisExp.addLoop(Stroop_trials)  # add the loop to the experiment
 thisStroop_trial = Stroop_trials.trialList[0]  # so we can initialise stimuli with some values
 # abbreviate parameter names if possible (e.g. rgb = thisStroop_trial.rgb)
@@ -906,7 +915,7 @@ for thisStroop_trial in Stroop_trials:
     if thisStroop_trial != None:
         for paramName in thisStroop_trial:
             exec('{} = thisStroop_trial[paramName]'.format(paramName))
-    
+
     # ------Prepare to start Routine "FixationCross"-------
     continueRoutine = True
     routineTimer.add(0.350000)
@@ -925,7 +934,7 @@ for thisStroop_trial in Stroop_trials:
     _timeToFirstFrame = win.getFutureFlipTime(clock="now")
     FixationCrossClock.reset(-_timeToFirstFrame)  # t0 is time of first possible flip
     frameN = -1
-    
+
     # -------Run Routine "FixationCross"-------
     while continueRoutine and routineTimer.getTime() > 0:
         # get current time
@@ -934,9 +943,9 @@ for thisStroop_trial in Stroop_trials:
         tThisFlipGlobal = win.getFutureFlipTime(clock=None)
         frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
         # update/draw components on each frame
-        
+
         # *fix_cross* updates
-        if fix_cross.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
+        if fix_cross.status == NOT_STARTED and tThisFlip >= 0.0 - frameTolerance:
             # keep track of start time/frame for later
             fix_cross.frameNStart = frameN  # exact frame index
             fix_cross.tStart = t  # local t and not account for scr refresh
@@ -945,17 +954,17 @@ for thisStroop_trial in Stroop_trials:
             fix_cross.setAutoDraw(True)
         if fix_cross.status == STARTED:
             # is it time to stop? (based on global clock, using actual start)
-            if tThisFlipGlobal > fix_cross.tStartRefresh + .35-frameTolerance:
+            if tThisFlipGlobal > fix_cross.tStartRefresh + .35 - frameTolerance:
                 # keep track of stop time/frame for later
                 fix_cross.tStop = t  # not accounting for scr refresh
                 fix_cross.frameNStop = frameN  # exact frame index
                 win.timeOnFlip(fix_cross, 'tStopRefresh')  # time at next scr refresh
                 fix_cross.setAutoDraw(False)
-        
+
         # check for quit (typically the Esc key)
         if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
             core.quit()
-        
+
         # check if all components have finished
         if not continueRoutine:  # a component has requested a forced-end of Routine
             break
@@ -964,18 +973,18 @@ for thisStroop_trial in Stroop_trials:
             if hasattr(thisComponent, "status") and thisComponent.status != FINISHED:
                 continueRoutine = True
                 break  # at least one component has not yet finished
-        
+
         # refresh the screen
         if continueRoutine:  # don't flip if this routine is over or we'll get a blank screen
             win.flip()
-    
+
     # -------Ending Routine "FixationCross"-------
     for thisComponent in FixationCrossComponents:
         if hasattr(thisComponent, "setAutoDraw"):
             thisComponent.setAutoDraw(False)
     Stroop_trials.addData('fix_cross.started', fix_cross.tStartRefresh)
     Stroop_trials.addData('fix_cross.stopped', fix_cross.tStopRefresh)
-    
+
     # ------Prepare to start Routine "StroopTrials"-------
     continueRoutine = True
     # update component parameters for each repeat
@@ -998,7 +1007,7 @@ for thisStroop_trial in Stroop_trials:
     _timeToFirstFrame = win.getFutureFlipTime(clock="now")
     StroopTrialsClock.reset(-_timeToFirstFrame)  # t0 is time of first possible flip
     frameN = -1
-    
+
     # -------Run Routine "StroopTrials"-------
     while continueRoutine:
         # get current time
@@ -1007,19 +1016,19 @@ for thisStroop_trial in Stroop_trials:
         tThisFlipGlobal = win.getFutureFlipTime(clock=None)
         frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
         # update/draw components on each frame
-        
+
         # *stroop_word* updates
-        if stroop_word.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
+        if stroop_word.status == NOT_STARTED and tThisFlip >= 0.0 - frameTolerance:
             # keep track of start time/frame for later
             stroop_word.frameNStart = frameN  # exact frame index
             stroop_word.tStart = t  # local t and not account for scr refresh
             stroop_word.tStartRefresh = tThisFlipGlobal  # on global time
             win.timeOnFlip(stroop_word, 'tStartRefresh')  # time at next scr refresh
             stroop_word.setAutoDraw(True)
-        
+
         # *stroop_key* updates
         waitOnFlip = False
-        if stroop_key.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
+        if stroop_key.status == NOT_STARTED and tThisFlip >= 0.0 - frameTolerance:
             # keep track of start time/frame for later
             stroop_key.frameNStart = frameN  # exact frame index
             stroop_key.tStart = t  # local t and not account for scr refresh
@@ -1031,7 +1040,8 @@ for thisStroop_trial in Stroop_trials:
             win.callOnFlip(stroop_key.clock.reset)  # t=0 on next screen flip
             win.callOnFlip(stroop_key.clearEvents, eventType='keyboard')  # clear events on next screen flip
         if stroop_key.status == STARTED and not waitOnFlip:
-            theseKeys = stroop_key.getKeys(keyList=[stroop_red_key, stroop_blue_key, stroop_yellow_key], waitRelease=False)
+            theseKeys = stroop_key.getKeys(keyList=[stroop_red_key, stroop_blue_key, stroop_yellow_key],
+                                           waitRelease=False)
             _stroop_key_allKeys.extend(theseKeys)
             if len(_stroop_key_allKeys):
                 stroop_key.keys = _stroop_key_allKeys[-1].name  # just the last key pressed
@@ -1043,11 +1053,11 @@ for thisStroop_trial in Stroop_trials:
                     stroop_key.corr = 0
                 # a response ends the routine
                 continueRoutine = False
-        
+
         # check for quit (typically the Esc key)
         if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
             core.quit()
-        
+
         # check if all components have finished
         if not continueRoutine:  # a component has requested a forced-end of Routine
             break
@@ -1056,11 +1066,11 @@ for thisStroop_trial in Stroop_trials:
             if hasattr(thisComponent, "status") and thisComponent.status != FINISHED:
                 continueRoutine = True
                 break  # at least one component has not yet finished
-        
+
         # refresh the screen
         if continueRoutine:  # don't flip if this routine is over or we'll get a blank screen
             win.flip()
-    
+
     # -------Ending Routine "StroopTrials"-------
     for thisComponent in StroopTrialsComponents:
         if hasattr(thisComponent, "setAutoDraw"):
@@ -1072,11 +1082,11 @@ for thisStroop_trial in Stroop_trials:
         stroop_key.keys = None
         # was no response the correct answer?!
         if str(correct_key).lower() == 'none':
-           stroop_key.corr = 1;  # correct non-response
+            stroop_key.corr = 1;  # correct non-response
         else:
-           stroop_key.corr = 0;  # failed to respond (incorrectly)
+            stroop_key.corr = 0;  # failed to respond (incorrectly)
     # store data for Stroop_trials (TrialHandler)
-    Stroop_trials.addData('stroop_key.keys',stroop_key.keys)
+    Stroop_trials.addData('stroop_key.keys', stroop_key.keys)
     Stroop_trials.addData('stroop_key.corr', stroop_key.corr)
     if stroop_key.keys != None:  # we had a response
         Stroop_trials.addData('stroop_key.rt', stroop_key.rt)
@@ -1085,7 +1095,7 @@ for thisStroop_trial in Stroop_trials:
     # the Routine "StroopTrials" was not non-slip safe, so reset the non-slip timer
     routineTimer.reset()
     thisExp.nextEntry()
-    
+
 # completed 4.0 repeats of 'Stroop_trials'
 
 
@@ -1120,7 +1130,7 @@ while continueRoutine:
     # update/draw components on each frame
 
     # *done_text* updates
-    if done_text.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
+    if done_text.status == NOT_STARTED and tThisFlip >= 0.0 - frameTolerance:
         # keep track of start time/frame for later
         done_text.frameNStart = frameN  # exact frame index
         done_text.tStart = t  # local t and not account for scr refresh
@@ -1130,7 +1140,7 @@ while continueRoutine:
 
     # *done_key* updates
     waitOnFlip = False
-    if done_key.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
+    if done_key.status == NOT_STARTED and tThisFlip >= 0.0 - frameTolerance:
         # keep track of start time/frame for later
         done_key.frameNStart = frameN  # exact frame index
         done_key.tStart = t  # local t and not account for scr refresh
@@ -1176,7 +1186,7 @@ thisExp.addData('done_text.stopped', done_text.tStopRefresh)
 # check responses
 if done_key.keys in ['', [], None]:  # No response was made
     done_key.keys = None
-thisExp.addData('done_key.keys',done_key.keys)
+thisExp.addData('done_key.keys', done_key.keys)
 if done_key.keys != None:  # we had a response
     thisExp.addData('done_key.rt', done_key.rt)
 thisExp.addData('done_key.started', done_key.tStartRefresh)
@@ -1184,7 +1194,6 @@ thisExp.addData('done_key.stopped', done_key.tStopRefresh)
 thisExp.nextEntry()
 # the Routine "Done" was not non-slip safe, so reset the non-slip timer
 routineTimer.reset()
-
 
 # ------Prepare to start Routine "FlankerInstruction"-------
 continueRoutine = True
@@ -1217,7 +1226,7 @@ while continueRoutine:
     # update/draw components on each frame
 
     # *Flanker_instructions* updates
-    if Flanker_instructions.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
+    if Flanker_instructions.status == NOT_STARTED and tThisFlip >= 0.0 - frameTolerance:
         # keep track of start time/frame for later
         Flanker_instructions.frameNStart = frameN  # exact frame index
         Flanker_instructions.tStart = t  # local t and not account for scr refresh
@@ -1227,7 +1236,7 @@ while continueRoutine:
 
     # *Flanker_instruction_key* updates
     waitOnFlip = False
-    if Flanker_instruction_key.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
+    if Flanker_instruction_key.status == NOT_STARTED and tThisFlip >= 0.0 - frameTolerance:
         # keep track of start time/frame for later
         Flanker_instruction_key.frameNStart = frameN  # exact frame index
         Flanker_instruction_key.tStart = t  # local t and not account for scr refresh
@@ -1273,7 +1282,7 @@ thisExp.addData('Flanker_instructions.stopped', Flanker_instructions.tStopRefres
 # check responses
 if Flanker_instruction_key.keys in ['', [], None]:  # No response was made
     Flanker_instruction_key.keys = None
-thisExp.addData('Flanker_instruction_key.keys',Flanker_instruction_key.keys)
+thisExp.addData('Flanker_instruction_key.keys', Flanker_instruction_key.keys)
 if Flanker_instruction_key.keys != None:  # we had a response
     thisExp.addData('Flanker_instruction_key.rt', Flanker_instruction_key.rt)
 thisExp.addData('Flanker_instruction_key.started', Flanker_instruction_key.tStartRefresh)
@@ -1311,7 +1320,7 @@ while continueRoutine and routineTimer.getTime() > 0:
     # update/draw components on each frame
 
     # *blank* updates
-    if blank.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
+    if blank.status == NOT_STARTED and tThisFlip >= 0.0 - frameTolerance:
         # keep track of start time/frame for later
         blank.frameNStart = frameN  # exact frame index
         blank.tStart = t  # local t and not account for scr refresh
@@ -1320,7 +1329,7 @@ while continueRoutine and routineTimer.getTime() > 0:
         blank.setAutoDraw(True)
     if blank.status == STARTED:
         # is it time to stop? (based on global clock, using actual start)
-        if tThisFlipGlobal > blank.tStartRefresh + .5-frameTolerance:
+        if tThisFlipGlobal > blank.tStartRefresh + .5 - frameTolerance:
             # keep track of stop time/frame for later
             blank.tStop = t  # not accounting for scr refresh
             blank.frameNStop = frameN  # exact frame index
@@ -1353,9 +1362,10 @@ thisExp.addData('blank.stopped', blank.tStopRefresh)
 
 # set up handler to look after randomisation of conditions etc
 Flanker_practice_trials = data.TrialHandler(nReps=2.0, method='random',
-    extraInfo=expInfo, originPath=-1,
-    trialList=data.importConditions(f'languages/{language}/Stroop-Flanker/FlankerStim_{language.lower()}.xlsx'),
-    seed=None, name='Flanker_practice_trials')
+                                            extraInfo=expInfo, originPath=-1,
+                                            trialList=data.importConditions(
+                                                f'languages/{language}/Stroop-Flanker/FlankerStim_{language.lower()}.xlsx'),
+                                            seed=None, name='Flanker_practice_trials')
 thisExp.addLoop(Flanker_practice_trials)  # add the loop to the experiment
 thisFlanker_practice_trial = Flanker_practice_trials.trialList[0]  # so we can initialise stimuli with some values
 # abbreviate parameter names if possible (e.g. rgb = thisFlanker_practice_trial.rgb)
@@ -1399,7 +1409,7 @@ for thisFlanker_practice_trial in Flanker_practice_trials:
         # update/draw components on each frame
 
         # *fix_cross* updates
-        if fix_cross.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
+        if fix_cross.status == NOT_STARTED and tThisFlip >= 0.0 - frameTolerance:
             # keep track of start time/frame for later
             fix_cross.frameNStart = frameN  # exact frame index
             fix_cross.tStart = t  # local t and not account for scr refresh
@@ -1408,7 +1418,7 @@ for thisFlanker_practice_trial in Flanker_practice_trials:
             fix_cross.setAutoDraw(True)
         if fix_cross.status == STARTED:
             # is it time to stop? (based on global clock, using actual start)
-            if tThisFlipGlobal > fix_cross.tStartRefresh + .35-frameTolerance:
+            if tThisFlipGlobal > fix_cross.tStartRefresh + .35 - frameTolerance:
                 # keep track of stop time/frame for later
                 fix_cross.tStop = t  # not accounting for scr refresh
                 fix_cross.frameNStop = frameN  # exact frame index
@@ -1472,7 +1482,7 @@ for thisFlanker_practice_trial in Flanker_practice_trials:
         # update/draw components on each frame
 
         # *Flanker_practice_arrows* updates
-        if Flanker_practice_arrows.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
+        if Flanker_practice_arrows.status == NOT_STARTED and tThisFlip >= 0.0 - frameTolerance:
             # keep track of start time/frame for later
             Flanker_practice_arrows.frameNStart = frameN  # exact frame index
             Flanker_practice_arrows.tStart = t  # local t and not account for scr refresh
@@ -1482,7 +1492,7 @@ for thisFlanker_practice_trial in Flanker_practice_trials:
 
         # *Flanker_practice_key* updates
         waitOnFlip = False
-        if Flanker_practice_key.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
+        if Flanker_practice_key.status == NOT_STARTED and tThisFlip >= 0.0 - frameTolerance:
             # keep track of start time/frame for later
             Flanker_practice_key.frameNStart = frameN  # exact frame index
             Flanker_practice_key.tStart = t  # local t and not account for scr refresh
@@ -1535,11 +1545,11 @@ for thisFlanker_practice_trial in Flanker_practice_trials:
         Flanker_practice_key.keys = None
         # was no response the correct answer?!
         if str(correct_key).lower() == 'none':
-           Flanker_practice_key.corr = 1;  # correct non-response
+            Flanker_practice_key.corr = 1;  # correct non-response
         else:
-           Flanker_practice_key.corr = 0;  # failed to respond (incorrectly)
+            Flanker_practice_key.corr = 0;  # failed to respond (incorrectly)
     # store data for Flanker_practice_trials (TrialHandler)
-    Flanker_practice_trials.addData('Flanker_practice_key.keys',Flanker_practice_key.keys)
+    Flanker_practice_trials.addData('Flanker_practice_key.keys', Flanker_practice_key.keys)
     Flanker_practice_trials.addData('Flanker_practice_key.corr', Flanker_practice_key.corr)
     if Flanker_practice_key.keys != None:  # we had a response
         Flanker_practice_trials.addData('Flanker_practice_key.rt', Flanker_practice_key.rt)
@@ -1552,9 +1562,9 @@ for thisFlanker_practice_trial in Flanker_practice_trials:
     continueRoutine = True
     routineTimer.add(1.000000)
     # update component parameters for each repeat
-    if(Flanker_practice_key.corr == 1):
+    if (Flanker_practice_key.corr == 1):
         feedback_text2 = "✓"
-    elif(Flanker_practice_key.corr == 0):
+    elif (Flanker_practice_key.corr == 0):
         feedback_text2 = "x"
     Flanker_feedback_text.setText(feedback_text2)
     # keep track of which components have finished
@@ -1582,7 +1592,7 @@ for thisFlanker_practice_trial in Flanker_practice_trials:
         # update/draw components on each frame
 
         # *Flanker_feedback_text* updates
-        if Flanker_feedback_text.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
+        if Flanker_feedback_text.status == NOT_STARTED and tThisFlip >= 0.0 - frameTolerance:
             # keep track of start time/frame for later
             Flanker_feedback_text.frameNStart = frameN  # exact frame index
             Flanker_feedback_text.tStart = t  # local t and not account for scr refresh
@@ -1591,7 +1601,7 @@ for thisFlanker_practice_trial in Flanker_practice_trials:
             Flanker_feedback_text.setAutoDraw(True)
         if Flanker_feedback_text.status == STARTED:
             # is it time to stop? (based on global clock, using actual start)
-            if tThisFlipGlobal > Flanker_feedback_text.tStartRefresh + 1.0-frameTolerance:
+            if tThisFlipGlobal > Flanker_feedback_text.tStartRefresh + 1.0 - frameTolerance:
                 # keep track of stop time/frame for later
                 Flanker_feedback_text.tStop = t  # not accounting for scr refresh
                 Flanker_feedback_text.frameNStop = frameN  # exact frame index
@@ -1655,7 +1665,7 @@ while continueRoutine and routineTimer.getTime() > 0:
     # update/draw components on each frame
 
     # *start_warning_text* updates
-    if start_warning_text.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
+    if start_warning_text.status == NOT_STARTED and tThisFlip >= 0.0 - frameTolerance:
         # keep track of start time/frame for later
         start_warning_text.frameNStart = frameN  # exact frame index
         start_warning_text.tStart = t  # local t and not account for scr refresh
@@ -1664,7 +1674,7 @@ while continueRoutine and routineTimer.getTime() > 0:
         start_warning_text.setAutoDraw(True)
     if start_warning_text.status == STARTED:
         # is it time to stop? (based on global clock, using actual start)
-        if tThisFlipGlobal > start_warning_text.tStartRefresh + 6.0-frameTolerance:
+        if tThisFlipGlobal > start_warning_text.tStartRefresh + 6.0 - frameTolerance:
             # keep track of stop time/frame for later
             start_warning_text.tStop = t  # not accounting for scr refresh
             start_warning_text.frameNStop = frameN  # exact frame index
@@ -1697,9 +1707,10 @@ thisExp.addData('start_warning_text.stopped', start_warning_text.tStopRefresh)
 
 # set up handler to look after randomisation of conditions etc
 Flanker_trials = data.TrialHandler(nReps=21.0, method='random',
-    extraInfo=expInfo, originPath=-1,
-    trialList=data.importConditions(f'languages/{language}/Stroop-Flanker/FlankerStim_{language.lower()}.xlsx'),
-    seed=None, name='Flanker_trials')
+                                   extraInfo=expInfo, originPath=-1,
+                                   trialList=data.importConditions(
+                                       f'languages/{language}/Stroop-Flanker/FlankerStim_{language.lower()}.xlsx'),
+                                   seed=None, name='Flanker_trials')
 thisExp.addLoop(Flanker_trials)  # add the loop to the experiment
 thisFlanker_trial = Flanker_trials.trialList[0]  # so we can initialise stimuli with some values
 # abbreviate parameter names if possible (e.g. rgb = thisFlanker_trial.rgb)
@@ -1743,7 +1754,7 @@ for thisFlanker_trial in Flanker_trials:
         # update/draw components on each frame
 
         # *fix_cross* updates
-        if fix_cross.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
+        if fix_cross.status == NOT_STARTED and tThisFlip >= 0.0 - frameTolerance:
             # keep track of start time/frame for later
             fix_cross.frameNStart = frameN  # exact frame index
             fix_cross.tStart = t  # local t and not account for scr refresh
@@ -1752,7 +1763,7 @@ for thisFlanker_trial in Flanker_trials:
             fix_cross.setAutoDraw(True)
         if fix_cross.status == STARTED:
             # is it time to stop? (based on global clock, using actual start)
-            if tThisFlipGlobal > fix_cross.tStartRefresh + .35-frameTolerance:
+            if tThisFlipGlobal > fix_cross.tStartRefresh + .35 - frameTolerance:
                 # keep track of stop time/frame for later
                 fix_cross.tStop = t  # not accounting for scr refresh
                 fix_cross.frameNStop = frameN  # exact frame index
@@ -1816,7 +1827,7 @@ for thisFlanker_trial in Flanker_trials:
         # update/draw components on each frame
 
         # *Flanker_arrow* updates
-        if Flanker_arrows.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
+        if Flanker_arrows.status == NOT_STARTED and tThisFlip >= 0.0 - frameTolerance:
             # keep track of start time/frame for later
             Flanker_arrows.frameNStart = frameN  # exact frame index
             Flanker_arrows.tStart = t  # local t and not account for scr refresh
@@ -1826,7 +1837,7 @@ for thisFlanker_trial in Flanker_trials:
 
         # *Flanker_key* updates
         waitOnFlip = False
-        if Flanker_key.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
+        if Flanker_key.status == NOT_STARTED and tThisFlip >= 0.0 - frameTolerance:
             # keep track of start time/frame for later
             Flanker_key.frameNStart = frameN  # exact frame index
             Flanker_key.tStart = t  # local t and not account for scr refresh
@@ -1879,11 +1890,11 @@ for thisFlanker_trial in Flanker_trials:
         Flanker_key.keys = None
         # was no response the correct answer?!
         if str(correct_key).lower() == 'none':
-           Flanker_key.corr = 1;  # correct non-response
+            Flanker_key.corr = 1;  # correct non-response
         else:
-           Flanker_key.corr = 0;  # failed to respond (incorrectly)
+            Flanker_key.corr = 0;  # failed to respond (incorrectly)
     # store data for Flanker_trials (TrialHandler)
-    Flanker_trials.addData('Flanker_key.keys',Flanker_key.keys)
+    Flanker_trials.addData('Flanker_key.keys', Flanker_key.keys)
     Flanker_trials.addData('Flanker_key.corr', Flanker_key.corr)
     if Flanker_key.keys != None:  # we had a response
         Flanker_trials.addData('Flanker_key.rt', Flanker_key.rt)
@@ -1926,9 +1937,9 @@ while continueRoutine and routineTimer.getTime() > 0:
     tThisFlipGlobal = win.getFutureFlipTime(clock=None)
     frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
     # update/draw components on each frame
-    
+
     # *Goodbyetext* updates
-    if Goodbyetext.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
+    if Goodbyetext.status == NOT_STARTED and tThisFlip >= 0.0 - frameTolerance:
         # keep track of start time/frame for later
         Goodbyetext.frameNStart = frameN  # exact frame index
         Goodbyetext.tStart = t  # local t and not account for scr refresh
@@ -1937,16 +1948,16 @@ while continueRoutine and routineTimer.getTime() > 0:
         Goodbyetext.setAutoDraw(True)
     if Goodbyetext.status == STARTED:
         # is it time to stop? (based on global clock, using actual start)
-        if tThisFlipGlobal > Goodbyetext.tStartRefresh + 10-frameTolerance:
+        if tThisFlipGlobal > Goodbyetext.tStartRefresh + 10 - frameTolerance:
             # keep track of stop time/frame for later
             Goodbyetext.tStop = t  # not accounting for scr refresh
             Goodbyetext.frameNStop = frameN  # exact frame index
             win.timeOnFlip(Goodbyetext, 'tStopRefresh')  # time at next scr refresh
             Goodbyetext.setAutoDraw(False)
-    
+
     # *key_goodbye* updates
     waitOnFlip = False
-    if key_goodbye.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
+    if key_goodbye.status == NOT_STARTED and tThisFlip >= 0.0 - frameTolerance:
         # keep track of start time/frame for later
         key_goodbye.frameNStart = frameN  # exact frame index
         key_goodbye.tStart = t  # local t and not account for scr refresh
@@ -1959,7 +1970,7 @@ while continueRoutine and routineTimer.getTime() > 0:
         win.callOnFlip(key_goodbye.clearEvents, eventType='keyboard')  # clear events on next screen flip
     if key_goodbye.status == STARTED:
         # is it time to stop? (based on global clock, using actual start)
-        if tThisFlipGlobal > key_goodbye.tStartRefresh + 10-frameTolerance:
+        if tThisFlipGlobal > key_goodbye.tStartRefresh + 10 - frameTolerance:
             # keep track of stop time/frame for later
             key_goodbye.tStop = t  # not accounting for scr refresh
             key_goodbye.frameNStop = frameN  # exact frame index
@@ -1973,11 +1984,11 @@ while continueRoutine and routineTimer.getTime() > 0:
             key_goodbye.rt = _key_goodbye_allKeys[-1].rt
             # a response ends the routine
             continueRoutine = False
-    
+
     # check for quit (typically the Esc key)
     if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
         core.quit()
-    
+
     # check if all components have finished
     if not continueRoutine:  # a component has requested a forced-end of Routine
         break
@@ -1986,7 +1997,7 @@ while continueRoutine and routineTimer.getTime() > 0:
         if hasattr(thisComponent, "status") and thisComponent.status != FINISHED:
             continueRoutine = True
             break  # at least one component has not yet finished
-    
+
     # refresh the screen
     if continueRoutine:  # don't flip if this routine is over or we'll get a blank screen
         win.flip()
@@ -2000,7 +2011,7 @@ thisExp.addData('Goodbyetext.stopped', Goodbyetext.tStopRefresh)
 # check responses
 if key_goodbye.keys in ['', [], None]:  # No response was made
     key_goodbye.keys = None
-thisExp.addData('key_goodbye.keys',key_goodbye.keys)
+thisExp.addData('key_goodbye.keys', key_goodbye.keys)
 if key_goodbye.keys != None:  # we had a response
     thisExp.addData('key_goodbye.rt', key_goodbye.rt)
 thisExp.addData('key_goodbye.started', key_goodbye.tStartRefresh)
@@ -2012,7 +2023,7 @@ thisExp.nextEntry()
 win.flip()
 
 # these shouldn't be strictly necessary (should auto-save)
-thisExp.saveAsWideText(filename+'.csv', delim='auto')
+thisExp.saveAsWideText(filename + '.csv', delim='auto')
 thisExp.saveAsPickle(filename)
 logging.flush()
 # make sure everything is closed down

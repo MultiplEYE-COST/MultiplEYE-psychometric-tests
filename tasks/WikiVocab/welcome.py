@@ -1,18 +1,18 @@
-import re
 import os
-
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QMainWindow
-import yaml
-import pandas as pd
+import re
 from datetime import datetime
+
+import pandas as pd
+import yaml
+from PyQt6 import QtCore, QtGui, QtWidgets
+from PyQt6.QtWidgets import QMainWindow
 
 from main import MyMainWindow
 
-
 class MyWelcomeWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, result_folder: str) -> None:
         super(MyWelcomeWindow, self).__init__()
+        self.result_folder = result_folder
         self.initUI()
         self.showFullScreen()
 
@@ -36,10 +36,10 @@ class MyWelcomeWindow(QMainWindow):
         self.psychopyVersion = exp[2]
         self.expName = exp[3]
         self.filename = exp[4]
-        self.output_path = exp[5]
 
-        instructions_df = pd.read_excel(f'languages/{self.language.upper()}/instructions/WikiVocab_instructions_{self.language}.xlsx',
-                                        index_col='screen')
+        instructions_df = pd.read_excel(
+            f'languages/{self.language.upper()}/instructions/WikiVocab_instructions_{self.language.lower()}.xlsx',
+            index_col='screen')
         welcome_text = instructions_df.loc['Welcome_text', self.language.upper()]
         welcome_text = welcome_text.replace('\\n', '\n')
         WikiVocab_instructions = instructions_df.loc['WikiVocab_instructions', self.language.upper()]
@@ -51,10 +51,10 @@ class MyWelcomeWindow(QMainWindow):
         self.mainText = QtWidgets.QLabel(self.centralWidget)
         self.mainText.setFont(font)
         self.mainText.setStyleSheet("color: rgb(0, 0, 0);")  # Set font color to black
-        self.mainText.setAlignment(QtCore.Qt.AlignCenter)
+        self.mainText.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.mainText.setObjectName("mainText")
         self.mainText.setText(self.welcome_instructions)
-        layout.addWidget(self.mainText, alignment=QtCore.Qt.AlignCenter)
+        layout.addWidget(self.mainText, alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
 
         # Define styles for other widgets
         widget_font = QtGui.QFont()
@@ -75,7 +75,7 @@ class MyWelcomeWindow(QMainWindow):
         items = self.get_languages()
         self.comboBox.addItems(items)
         self.comboBox.setCurrentText(self.language)
-        layout.addWidget(self.comboBox, alignment=QtCore.Qt.AlignCenter)
+        layout.addWidget(self.comboBox, alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
 
         # Add the main button
         self.mainButton = QtWidgets.QPushButton(self.centralWidget)
@@ -88,7 +88,7 @@ class MyWelcomeWindow(QMainWindow):
         self.mainButton.setMinimumSize(400, 60)
         self.mainButton.clicked.connect(self.click_main_button)
         self.mainButton.setText(self.start_text)
-        layout.addWidget(self.mainButton, alignment=QtCore.Qt.AlignCenter)
+        layout.addWidget(self.mainButton, alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
 
         self.setCentralWidget(self.centralWidget)
 
@@ -96,7 +96,7 @@ class MyWelcomeWindow(QMainWindow):
         self.main_window = MyMainWindow(
             name=self.participant_id,
             language=self.comboBox.currentText(),
-            result_folder=self.output_path,
+            result_folder=self.result_folder,
             result_filename=self.filename
         )
         self.main_window.show()
@@ -111,7 +111,7 @@ class MyWelcomeWindow(QMainWindow):
                 result.append(m.group(1))
         return result
 
-    def get_exp_info(self):
+    def get_exp_info(self) -> tuple:
         date = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
 
         # Path to the YAML file contains the language and experiment configurations
@@ -137,20 +137,27 @@ class MyWelcomeWindow(QMainWindow):
         else:
             # Set default values if the file does not exist
             expInfo = {'participant_id': 999, 'session_id': 2}
+            participant_id = 999
 
         # Store info about the experiment session
-        psychopyVersion = '2023.2.3'
+        # get actualy psychopy version
+        try:
+            from psychopy import __version__ as psychopyVersion
+        except ImportError:
+            # If psychopy is not installed, we have a problem in any case
+            raise ImportError("Psychopy is not installed. Please install it to run the experiment.")
+
         expName = 'WikiVocab'  # from the Builder filename that created this script
 
         # Create folder name for the results
-        results_folder = f"{participant_id}_{language}_{country_code}_{lab_number}_PT{expInfo['session_id']}"
+        results_folder = self.result_folder
 
         # Create folder for audio and csv data
-        output_path = f'data/psychometric_test_{language}_{country_code}_{lab_number}/WikiVocab/{results_folder}/'
+        output_path = f'data/{results_folder}/WikiVocab/'
         os.makedirs(output_path, exist_ok=True)
 
         # Data file name stem = absolute path + name; later add .psyexp, .csv, .log, etc
         filename = f"{output_path}" \
                    f"{language}{country_code}{lab_number}" \
                    f"_{participant_id}_PT{expInfo['session_id']}_{date}"
-        return language, participant_id, psychopyVersion, expName, filename, output_path
+        return language, participant_id, psychopyVersion, expName, filename

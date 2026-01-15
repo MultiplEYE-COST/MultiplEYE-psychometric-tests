@@ -1,6 +1,6 @@
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QMainWindow
 import pandas as pd
+from PyQt6 import QtCore, QtGui, QtWidgets
+from PyQt6.QtWidgets import QMainWindow
 
 
 class MyResultWindow(QMainWindow):
@@ -9,8 +9,9 @@ class MyResultWindow(QMainWindow):
         self.name = name
         self.result = result
         self.language = language
-        instructions_df = pd.read_excel(f'languages/{self.language.upper()}/instructions/WikiVocab_instructions_{self.language}.xlsx',
-                                        index_col='screen')
+        instructions_df = pd.read_excel(
+            f'languages/{self.language.upper()}/instructions/WikiVocab_instructions_{self.language}.xlsx',
+            index_col='screen')
         Goodbye_text = instructions_df.loc['Goodbye_text', self.language.upper()]
         self.Goodbye_text = Goodbye_text.replace('\\n', '\n')
 
@@ -39,7 +40,7 @@ class MyResultWindow(QMainWindow):
         self.resultLabel.setGeometry(QtCore.QRect(center_x - 500, 50, 1000, 400))  # Adjusted to full width
         self.resultLabel.setFont(font)
         self.resultLabel.setStyleSheet("color: rgb(0, 0, 0);")
-        self.resultLabel.setAlignment(QtCore.Qt.AlignCenter)  # Center the text
+        self.resultLabel.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)  # Center the text
         self.resultLabel.setObjectName("result")
 
         # Set the text with formatted result
@@ -55,4 +56,3 @@ class MyResultWindow(QMainWindow):
             f"Score with fake words - {self.result['incorrect'] * 100}%\n"
             f"Total score - {self.result['total'] * 100}%\n"
         )
-

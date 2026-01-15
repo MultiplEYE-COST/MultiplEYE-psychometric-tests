@@ -1,16 +1,17 @@
-import os
 import hashlib
-from functools import partial
+import os
 import time  # Add the time module
+from functools import partial
 
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QMainWindow
-from PyQt5.QtSvg import QSvgWidget
-from PyQt5.QtGui import QPixmap
-from bidi import algorithm as bidialg
 import arabic_reshaper
 import matplotlib.pyplot as plt
 import pandas as pd
+from PyQt6 import QtCore, QtGui, QtWidgets
+from PyQt6.QtGui import QPixmap
+from PyQt6.QtSvgWidgets import QGraphicsSvgItem
+from PyQt6.QtWidgets import QGraphicsView, QGraphicsScene
+from PyQt6.QtWidgets import QMainWindow
+from bidi import algorithm as bidialg
 
 from result import MyResultWindow
 
@@ -55,8 +56,11 @@ class MyMainWindow(QMainWindow):
         self.result_df = None
         self.current_index = -1
         self.stimulus_shown_time = None  # To capture the time when stimulus is shown
-        instructions_df = pd.read_excel(f'languages/{self.language.upper()}/instructions/WikiVocab_instructions_{self.language}.xlsx',
-                                        index_col='screen')
+
+        instructions_df = pd.read_excel(
+            f'languages/{self.language.upper()}/instructions/WikiVocab_instructions_{self.language}.xlsx',
+            index_col='screen'
+        )
         key_instruction = instructions_df.loc['key_instruction', self.language.upper()]
         self.key_instruction = key_instruction.replace('\\n', '\n')
         self.real_text = instructions_df.loc['real_text', self.language.upper()]
@@ -74,7 +78,7 @@ class MyMainWindow(QMainWindow):
         self.setStyleSheet("background-color: rgb(221, 235, 255);")
         self.centralWidget = QtWidgets.QWidget(self)
         self.centralWidget.setObjectName("centralWidget")
-        self.setFocusPolicy(QtCore.Qt.StrongFocus)
+        self.setFocusPolicy(QtCore.Qt.FocusPolicy.StrongFocus)
 
         # Define styles
         font = QtGui.QFont()
@@ -92,12 +96,15 @@ class MyMainWindow(QMainWindow):
             self.imageLabel = QtWidgets.QLabel(self.centralWidget)
             self.imageLabel.setGeometry(QtCore.QRect(center_x - 235, 70, 471, 191))
         else:
-            self.imageLabel = QSvgWidget(self.centralWidget)
+            self.scene = QGraphicsScene(self.centralWidget)
+            self.imageLabel = QGraphicsView(self.scene, self.centralWidget)
             self.imageLabel.setGeometry(QtCore.QRect(center_x - 235, 70, 471, 191))
 
         self.imageLabel.setObjectName("imageLabel")
         self.load_image()
         self.stimulus_shown_time = time.time()  # Capture the time when stimulus is shown
+
+        self.centralWidget.setFocusPolicy(QtCore.Qt.FocusPolicy.StrongFocus)
 
         self.real = QtWidgets.QPushButton(self.centralWidget)
         self.real.setGeometry(QtCore.QRect(950, 600, 250, 71))  # Align vertically
@@ -105,7 +112,7 @@ class MyMainWindow(QMainWindow):
         self.real.setStyleSheet("color: rgb(0, 0, 0);")  # Set font color to black
         self.real.setObjectName("real")
         self.real.setText(self.real_text)
-        self.real.setFocusPolicy(QtCore.Qt.NoFocus)
+        self.real.setFocusPolicy(QtCore.Qt.FocusPolicy.NoFocus)
         self.real.clicked.connect(partial(self.process_action, "real"))
 
         self.fake = QtWidgets.QPushButton(self.centralWidget)
@@ -115,14 +122,14 @@ class MyMainWindow(QMainWindow):
         self.fake.setStyleSheet("color: rgb(0, 0, 0);")  # Set font color to black
         self.fake.setObjectName("fake")
         self.fake.setText(self.fake_text)
-        self.fake.setFocusPolicy(QtCore.Qt.NoFocus)
+        self.fake.setFocusPolicy(QtCore.Qt.FocusPolicy.NoFocus)
         self.fake.clicked.connect(partial(self.process_action, "fake"))
 
         self.tips = QtWidgets.QLabel(self.centralWidget)
         self.tips.setGeometry(QtCore.QRect(center_x - 420, 350, 850, 191))
         self.tips.setFont(font)
         self.tips.setStyleSheet("color: rgb(0, 0, 0);")  # Set font color to black
-        self.tips.setAlignment(QtCore.Qt.AlignCenter)
+        self.tips.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.tips.setObjectName("tips")
         self.tips.setText(self.key_instruction)
 
@@ -136,21 +143,24 @@ class MyMainWindow(QMainWindow):
 
     def keyPressEvent(self, event):
         key = event.key()
-        if key in (QtCore.Qt.Key_Right, 16777236):  # Add Windows-specific key code
+        if key == QtCore.Qt.Key.Key_Right or key == 16777236:  # Add Windows-specific key code
             self.process_action("real")
-        elif key in (QtCore.Qt.Key_Left, 16777234):  # Add Windows-specific key code
+        elif key == QtCore.Qt.Key.Key_Left or key == 16777234:  # Add Windows-specific key code
             self.process_action("fake")
 
     def load_image(self):
+
         if self.language == 'zh':
             # Use QPixmap for PNG images
             path = f"languages/{self.language.upper()}/WikiVocab/ch_items/LEXTALE_CH_{self.stimuli['hash']}.png"
             pixmap = QPixmap(path)
             self.imageLabel.setPixmap(pixmap)
         else:
-            # For SVG images
             path = f"{self.get_result_folder()}/images/{self.stimuli['hash']}.svg"
-            self.imageLabel.load(QtCore.QByteArray(open(path, 'rb').read()))
+            svg_item = QGraphicsSvgItem(path)
+            self.scene.clear()  # Clear the scene before adding a new item
+            self.scene.addItem(svg_item)
+            self.imageLabel.setScene(self.scene)
 
     def process_action(self, answer) -> None:
         key_press_time = time.time()  # Capture the time when key is pressed
@@ -239,7 +249,6 @@ class MyMainWindow(QMainWindow):
                     text = arabic_reshaper.reshape(text)
                 plot_text(bidialg.get_display(text), img_name, font_name)
 
-
     def get_result_folder(self) -> str:
         return self.result_folder
 
@@ -270,7 +279,7 @@ class MyMainWindow(QMainWindow):
     @property
     def prepared_results(self) -> dict:
         self.result_df["is_right"] = (
-            self.result_df["correct_answer"] == self.result_df["real_answer"]
+                self.result_df["correct_answer"] == self.result_df["real_answer"]
         ).astype(int)
         incorrect_data = self.result_df[self.result_df["correct_answer"] == 0]
         correct_data = self.result_df[self.result_df["correct_answer"] == 1]
