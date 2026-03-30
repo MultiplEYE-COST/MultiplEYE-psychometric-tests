@@ -1,16 +1,22 @@
 ﻿#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-This experiment was created using PsychoPy3 Experiment Builder (v2021.2.3),
-    on Sun Jan 16 16:49:37 2022
-If you publish work using this script the most relevant publication is:
+This experiment implements the Stroop and Flanker tasks.
 
-    Peirce J, Gray JR, Simpson S, MacAskill M, Höchenberger R, Sogo H, Kastman E, Lindeløv JK. (2019) 
-        PsychoPy2: Experiments in behavior made easy Behav Res 51: 195. 
-        https://doi.org/10.3758/s13428-018-01193-y
+Based on the original stroop-simon-german project: https://github.com/DiLi-Lab/stroop-simon-german
+(The original project does not include a LICENSE file)
 
+Based on paradigms:
+- Stroop: Stroop, J. R. (1935). Studies of interference in serial verbal reactions.
+- Flanker: Eriksen, B. A., & Eriksen, C. W. (1974). Effects of noise letters.
+
+Modifications:
+- Changed from separate Stroop + Simon to combined Stroop + Flanker
+- Added YAML-based configuration
+- Modified data output to CSV format
+
+Copyright (C) 2024-2026 MultiplEYE Project
 """
-
 from __future__ import absolute_import, division
 
 import argparse

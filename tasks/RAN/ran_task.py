@@ -1,7 +1,20 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-This experiment runs the RAN digit test
+This file is a modification of the original py-ran-task code:
+https://github.com/bnicenboim/py-ran-task
+
+Original License: GPL-2.0 (see LICENSE file)
+Copyright (C) Bruno Nicenboim et al.
+
+Modifications:
+- Replaced Tkinter GUI with PsychoPy
+- Changed audio from tkSnack to sounddevice + soundfile
+- Added YAML-based configuration
+- Changed from letters + numbers to numbers only
+- Modified data output to CSV format with audio files
+
+Copyright (C) 2024-2026 MultiplEYE Project
 """
 import argparse
 import csv

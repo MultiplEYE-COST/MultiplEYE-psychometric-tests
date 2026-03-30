@@ -1,16 +1,19 @@
 ﻿#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-This experiment was created using PsychoPy3 Experiment Builder (v2021.2.3),
-    on January 26, 2022, at 14:00
-If you publish work using this script the most relevant publication is:
+WMC (Working Memory Capacity) Task - Mac version.
 
-    Peirce J, Gray JR, Simpson S, MacAskill M, Höchenberger R, Sogo H, Kastman E, Lindeløv JK. (2019) 
-        PsychoPy2: Experiments in behavior made easy Behav Res 51: 195. 
-        https://doi.org/10.3758/s13428-018-01193-y
+Based on the original python-wmc-battery: https://github.com/aeye-lab/python-wmc-battery
+Original License: MIT (see LICENSE file)
 
+Modifications:
+- Added YAML-based configuration
+- Modified data output structure
+- Added custom scoring logic
+- Changed abort key (f12 to escape)
+
+Copyright (C) 2024-2026 MultiplEYE Project
 """
-
 from __future__ import absolute_import, division
 
 import argparse

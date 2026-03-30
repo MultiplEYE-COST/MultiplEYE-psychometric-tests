@@ -1,5 +1,11 @@
 ﻿from __future__ import absolute_import, division
-
+"""
+PLAB (Language Analysis) Task - PsychoPy implementation.
+This is a custom implementation based on the paper-and-pencil PLAB test.
+The original test materials were adapted from a PowerPoint template,
+converted to screenshots, and presented as visual stimuli.
+Copyright (C) 2024-2026 MultiplEYE Project
+"""
 import argparse
 import os
 from datetime import datetime
