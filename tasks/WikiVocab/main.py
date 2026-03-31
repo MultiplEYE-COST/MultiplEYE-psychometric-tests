@@ -61,7 +61,7 @@ class MyMainWindow(QMainWindow):
         super(MyMainWindow, self).__init__()
         self.name = name
         self.language = language
-        self.result_folder = result_folder
+        self.result_folder = f'data/{result_folder}/WikiVocab/'
         self.result_filename = result_filename
         self.data_df = None
         self.result_df = None
