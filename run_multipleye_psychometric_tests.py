@@ -203,7 +203,7 @@ def parse_args():
         gooey_options={'visible': wiki_vocab}
     )
     args = vars(parser.parse_args())
-    print(args)
+    #print(args)
     return args
 
 
@@ -258,7 +258,7 @@ if __name__ == '__main__':
     with open(participant_config_path, 'w') as file:
         yaml.dump(arguments, file)
 
-    if arguments['wmc']:
+    if wmc and arguments['wmc']:
         print("Running WMC")
         if system == 'Windows':
             print("Running WMC on Windows")
@@ -274,7 +274,7 @@ if __name__ == '__main__':
         with open(participant_config_path, 'w') as file:
             yaml.dump(arguments, file)
 
-    if arguments['ran']:
+    if ran and arguments['ran']:
         print("Running RAN")
         run_script('tasks/RAN/ran_task.py', part_folder=participant_folder_relative)
         arguments['run_ran'] = 'success'
@@ -282,7 +282,7 @@ if __name__ == '__main__':
         with open(participant_config_path, 'w') as file:
             yaml.dump(arguments, file)
 
-    if arguments['stroop_flanker']:
+    if stroop_flanker and arguments['stroop_flanker']:
         print("Running Stroop Flanker")
         run_script('tasks/Stroop-Flanker/stroop_flanker.py', part_folder=participant_folder_relative)
         arguments['run_stroop_flanker'] = 'success'
@@ -290,7 +290,7 @@ if __name__ == '__main__':
         with open(participant_config_path, 'w') as file:
             yaml.dump(arguments, file)
 
-    if arguments['plab']:
+    if plab and arguments['plab']:
         print("Running PLAB")
         run_script('tasks/PLAB/plab.py', part_folder=participant_folder_relative)
         arguments['run_plab'] = 'success'
@@ -298,7 +298,7 @@ if __name__ == '__main__':
         with open(participant_config_path, 'w') as file:
             yaml.dump(arguments, file)
 
-    if arguments['wiki_vocab']:
+    if wiki_vocab and arguments['wiki_vocab']:
         print("Running WikiVocab")
         run_script('tasks/WikiVocab/app.py', part_folder=participant_folder_relative)
         arguments['run_wiki_vocab'] = 'success'
