@@ -51,7 +51,7 @@ class MyWelcomeWindow(QMainWindow):
 
         instructions_df = pd.read_excel(
             f'languages/{self.language.upper()}/instructions/WikiVocab_instructions_{self.language.lower()}.xlsx',
-            index_col='screen')
+            index_col='screen', nrows=8)
         welcome_text = instructions_df.loc['Welcome_text', self.language.upper()]
         welcome_text = welcome_text.replace('\\n', '\n')
         WikiVocab_instructions = instructions_df.loc['WikiVocab_instructions', self.language.upper()]
