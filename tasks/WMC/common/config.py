@@ -1,3 +1,12 @@
+"""
+WMC configuration module.
+
+Based on the original python-wmc-battery: https://github.com/aeye-lab/python-wmc-battery
+Original License: MIT (see LICENSE file)
+
+Copyright (C) 2024-2026 MultiplEYE Project
+"""
+
 import yaml
 from dotmap import DotMap
 
