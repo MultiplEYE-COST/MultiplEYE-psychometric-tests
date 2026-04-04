@@ -1,25 +1,35 @@
 ﻿#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-WMC (Working Memory Capacity) Task - Windows version.
+PATCHED FOR WINDOWS RTL TEXT HANDLING
 
-Based on the original python-wmc-battery: https://github.com/aeye-lab/python-wmc-battery
-Original License: MIT (see LICENSE file)
+This experiment was created using PsychoPy3 Experiment Builder (v2021.2.3),
+    on January 26, 2022, at 14:00
+If you publish work using this script the most relevant publication is:
 
-Modifications:
-- Added YAML-based configuration
-- Modified data output structure
-- Added custom scoring logic
-- Changed abort key (f12 to escape)
+    Peirce J, Gray JR, Simpson S, MacAskill M, Höchenberger R, Sogo H, Kastman E, Lindeløv JK. (2019) 
+        PsychoPy2: Experiments in behavior made easy Behav Res 51: 195. 
+        https://doi.org/10.3758/s13428-018-01193-y
 
-Copyright (C) 2024-2026 MultiplEYE Project
 """
+
 from __future__ import absolute_import, division
 
 import argparse
 import os
+import unicodedata
 
-from psychopy import prefs
+try:
+    import arabic_reshaper
+except ImportError:
+    arabic_reshaper = None
+
+try:
+    from bidi.algorithm import get_display
+except ImportError:
+    get_display = None
+
+from psychopy import prefs 
 
 prefs.hardware['audioLib'] = 'pygame'
 from psychopy import gui, visual, core, data, event, logging
@@ -53,6 +63,9 @@ country_code = config_data['country_code']
 lab_number = config_data['lab_number']
 random_seed = config_data['random_seed']
 font = config_data['font']
+
+rtl_langs = {'fa', 'fas', 'ar', 'he', 'ur'}
+sentence_language_style = 'RTL' if str(language).lower() in rtl_langs else 'LTR'
 
 if os.path.exists(experiment_config_path):
     # Load the experiment configuration if the file exists
@@ -161,6 +174,115 @@ if random_seed is None or random_seed == '':
 
 # set text wrap width to 90% of screen width (in height units)
 text_wrap_width = win.size[0] / win.size[1] * 0.9
+    
+def _contains_rtl_script(value):
+    """
+    Return True if the string contains Arabic/Hebrew script characters.
+    """
+    if not value:
+        return False
+    for ch in str(value):
+        code = ord(ch)
+        if (
+            0x0590 <= code <= 0x05FF or   # Hebrew
+            0x0600 <= code <= 0x06FF or   # Arabic
+            0x0750 <= code <= 0x077F or   # Arabic Supplement
+            0x08A0 <= code <= 0x08FF or   # Arabic Extended-A
+            0xFB50 <= code <= 0xFDFF or   # Arabic Presentation Forms-A
+            0xFE70 <= code <= 0xFEFF      # Arabic Presentation Forms-B
+        ):
+            return True
+    return False
+
+
+def sanitize_pyglet_text(value):
+    """
+    Make text safer for PsychoPy TextStim / pyglet on Windows.
+
+    Removes:
+    - surrogate code points
+    - non-BMP characters
+    - problematic invisible/control/private-use chars
+    """
+    if value is None:
+        return ''
+    s = str(value)
+
+    # normalize line endings
+    s = s.replace('\r\n', '\n').replace('\r', '\n')
+
+    # normalize Unicode
+    s = unicodedata.normalize("NFC", s)
+
+    cleaned = []
+    for ch in s:
+        code = ord(ch)
+        cat = unicodedata.category(ch)
+
+        # Remove surrogate code points explicitly
+        if 0xD800 <= code <= 0xDFFF:
+            continue
+
+        # Remove non-BMP chars (emoji and some symbols often break pyglet on win32)
+        if code > 0xFFFF:
+            continue
+
+        # Remove formatting/private/unassigned chars.
+        # This also removes ZWNJ and bidi control marks that can trigger
+        # pyglet/font issues on Windows.
+        if cat in {'Cf', 'Cs', 'Co', 'Cn'}:
+            continue
+
+        # Remove control chars except newline/tab
+        if cat == 'Cc' and ch not in ('\n', '\t'):
+            continue
+
+        cleaned.append(ch)
+
+    s = ''.join(cleaned)
+
+    # Defensive cleanup against malformed surrogate remnants
+    try:
+        s = s.encode('utf-16', 'surrogatepass').decode('utf-16', 'ignore')
+    except Exception:
+        pass
+
+    return s
+
+
+def prepare_psychopy_text(value):
+    """
+    Sanitize text and optionally reshape/reorder RTL script text for more
+    reliable display in PsychoPy/pyglet on Windows.
+    """
+    s = sanitize_pyglet_text(value)
+
+    if _contains_rtl_script(s):
+        for bad in (
+            '\u200c', '\u200d', '\u200e', '\u200f',
+            '\u202a', '\u202b', '\u202c', '\u202d', '\u202e'
+        ):
+            s = s.replace(bad, '')
+
+        if arabic_reshaper is not None:
+            try:
+                s = arabic_reshaper.reshape(s)
+            except Exception:
+                pass
+
+        if get_display is not None:
+            try:
+                s = get_display(s)
+            except Exception:
+                pass
+
+    return s
+
+
+def safe_set_text(stim, value):
+    txt = prepare_psychopy_text(value)
+    stim.setText(txt)
+    return txt
 
 # Initialize components for Routine "base_instruction"
 base_instructionClock = core.Clock()
@@ -210,7 +332,7 @@ base_text_begin_task = visual.TextStim(
     units='height', pos=(0, 0), height=config.experiment_messages.size,
     wrapWidth=text_wrap_width, ori=0,
     color='black', colorSpace='rgb', opacity=1,
-    languageStyle='LTR',
+    languageStyle=sentence_language_style,
     depth=-1.0
     );
 base_key_resp_task_begin = keyboard.Keyboard()
@@ -222,12 +344,12 @@ base_init_trialClock = core.Clock()
 mu_init_trialClock = core.Clock()
 mu_text_blank = visual.TextStim(
     win=win, name='mu_text_blank',
-    text=None,
+    text='',
     font=font,
     units='height', pos=(0, 0), height=config.experiment_messages.size, wrapWidth=None,
     ori=0,
     color='white', colorSpace='rgb', opacity=1,
-    languageStyle='LTR',
+    languageStyle=sentence_language_style,
     depth=-1.0
     );
 
@@ -240,7 +362,7 @@ mu_text_digit = visual.TextStim(
     units='height', pos=[0, 0], height=config.memory_update.text.size, wrapWidth=None,
     ori=0,
     color='black', colorSpace='rgb', opacity=1,
-    languageStyle='LTR',
+    languageStyle=sentence_language_style,
     depth=-1.0
     );
 
@@ -248,12 +370,12 @@ mu_text_digit = visual.TextStim(
 mu_empty_cellsClock = core.Clock()
 mu_text_blank_2 = visual.TextStim(
     win=win, name='mu_text_blank_2',
-    text=None,
+    text='',
     font=config.memory_update.text.font,
     units='height', pos=(0, 0), height=config.memory_update.text.size, wrapWidth=None,
     ori=0,
     color='black', colorSpace='rgb', opacity=1,
-    languageStyle='LTR',
+    languageStyle=sentence_language_style,
     depth=-1.0
     );
 
@@ -266,7 +388,7 @@ mu_text_operation = visual.TextStim(
     units='height', pos=[0, 0], height=config.memory_update.text.size, wrapWidth=None,
     ori=0,
     color='black', colorSpace='rgb', opacity=1,
-    languageStyle='LTR',
+    languageStyle=sentence_language_style,
     depth=-1.0
     );
 
@@ -274,12 +396,12 @@ mu_text_operation = visual.TextStim(
 mu_empty_cellsClock = core.Clock()
 mu_text_blank_2 = visual.TextStim(
     win=win, name='mu_text_blank_2',
-    text=None,
+    text='',
     font=config.memory_update.text.font,
     units='height', pos=(0, 0), height=config.memory_update.text.size, wrapWidth=None,
     ori=0,
     color='black', colorSpace='rgb', opacity=1,
-    languageStyle='LTR',
+    languageStyle=sentence_language_style,
     depth=-1.0
     );
 
@@ -292,7 +414,7 @@ mu_text_question_mark = visual.TextStim(
     units='height', pos=[0, 0], height=config.memory_update.text.size,
     wrapWidth=None, ori=0,
     color='black', colorSpace='rgb', opacity=1,
-    languageStyle='LTR',
+    languageStyle=sentence_language_style,
     depth=-1.0
     );
 mu_key_resp_recall = keyboard.Keyboard()
@@ -305,7 +427,7 @@ mu_text_recall = visual.TextStim(
     font=config.memory_update.text.font,
     pos=[0, 0], height=config.memory_update.text.size, wrapWidth=None, ori=0,
     color='black', colorSpace='rgb', opacity=1,
-    languageStyle='LTR',
+    languageStyle=sentence_language_style,
     depth=-1.0
     );
 
@@ -317,7 +439,7 @@ base_text_next_trial = visual.TextStim(
     font=config.experiment_messages.font,
     pos=(0, 0), height=config.experiment_messages.size, wrapWidth=None, ori=0,
     color='black', colorSpace='rgb', opacity=1,
-    languageStyle='LTR',
+    languageStyle=sentence_language_style,
     depth=-1.0
     );
 base_next_trial_key_resp = keyboard.Keyboard()
@@ -326,12 +448,12 @@ base_next_trial_key_resp = keyboard.Keyboard()
 base_intertrialClock = core.Clock()
 base_text_intertrial = visual.TextStim(
     win=win, name='base_text_intertrial',
-    text=None,
+    text='',
     font=font,
     units='height', pos=(0, 0), height=config.experiment_messages.size,
     wrapWidth=None, ori=0,
     color='white', colorSpace='rgb', opacity=1,
-    languageStyle='LTR',
+    languageStyle=sentence_language_style,
     depth=-1.0
     );
 
@@ -344,7 +466,7 @@ base_text_task_end = visual.TextStim(
     units='height', pos=(0, 0), height=config.experiment_messages.size,
     wrapWidth=text_wrap_width, ori=0,
     color='black', colorSpace='rgb', opacity=1,
-    languageStyle='LTR',
+    languageStyle=sentence_language_style,
     depth=-1.0
     );
 base_key_resp_task_end = keyboard.Keyboard()
@@ -379,7 +501,7 @@ base_text_begin_task = visual.TextStim(
     units='height', pos=(0, 0), height=config.experiment_messages.size,
     wrapWidth=text_wrap_width, ori=0,
     color='black', colorSpace='rgb', opacity=1,
-    languageStyle='LTR',
+    languageStyle=sentence_language_style,
     depth=-1.0
     );
 base_key_resp_task_begin = keyboard.Keyboard()
@@ -396,7 +518,7 @@ os_text_fixation_cross = visual.TextStim(
     units='height', pos=(0, 0),
     height=config.operation_span.text.fixation_cross.size, wrapWidth=None, ori=0,
     color='black', colorSpace='rgb', opacity=1,
-    languageStyle='LTR',
+    languageStyle=sentence_language_style,
     depth=-1.0
     );
 
@@ -409,7 +531,7 @@ os_text_equation = visual.TextStim(
     units='height', pos=(0, 0), height=config.operation_span.text.equations.size,
     wrapWidth=None, ori=0,
     color='black', colorSpace='rgb', opacity=1,
-    languageStyle='LTR',
+    languageStyle=sentence_language_style,
     depth=-1.0
     );
 os_key_resp_equation = keyboard.Keyboard()
@@ -423,7 +545,7 @@ os_text_letter = visual.TextStim(
     units='height', pos=(0, 0), height=config.operation_span.text.letters.size,
     wrapWidth=None, ori=0,
     color='black', colorSpace='rgb', opacity=1,
-    languageStyle='LTR',
+    languageStyle=sentence_language_style,
     depth=-1.0
     );
 
@@ -431,12 +553,12 @@ os_text_letter = visual.TextStim(
 os_blankClock = core.Clock()
 os_text_blank = visual.TextStim(
     win=win, name='os_text_blank',
-    text=None,
+    text='',
     font=font,
     units='height', pos=(0, 0), height=config.experiment_messages.size, wrapWidth=None,
     ori=0,
     color='white', colorSpace='rgb', opacity=1,
-    languageStyle='LTR',
+    languageStyle=sentence_language_style,
     depth=-1.0
     );
 
@@ -449,7 +571,7 @@ os_text_question_mark = visual.TextStim(
     units='height', pos=(0, 0), height=config.operation_span.text.letters.size,
     wrapWidth=None, ori=0,
     color='black', colorSpace='rgb', opacity=1,
-    languageStyle='LTR',
+    languageStyle=sentence_language_style,
     depth=-1.0
     );
 os_key_resp_recall = keyboard.Keyboard()
@@ -463,7 +585,7 @@ os_text_recall = visual.TextStim(
     units='height', pos=(0.075, 0), height=config.operation_span.text.letters.size,
     wrapWidth=None, ori=0,
     color='black', colorSpace='rgb', opacity=1,
-    languageStyle='LTR',
+    languageStyle=sentence_language_style,
     depth=-1.0
     );
 
@@ -471,12 +593,12 @@ os_text_recall = visual.TextStim(
 base_intertrialClock = core.Clock()
 base_text_intertrial = visual.TextStim(
     win=win, name='base_text_intertrial',
-    text=None,
+    text='',
     font=font,
     units='height', pos=(0, 0), height=config.experiment_messages.size,
     wrapWidth=None, ori=0,
     color='white', colorSpace='rgb', opacity=1,
-    languageStyle='LTR',
+    languageStyle=sentence_language_style,
     depth=-1.0
     );
 
@@ -489,7 +611,7 @@ base_text_self_paced_break = visual.TextStim(
     units='height', pos=(0, 0), height=config.experiment_messages.size,
     wrapWidth=text_wrap_width, ori=0,
     color='black', colorSpace='rgb', opacity=1,
-    languageStyle='LTR',
+    languageStyle=sentence_language_style,
     depth=-1.0
     );
 base_key_resp_self_paced_break = keyboard.Keyboard()
@@ -498,12 +620,12 @@ base_key_resp_self_paced_break = keyboard.Keyboard()
 base_after_break_pauseClock = core.Clock()
 base_text_pause_after_break = visual.TextStim(
     win=win, name='base_text_pause_after_break',
-    text=None,
+    text='',
     font=font,
     units='height', pos=(0, 0), height=config.experiment_messages.size,
     wrapWidth=None, ori=0,
     color='white', colorSpace='rgb', opacity=1,
-    languageStyle='LTR',
+    languageStyle=sentence_language_style,
     depth=-1.0
     );
 
@@ -516,7 +638,7 @@ base_text_task_end = visual.TextStim(
     units='height', pos=(0, 0), height=config.experiment_messages.size,
     wrapWidth=text_wrap_width, ori=0,
     color='black', colorSpace='rgb', opacity=1,
-    languageStyle='LTR',
+    languageStyle=sentence_language_style,
     depth=-1.0
     );
 base_key_resp_task_end = keyboard.Keyboard()
@@ -551,7 +673,7 @@ base_text_begin_task = visual.TextStim(
     units='height', pos=(0, 0), height=config.experiment_messages.size,
     wrapWidth=text_wrap_width, ori=0,
     color='black', colorSpace='rgb', opacity=1,
-    languageStyle='LTR',
+    languageStyle=sentence_language_style,
     depth=-1.0
     );
 base_key_resp_task_begin = keyboard.Keyboard()
@@ -568,12 +690,13 @@ ss_text_fixation_cross = visual.TextStim(
     units='height', pos=(0, 0),
     height=config.sentence_span.text.fixation_cross.size, wrapWidth=None, ori=0,
     color='black', colorSpace='rgb', opacity=1,
-    languageStyle='LTR',
+    languageStyle=sentence_language_style,
     depth=-1.0
     )
 
 # Initialize components for Routine "ss_sentence"
 ss_sentenceClock = core.Clock()
+
 ss_text_sentence = visual.TextStim(
     win=win, name='ss_text_sentence',
     text='',
@@ -581,9 +704,9 @@ ss_text_sentence = visual.TextStim(
     units='height', pos=(0, 0), height=config.sentence_span.text.sentences.size,
     wrapWidth=text_wrap_width, ori=0,
     color='black', colorSpace='rgb', opacity=1,
-    languageStyle='LTR',
+    languageStyle=sentence_language_style,
     depth=-1.0
-    )
+)
 ss_key_resp_sentence = keyboard.Keyboard()
 
 # Initialize components for Routine "ss_letter"
@@ -595,7 +718,7 @@ ss_text_letter = visual.TextStim(
     units='height', pos=(0, 0), height=config.sentence_span.text.letters.size,
     wrapWidth=None, ori=0,
     color='black', colorSpace='rgb', opacity=1,
-    languageStyle='LTR',
+    languageStyle=sentence_language_style,
     depth=-1.0
     );
 
@@ -603,12 +726,12 @@ ss_text_letter = visual.TextStim(
 ss_blankClock = core.Clock()
 ss_text_blank = visual.TextStim(
     win=win, name='ss_text_blank',
-    text=None,
+    text='',
     font=font,
     units='height', pos=(0, 0), height=config.experiment_messages.size, wrapWidth=None,
     ori=0,
     color='white', colorSpace='rgb', opacity=1,
-    languageStyle='LTR',
+    languageStyle=sentence_language_style,
     depth=-1.0
     );
 
@@ -621,7 +744,7 @@ ss_text_question_mark = visual.TextStim(
     units='height', pos=(0, 0), height=config.sentence_span.text.letters.size,
     wrapWidth=None, ori=0,
     color='black', colorSpace='rgb', opacity=1,
-    languageStyle='LTR',
+    languageStyle=sentence_language_style,
     depth=-1.0
     );
 ss_key_resp_recall = keyboard.Keyboard()
@@ -635,7 +758,7 @@ ss_text_display_recall = visual.TextStim(
     units='height', pos=(0.075, 0), height=config.sentence_span.text.letters.size,
     wrapWidth=None, ori=0,
     color='black', colorSpace='rgb', opacity=1,
-    languageStyle='LTR',
+    languageStyle=sentence_language_style,
     depth=-1.0
     );
 
@@ -643,12 +766,12 @@ ss_text_display_recall = visual.TextStim(
 base_intertrialClock = core.Clock()
 base_text_intertrial = visual.TextStim(
     win=win, name='base_text_intertrial',
-    text=None,
+    text='',
     font=font,
     units='height', pos=(0, 0), height=config.experiment_messages.size,
     wrapWidth=None, ori=0,
     color='white', colorSpace='rgb', opacity=1,
-    languageStyle='LTR',
+    languageStyle=sentence_language_style,
     depth=-1.0
     );
 
@@ -661,7 +784,7 @@ base_text_self_paced_break = visual.TextStim(
     units='height', pos=(0, 0), height=config.experiment_messages.size,
     wrapWidth=text_wrap_width, ori=0,
     color='black', colorSpace='rgb', opacity=1,
-    languageStyle='LTR',
+    languageStyle=sentence_language_style,
     depth=-1.0
     );
 base_key_resp_self_paced_break = keyboard.Keyboard()
@@ -670,12 +793,12 @@ base_key_resp_self_paced_break = keyboard.Keyboard()
 base_after_break_pauseClock = core.Clock()
 base_text_pause_after_break = visual.TextStim(
     win=win, name='base_text_pause_after_break',
-    text=None,
+    text='',
     font=font,
     units='height', pos=(0, 0), height=config.experiment_messages.size,
     wrapWidth=None, ori=0,
     color='white', colorSpace='rgb', opacity=1,
-    languageStyle='LTR',
+    languageStyle=sentence_language_style,
     depth=-1.0
     );
 
@@ -688,7 +811,7 @@ base_text_task_end = visual.TextStim(
     units='height', pos=(0, 0), height=config.experiment_messages.size,
     wrapWidth=text_wrap_width, ori=0,
     color='black', colorSpace='rgb', opacity=1,
-    languageStyle='LTR',
+    languageStyle=sentence_language_style,
     depth=-1.0
     );
 base_key_resp_task_end = keyboard.Keyboard()
@@ -723,7 +846,7 @@ base_text_begin_task = visual.TextStim(
     units='height', pos=(0, 0), height=config.experiment_messages.size,
     wrapWidth=text_wrap_width, ori=0,
     color='black', colorSpace='rgb', opacity=1,
-    languageStyle='LTR',
+    languageStyle=sentence_language_style,
     depth=-1.0
     );
 base_key_resp_task_begin = keyboard.Keyboard()
@@ -741,7 +864,7 @@ sstm_text_fixation_cross = visual.TextStim(
     height=config.spatial_short_term_memory.text.fixation_cross.size,
     wrapWidth=None, ori=0,
     color='black', colorSpace='rgb', opacity=1,
-    languageStyle='LTR',
+    languageStyle=sentence_language_style,
     depth=-1.0
     );
 
@@ -749,12 +872,12 @@ sstm_text_fixation_cross = visual.TextStim(
 sstm_empty_gridClock = core.Clock()
 sstm_text_blank = visual.TextStim(
     win=win, name='sstm_text_blank',
-    text=None,
+    text='',
     font=font,
     units='height', pos=(0, 0), height=config.experiment_messages.size, wrapWidth=None,
     ori=0,
     color='white', colorSpace='rgb', opacity=1,
-    languageStyle='LTR',
+    languageStyle=sentence_language_style,
     depth=-1.0
     );
 
@@ -772,11 +895,11 @@ sstm_polygon_display_dot = visual.ShapeStim(
 sstm_after_display_dotClock = core.Clock()
 sstm_text_after_display_dot = visual.TextStim(
     win=win, name='sstm_text_after_display_dot',
-    text=None,
+    text='',
     font=font,
     units='height', pos=(0, 0), height=0.1, wrapWidth=None, ori=0,
     color='white', colorSpace='rgb', opacity=1,
-    languageStyle='LTR',
+    languageStyle=sentence_language_style,
     depth=-1.0
     );
 
@@ -790,7 +913,7 @@ text_sstm_draw_dots = visual.TextStim(
     height=config.spatial_short_term_memory.text.draw_text.size,
     wrapWidth=text_wrap_width, ori=0,
     color='black', colorSpace='rgb', opacity=1,
-    languageStyle='LTR',
+    languageStyle=sentence_language_style,
     depth=-1.0
     );
 text_sstm_presentation_end = visual.TextStim(
@@ -800,7 +923,7 @@ text_sstm_presentation_end = visual.TextStim(
     pos=(0, 0.075), height=config.spatial_short_term_memory.text.end_text.size,
     wrapWidth=None, ori=0,
     color='black', colorSpace='rgb', opacity=1,
-    languageStyle='LTR',
+    languageStyle=sentence_language_style,
     depth=-2.0
     );
 
@@ -814,7 +937,7 @@ sstm_text_next = visual.TextStim(
     height=config.spatial_short_term_memory.text.next_button.size,
     wrapWidth=text_wrap_width, ori=0,
     color='black', colorSpace='rgb', opacity=1,
-    languageStyle='LTR',
+    languageStyle=sentence_language_style,
     depth=-1.0
     );
 sstm_mouse = event.Mouse(win=win)
@@ -829,7 +952,7 @@ base_text_next_trial = visual.TextStim(
     font=config.experiment_messages.font,
     pos=(0, 0), height=config.experiment_messages.size, wrapWidth=None, ori=0,
     color='black', colorSpace='rgb', opacity=1,
-    languageStyle='LTR',
+    languageStyle=sentence_language_style,
     depth=-1.0
     );
 base_next_trial_key_resp = keyboard.Keyboard()
@@ -838,12 +961,12 @@ base_next_trial_key_resp = keyboard.Keyboard()
 base_intertrialClock = core.Clock()
 base_text_intertrial = visual.TextStim(
     win=win, name='base_text_intertrial',
-    text=None,
+    text='',
     font=font,
     units='height', pos=(0, 0), height=config.experiment_messages.size,
     wrapWidth=None, ori=0,
     color='white', colorSpace='rgb', opacity=1,
-    languageStyle='LTR',
+    languageStyle=sentence_language_style,
     depth=-1.0
     );
 
@@ -851,12 +974,12 @@ base_text_intertrial = visual.TextStim(
 sstm_task_endClock = core.Clock()
 text_sstm_task_end = visual.TextStim(
     win=win, name='text_sstm_task_end',
-    text=expmsgs.task_over,
+    text='',
     font=config.experiment_messages.font,
     units='height', pos=(0, 0), height=config.experiment_messages.size,
     wrapWidth=text_wrap_width, ori=0,
     color='black', colorSpace='rgb', opacity=1,
-    languageStyle='LTR',
+    languageStyle=sentence_language_style,
     depth=-1.0
     );
 sstm_key_resp_task_end = keyboard.Keyboard()
@@ -870,7 +993,7 @@ base_text_end = visual.TextStim(
     units='height', pos=(0, 0), height=config.experiment_messages.size,
     wrapWidth=text_wrap_width, ori=0,
     color='black', colorSpace='rgb', opacity=1,
-    languageStyle='LTR',
+    languageStyle=sentence_language_style,
     depth=-1.0
     );
 base_key_resp_end = keyboard.Keyboard()
@@ -1352,7 +1475,7 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
             msg_task_begin = expmsgs.begin_task
 
         n_trials = current_task.get_trial_count()
-        base_text_begin_task.setText(msg_task_begin)
+        safe_set_text(base_text_begin_task, msg_task_begin)
         base_key_resp_task_begin.keys = []
         base_key_resp_task_begin.rt = []
         _base_key_resp_task_begin_allKeys = []
@@ -2159,7 +2282,7 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
                 # ------Prepare to start Routine "base_next_trial"-------
                 continueRoutine = True
                 # update component parameters for each repeat
-                base_text_next_trial.setText(expmsgs.next_trial)
+                safe_set_text(base_text_next_trial, expmsgs.next_trial)
                 base_next_trial_key_resp.keys = []
                 base_next_trial_key_resp.rt = []
                 _base_next_trial_key_resp_allKeys = []
@@ -2344,7 +2467,7 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
     # update component parameters for each repeat
     output_filepath = os.path.join(output_path, f'{current_task.name}-{subject_id}.dat')
     current_task.write_results(output_filepath)
-    base_text_task_end.setText(expmsgs.task_over)
+    safe_set_text(base_text_task_end, expmsgs.task_over)
     base_key_resp_task_end.keys = []
     base_key_resp_task_end.rt = []
     _base_key_resp_task_end_allKeys = []
@@ -2711,7 +2834,7 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
             msg_task_begin = expmsgs.begin_task
 
         n_trials = current_task.get_trial_count()
-        base_text_begin_task.setText(msg_task_begin)
+        safe_set_text(base_text_begin_task, msg_task_begin)
         base_key_resp_task_begin.keys = []
         base_key_resp_task_begin.rt = []
         _base_key_resp_task_begin_allKeys = []
@@ -3580,7 +3703,7 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
                 # ------Prepare to start Routine "base_self_paced_break"-------
                 continueRoutine = True
                 # update component parameters for each repeat
-                base_text_self_paced_break.setText(expmsgs.self_paced_break)
+                safe_set_text(base_text_self_paced_break, expmsgs.self_paced_break)
                 base_key_resp_self_paced_break.keys = []
                 base_key_resp_self_paced_break.rt = []
                 _base_key_resp_self_paced_break_allKeys = []
@@ -3765,7 +3888,7 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
     # update component parameters for each repeat
     output_filepath = os.path.join(output_path, f'{current_task.name}-{subject_id}.dat')
     current_task.write_results(output_filepath)
-    base_text_task_end.setText(expmsgs.task_over)
+    safe_set_text(base_text_task_end, expmsgs.task_over)
     base_key_resp_task_end.keys = []
     base_key_resp_task_end.rt = []
     _base_key_resp_task_end_allKeys = []
@@ -4133,7 +4256,7 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
             msg_task_begin = expmsgs.begin_task
 
         n_trials = current_task.get_trial_count()
-        base_text_begin_task.setText(msg_task_begin)
+        safe_set_text(base_text_begin_task, msg_task_begin)
         base_key_resp_task_begin.keys = []
         base_key_resp_task_begin.rt = []
         _base_key_resp_task_begin_allKeys = []
@@ -4394,15 +4517,18 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
                 continueRoutine = True
                 # update component parameters for each repeat
                 sentence = current_trial.get_next_sentence()
-                sentence_string = str(sentence)
+                sentence_string = sanitize_pyglet_text(sentence.sentence_string)
                 correct_key = current_task.key_map[sentence.correct]
 
                 thisExp.addData('is_practice', current_task.do_practice)
                 thisExp.addData('ss_key_resp_sentence.sentence_string', sentence_string)
                 thisExp.addData('ss_key_resp_sentence.sentence_correct', sentence.correct)
                 thisExp.addData('ss_key_resp_sentence.correct_answer', correct_key)
+                
+                # print("DEBUG sentence repr:", repr(sentence_string))
+                # print("DEBUG chars:", [(ch, hex(ord(ch)), unicodedata.name(ch, 'UNKNOWN')) for ch in sentence_string])
 
-                ss_text_sentence.setText(sentence_string)
+                safe_set_text(ss_text_sentence, sentence_string)
                 ss_key_resp_sentence.keys = []
                 ss_key_resp_sentence.rt = []
                 _ss_key_resp_sentence_allKeys = []
@@ -5007,7 +5133,7 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
                 # ------Prepare to start Routine "base_self_paced_break"-------
                 continueRoutine = True
                 # update component parameters for each repeat
-                base_text_self_paced_break.setText(expmsgs.self_paced_break)
+                safe_set_text(base_text_self_paced_break, expmsgs.self_paced_break)
                 base_key_resp_self_paced_break.keys = []
                 base_key_resp_self_paced_break.rt = []
                 _base_key_resp_self_paced_break_allKeys = []
@@ -5192,7 +5318,7 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
     # update component parameters for each repeat
     output_filepath = os.path.join(output_path, f'{current_task.name}-{subject_id}.dat')
     current_task.write_results(output_filepath)
-    base_text_task_end.setText(expmsgs.task_over)
+    safe_set_text(base_text_task_end, expmsgs.task_over)
     base_key_resp_task_end.keys = []
     base_key_resp_task_end.rt = []
     _base_key_resp_task_end_allKeys = []
@@ -5560,7 +5686,7 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
             msg_task_begin = expmsgs.begin_task
 
         n_trials = current_task.get_trial_count()
-        base_text_begin_task.setText(msg_task_begin)
+        safe_set_text(base_text_begin_task, msg_task_begin)
         base_key_resp_task_begin.keys = []
         base_key_resp_task_begin.rt = []
         _base_key_resp_task_begin_allKeys = []
@@ -6039,8 +6165,10 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
             continueRoutine = True
             # update component parameters for each repeat
             current_trial.grid.show(False)
-            text_sstm_draw_dots.setText(expmsgs.draw_dots)
-            text_sstm_presentation_end.setText(expmsgs.word_end)
+            # print("draw_dots raw repr:", repr(expmsgs.draw_dots))
+            # print("draw_dots chars:", [(c, hex(ord(c)), unicodedata.category(c), unicodedata.name(c, 'UNKNOWN')) for c in str(expmsgs.draw_dots)])
+            safe_set_text(text_sstm_draw_dots, expmsgs.draw_dots)
+            safe_set_text(text_sstm_presentation_end, expmsgs.word_end)
             # keep track of which components have finished
             sstm_draw_requestComponents = [text_sstm_draw_dots, text_sstm_presentation_end]
             for thisComponent in sstm_draw_requestComponents:
@@ -6131,7 +6259,7 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
             current_trial.grid.show(True)
             win.mouseVisible = True
             sstm_mouse.setVisible(True)
-            sstm_text_next.setText(expmsgs.word_next)
+            safe_set_text(sstm_text_next, expmsgs.word_next)
             # setup some python lists for storing info about the sstm_mouse
             sstm_mouse.x = []
             sstm_mouse.y = []
@@ -6289,7 +6417,7 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
                 # ------Prepare to start Routine "base_next_trial"-------
                 continueRoutine = True
                 # update component parameters for each repeat
-                base_text_next_trial.setText(expmsgs.next_trial)
+                safe_set_text(base_text_next_trial, expmsgs.next_trial)
                 base_next_trial_key_resp.keys = []
                 base_next_trial_key_resp.rt = []
                 _base_next_trial_key_resp_allKeys = []
@@ -6474,6 +6602,7 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
 
     overall_output_filepath = os.path.join(output_path, f'{current_task.name}-{subject_id}.dat')
     current_task.write_overall_results(overall_output_filepath)
+    safe_set_text(text_sstm_task_end, expmsgs.task_over)
     sstm_key_resp_task_end.keys = []
     sstm_key_resp_task_end.rt = []
     _sstm_key_resp_task_end_allKeys = []
@@ -6571,7 +6700,7 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
 # ------Prepare to start Routine "base_end"-------
 continueRoutine = True
 # update component parameters for each repeat
-base_text_end.setText(expmsgs.experiment_over)
+safe_set_text(base_text_end, expmsgs.experiment_over)
 base_key_resp_end.keys = []
 base_key_resp_end.rt = []
 _base_key_resp_end_allKeys = []

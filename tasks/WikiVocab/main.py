@@ -1,14 +1,3 @@
-"""
-This file is part of WikiVocab, a local PyQt6 implementation of VocabTest.
-
-Based on the original VocabTest project: https://github.com/polvanrijn/VocabTest
-
-Original Citation:
-Pol van Rijn et al. (2023).
-Around the world in 60 words: A generative vocabulary test for online research.
-
-Copyright (C) 2024-2026 MultiplEYE Project
-"""
 import hashlib
 import os
 import time  # Add the time module
@@ -16,6 +5,7 @@ from functools import partial
 
 import arabic_reshaper
 import matplotlib.pyplot as plt
+plt.rcParams['svg.fonttype'] = 'path'
 import pandas as pd
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtGui import QPixmap
@@ -29,6 +19,16 @@ from result import MyResultWindow
 # Maximum number is 63
 NUM_OF_WORDS = 63
 
+def prepare_display_text(text, language):
+    language = str(language).lower()
+    arabic_script_langs = {'ar', 'fa', 'ur', 'ug'}
+    rtl_non_joining_langs = {'he', 'yi'}
+    if language in arabic_script_langs:
+        text = arabic_reshaper.reshape(text)
+        text = bidialg.get_display(text)
+    elif language in rtl_non_joining_langs:
+        text = bidialg.get_display(text)
+    return text
 
 def plot_text(text, file_path, font_name):
     # Calculate size based on text length
@@ -256,9 +256,8 @@ class MyMainWindow(QMainWindow):
                 img_dir = f'{self.get_result_folder()}/images'
                 os.makedirs(img_dir, exist_ok=True)
                 img_name = f'{img_dir}/{hash}.svg'
-                if self.language == 'ar':
-                    text = arabic_reshaper.reshape(text)
-                plot_text(bidialg.get_display(text), img_name, font_name)
+                display_text = prepare_display_text(text, self.language)
+                plot_text(display_text, img_name, font_name)
 
     def get_result_folder(self) -> str:
         return self.result_folder

@@ -54,50 +54,47 @@ class SentenceSpanSentence:
     def __str__(self):
         return self.sentence_string
 
-
+        
 class SentenceSpanTrialFactory:
     def __init__(self, alphabet, true_sentences, false_sentences):
         self.alphabet = alphabet
         self.true_sentences = true_sentences
         self.false_sentences = false_sentences
-        random.shuffle(self.true_sentences)
-        random.shuffle(self.false_sentences)
 
     def generate(self, list_lengths, n_trials_per_condition):
-        n_trials = len(list_lengths) * n_trials_per_condition
         trial_list_lengths = list_lengths * n_trials_per_condition
+        random.shuffle(trial_list_lengths)
 
-        extra_true = False  # these extra values will be toggled to
-        extra_false = True  # balance sampling on uneven list lengths
+        extra_true = False
+        extra_false = True
+
+        true_pool = self.true_sentences.copy()
+        false_pool = self.false_sentences.copy()
+        random.shuffle(true_pool)
+        random.shuffle(false_pool)
 
         trials = []
         for list_length in trial_list_lengths:
             trial_letters = random.sample(self.alphabet, k=list_length)
 
-            if list_length % 2:  # toggle extra value sampling
-                extra_true = not (extra_true)
-                extra_false = not (extra_false)
+            if list_length % 2:
+                extra_true = not extra_true
+                extra_false = not extra_false
 
-            n_true = list_length // 2 + extra_true * list_length % 2
-            n_false = list_length // 2 + extra_false * list_length % 2
+            n_true = list_length // 2 + extra_true * (list_length % 2)
+            n_false = list_length // 2 + extra_false * (list_length % 2)
 
-            true_sentences = self.true_sentences.copy()
-            false_sentences = self.false_sentences.copy()
+            if len(true_pool) < n_true or len(false_pool) < n_false:
+                raise ValueError("Not enough true/false sentences to build all trials.")
+
             trial_sentences = []
             for _ in range(n_true):
-                sentence_string = true_sentences.pop()
-                sentence = SentenceSpanSentence(sentence_string, True)
-                trial_sentences.append(sentence)
+                trial_sentences.append(SentenceSpanSentence(true_pool.pop(), True))
             for _ in range(n_false):
-                sentence_string = false_sentences.pop()
-                sentence = SentenceSpanSentence(sentence_string, False)
-                trial_sentences.append(sentence)
-            # print('trial_sentences:', trial_sentences)
+                trial_sentences.append(SentenceSpanSentence(false_pool.pop(), False))
 
             random.shuffle(trial_sentences)
-
-            trial = SentenceSpanTrial(trial_letters, trial_sentences)
-            trials.append(trial)
+            trials.append(SentenceSpanTrial(trial_letters, trial_sentences))
 
         random.shuffle(trials)
         return trials

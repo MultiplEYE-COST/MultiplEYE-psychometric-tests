@@ -1,22 +1,16 @@
 ﻿#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-This experiment implements the Stroop and Flanker tasks.
+This experiment was created using PsychoPy3 Experiment Builder (v2021.2.3),
+    on Sun Jan 16 16:49:37 2022
+If you publish work using this script the most relevant publication is:
 
-Based on the original stroop-simon-german project: https://github.com/DiLi-Lab/stroop-simon-german
-(The original project does not include a LICENSE file)
+    Peirce J, Gray JR, Simpson S, MacAskill M, Höchenberger R, Sogo H, Kastman E, Lindeløv JK. (2019) 
+        PsychoPy2: Experiments in behavior made easy Behav Res 51: 195. 
+        https://doi.org/10.3758/s13428-018-01193-y
 
-Based on paradigms:
-- Stroop: Stroop, J. R. (1935). Studies of interference in serial verbal reactions.
-- Flanker: Eriksen, B. A., & Eriksen, C. W. (1974). Effects of noise letters.
-
-Modifications:
-- Changed from separate Stroop + Simon to combined Stroop + Flanker
-- Added YAML-based configuration
-- Modified data output to CSV format
-
-Copyright (C) 2024-2026 MultiplEYE Project
 """
+
 from __future__ import absolute_import, division
 
 import argparse
@@ -25,6 +19,7 @@ from datetime import datetime
 
 import pandas as pd
 import yaml
+import unicodedata
 from psychopy import visual, core, data, logging
 from psychopy.constants import (NOT_STARTED, STARTED, FINISHED)
 from psychopy.hardware import keyboard
@@ -41,7 +36,6 @@ args = parser.parse_args()
 results_folder = args.participant_folder
 
 # Path to the YAML file contains the language and experiment configurations
-# Path to the YAML file contains the language and experiment configurations
 config_path = f'configs/config.yaml'
 experiment_config_path = f'configs/experiment.yaml'
 
@@ -53,6 +47,10 @@ country_code = config_data['country_code']
 lab_number = config_data['lab_number']
 random_seed = config_data['random_seed']
 font = config_data['font']
+
+rtl_langs = {'fa', 'fas', 'ar', 'he', 'ur'}
+language_style = 'RTL' if str(language).lower() in rtl_langs else 'LTR'
+display_font = 'Arial' if str(language).lower() in rtl_langs else font
 
 if os.path.exists(experiment_config_path):
     # Load the experiment configuration if the file exists
@@ -74,22 +72,36 @@ os.makedirs(output_path, exist_ok=True)
 filename = f"{output_path}" \
            f"{language}{country_code}{lab_number}" \
            f"_{participant_id}_PT{expInfo['session_id']}_{date}"
-
-# Load the instruction CSV file
+print(filename)
+# Load the instruction Excel file
 instructions_df = pd.read_excel(
-    f'languages/{language}/instructions/Stroop_Flanker_instructions_{language.lower()}.xlsx', index_col='screen')
+    f'languages/{language}/instructions/Stroop_Flanker_instructions_{language.lower()}.xlsx',
+    index_col='screen'
+)
+
 welcome_text = instructions_df.loc['Welcome_text', language]
-welcome_text = welcome_text.replace('\\n', '\n')
+welcome_text = unicodedata.normalize('NFC', welcome_text.replace('\\n', '\n').replace('\u200c', ''))
+welcome_text = ''.join(ch for ch in welcome_text if not unicodedata.combining(ch))
+
 stroop_instructions = instructions_df.loc['stroop_instructions', language]
-stroop_instructions = stroop_instructions.replace('\\n', '\n')
+stroop_instructions = unicodedata.normalize('NFC', stroop_instructions.replace('\\n', '\n').replace('\u200c', ''))
+stroop_instructions = ''.join(ch for ch in stroop_instructions if not unicodedata.combining(ch))
+
 flanker_instructions = instructions_df.loc['flanker_instructions', language]
-flanker_instructions = flanker_instructions.replace('\\n', '\n')
+flanker_instructions = unicodedata.normalize('NFC', flanker_instructions.replace('\\n', '\n').replace('\u200c', ''))
+flanker_instructions = ''.join(ch for ch in flanker_instructions if not unicodedata.combining(ch))
+
 done_text = instructions_df.loc['done_text', language]
-done_text = done_text.replace('\\n', '\n')
+done_text = unicodedata.normalize('NFC', done_text.replace('\\n', '\n').replace('\u200c', ''))
+done_text = ''.join(ch for ch in done_text if not unicodedata.combining(ch))
+
 start_warning_text = instructions_df.loc['start_warning_text', language]
-start_warning_text = start_warning_text.replace('\\n', '\n')
+start_warning_text = unicodedata.normalize('NFC', start_warning_text.replace('\\n', '\n').replace('\u200c', ''))
+start_warning_text = ''.join(ch for ch in start_warning_text if not unicodedata.combining(ch))
+
 Goodbyetext = instructions_df.loc['Goodbyetext', language]
-Goodbyetext = Goodbyetext.replace('\\n', '\n')
+Goodbyetext = unicodedata.normalize('NFC', Goodbyetext.replace('\\n', '\n').replace('\u200c', ''))
+Goodbyetext = ''.join(ch for ch in Goodbyetext if not unicodedata.combining(ch))
 
 
 # Function to get the correct_key for a given color
@@ -145,10 +157,10 @@ defaultKeyboard = keyboard.Keyboard()
 WelcomeScreenClock = core.Clock()
 Welcome_text = visual.TextStim(win=win, name='Welcome_text',
                                text=welcome_text,
-                               font=font,
+                               font=display_font,
                                pos=(0, 0), height=0.05, wrapWidth=None, ori=0.0,
                                color='black', colorSpace='rgb', opacity=None,
-                               languageStyle='LTR',
+                               languageStyle=language_style,
                                depth=0.0);
 Welcome_resp = keyboard.Keyboard()
 
@@ -156,10 +168,10 @@ Welcome_resp = keyboard.Keyboard()
 StroopInstructionsClock = core.Clock()
 stroop_instructions = visual.TextStim(win=win, name='stroop_instructions',
                                       text=stroop_instructions,
-                                      font=font,
+                                      font=display_font,
                                       pos=(0, 0), height=0.035, wrapWidth=1.5, ori=0.0,
                                       color='black', colorSpace='rgb', opacity=None,
-                                      languageStyle='LTR',
+                                      languageStyle=language_style,
                                       depth=0.0, );
 stroop_instruction_key = keyboard.Keyboard()
 
@@ -170,7 +182,7 @@ blank = visual.TextStim(win=win, name='blank',
                         font='Open Sans',
                         pos=(0, 0), height=0.1, wrapWidth=None, ori=0.0,
                         color='white', colorSpace='rgb', opacity=None,
-                        languageStyle='LTR',
+                        languageStyle=language_style,
                         depth=0.0);
 
 # Initialize components for Routine "FixationCross"
@@ -180,17 +192,17 @@ fix_cross = visual.TextStim(win=win, name='fix_cross',
                             font='Courier New',
                             pos=(0, 0), height=0.1, wrapWidth=None, ori=0.0,
                             color='white', colorSpace='rgb', opacity=None,
-                            languageStyle='LTR',
+                            languageStyle=language_style,
                             depth=0.0);
 
 # Initialize components for Routine "StroopPractice"
 StroopPracticeClock = core.Clock()
 stroop_practice_word = visual.TextStim(win=win, name='stroop_practice_word',
                                        text='',
-                                       font=font,
+                                       font=display_font,
                                        pos=(0, 0), height=0.1, wrapWidth=None, ori=0.0,
                                        color='white', colorSpace='rgb', opacity=None,
-                                       languageStyle='LTR',
+                                       languageStyle=language_style,
                                        depth=0.0);
 stroop_practice_key = keyboard.Keyboard()
 
@@ -201,27 +213,27 @@ stroop_feedback_text = visual.TextStim(win=win, name='stroop_feedback_text',
                                        font='Arial Unicode MS',
                                        pos=(0, 0), height=0.1, wrapWidth=None, ori=0.0,
                                        color='white', colorSpace='rgb', opacity=None,
-                                       languageStyle='LTR',
+                                       languageStyle=language_style,
                                        depth=-1.0);
 
 # Initialize components for Routine "StartWarning"
 StartWarningClock = core.Clock()
 start_warning_text = visual.TextStim(win=win, name='start_warning_text',
                                      text=start_warning_text,
-                                     font=font,
+                                     font=display_font,
                                      pos=(0, 0), height=0.035, wrapWidth=1.5, ori=0.0,
                                      color='black', colorSpace='rgb', opacity=None,
-                                     languageStyle='LTR',
+                                     languageStyle=language_style,
                                      depth=0.0);
 
 # Initialize components for Routine "StroopTrials"
 StroopTrialsClock = core.Clock()
 stroop_word = visual.TextStim(win=win, name='stroop_word',
                               text='',
-                              font=font,
+                              font=display_font,
                               pos=(0, 0), height=0.1, wrapWidth=None, ori=0.0,
                               color='white', colorSpace='rgb', opacity=None,
-                              languageStyle='LTR',
+                              languageStyle=language_style,
                               depth=0.0);
 stroop_key = keyboard.Keyboard()
 
@@ -229,10 +241,10 @@ stroop_key = keyboard.Keyboard()
 DoneClock = core.Clock()
 done_text = visual.TextStim(win=win, name='done_text',
                             text=done_text,
-                            font=font,
+                            font=display_font,
                             pos=(0, 0), height=0.035, wrapWidth=None, ori=0.0,
                             color='black', colorSpace='rgb', opacity=None,
-                            languageStyle='LTR',
+                            languageStyle=language_style,
                             depth=0.0);
 done_key = keyboard.Keyboard()
 
@@ -240,10 +252,10 @@ done_key = keyboard.Keyboard()
 FlankerInstructionClock = core.Clock()
 Flanker_instructions = visual.TextStim(win=win, name='Flanker_instructions',
                                        text=flanker_instructions,
-                                       font=font,
+                                       font=display_font,
                                        pos=(0, 0), height=0.035, wrapWidth=1.5, ori=0.0,
                                        color='black', colorSpace='rgb', opacity=None,
-                                       languageStyle='LTR',
+                                       languageStyle=language_style,
                                        depth=0.0
                                        );
 Flanker_instruction_key = keyboard.Keyboard()
@@ -255,7 +267,7 @@ Flanker_practice_arrows = visual.TextStim(win=win, name='Flanker_practice_arrows
                                           font='Courier New',
                                           pos=(0, 0), height=0.1, wrapWidth=None, ori=0.0,
                                           color='white', colorSpace='rgb', opacity=None,
-                                          languageStyle='LTR',
+                                          languageStyle=language_style,
                                           depth=0.0);
 Flanker_practice_key = keyboard.Keyboard()
 
@@ -266,7 +278,7 @@ Flanker_feedback_text = visual.TextStim(win=win, name='flanker_feedback_text',
                                         font='Arial Unicode MS',
                                         pos=(0, 0), height=0.1, wrapWidth=None, ori=0.0,
                                         color='white', colorSpace='rgb', opacity=None,
-                                        languageStyle='LTR',
+                                        languageStyle=language_style,
                                         depth=-1.0);
 
 # Initialize components for Routine "FlankerTrials"
@@ -276,7 +288,7 @@ Flanker_arrows = visual.TextStim(win=win, name='Flanker_arrows',
                                  font='Courier New',
                                  pos=(0, 0), height=0.1, wrapWidth=None, ori=0.0,
                                  color='white', colorSpace='rgb', opacity=None,
-                                 languageStyle='LTR',
+                                 languageStyle=language_style,
                                  depth=0.0);
 Flanker_key = keyboard.Keyboard()
 
@@ -284,10 +296,10 @@ Flanker_key = keyboard.Keyboard()
 GoodbyeScreenClock = core.Clock()
 Goodbyetext = visual.TextStim(win=win, name='Goodbyetext',
                               text=Goodbyetext,
-                              font=font,
+                              font=display_font,
                               pos=(0, 0), height=0.05, wrapWidth=1.5, ori=0.0,
                               color='black', colorSpace='rgb', opacity=None,
-                              languageStyle='LTR',
+                              languageStyle=language_style,
                               depth=0.0);
 key_goodbye = keyboard.Keyboard()
 

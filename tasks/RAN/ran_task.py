@@ -1,24 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-This file is a modification of the original py-ran-task code:
-https://github.com/bnicenboim/py-ran-task
-
-Original License: GPL-2.0 (see LICENSE file)
-Copyright (C) Bruno Nicenboim et al.
-
-Modifications:
-- Replaced Tkinter GUI with PsychoPy
-- Changed audio from tkSnack to sounddevice + soundfile
-- Added YAML-based configuration
-- Changed from letters + numbers to numbers only
-- Modified data output to CSV format with audio files
-
-Copyright (C) 2024-2026 MultiplEYE Project
+This experiment runs the RAN digit test
 """
 import argparse
 import csv
 import os
+import unicodedata
 from datetime import datetime
 
 import numpy as np
@@ -73,6 +61,9 @@ else:
     # Set default values if the file does not exist
     expInfo = {'participant_id': 999, 'session_id': 2}
     participant_id = 999
+    
+rtl_langs = {'fa', 'fas', 'ar', 'he', 'ur'}
+sentence_language_style = 'RTL' if str(language).lower() in rtl_langs else 'LTR'
 
 # Create folder for audio and csv data
 output_path = f'data/{results_folder}/RAN/'
@@ -94,6 +85,62 @@ recording = []
 recording_start_time = 0
 # Configuration of the digit task
 num_trials = 2
+
+
+def sanitize_pyglet_text(value):
+    """
+    Make text safer for PsychoPy TextStim / pyglet on Windows.
+
+    Removes:
+    - surrogate code points
+    - non-BMP characters
+    - problematic invisible/control/private-use chars
+    """
+    if value is None:
+        return ''
+    s = str(value)
+
+    # turn literal \n into actual newlines
+    s = s.replace('\\n', '\n')
+
+    # normalize line endings
+    s = s.replace('\r\n', '\n').replace('\r', '\n')
+
+    # normalize Unicode
+    s = unicodedata.normalize("NFC", s)
+
+    cleaned = []
+    for ch in s:
+        code = ord(ch)
+        cat = unicodedata.category(ch)
+
+        # Remove surrogate code points explicitly
+        if 0xD800 <= code <= 0xDFFF:
+            continue
+
+        # Remove non-BMP chars
+        if code > 0xFFFF:
+            continue
+
+        # Remove formatting/private/unassigned chars
+        if cat in {'Cf', 'Cs', 'Co', 'Cn'}:
+            continue
+
+        # Remove control chars except newline/tab
+        if cat == 'Cc' and ch not in ('\n', '\t'):
+            continue
+
+        cleaned.append(ch)
+
+    s = ''.join(cleaned)
+
+    # Defensive cleanup against malformed surrogate remnants
+    try:
+        s = s.encode('utf-16', 'surrogatepass').decode('utf-16', 'ignore')
+    except Exception:
+        pass
+
+    return s
 
 
 # Function to start recording audio asynchronously
@@ -129,9 +176,9 @@ print(sd.query_devices())
 # Load the instructions
 instructions_df = pd.read_excel(f'languages/{language}/instructions/RAN_instructions_{language.lower()}.xlsx',
                                 index_col='screen')
-welcome_text = instructions_df.loc['Welcome_text', language].replace('\\n', '\n')
-instructions = instructions_df.loc['RAN_instructions', language].replace('\\n', '\n')
-done_text = instructions_df.loc['done_text', language].replace('\\n', '\n')
+welcome_text = sanitize_pyglet_text(instructions_df.loc['Welcome_text', language])
+instructions = sanitize_pyglet_text(instructions_df.loc['RAN_instructions', language])
+done_text = sanitize_pyglet_text(instructions_df.loc['done_text', language])
 
 # save a log file for detail verbose info
 logFile = logging.LogFile(filename + '.log', level=logging.EXP)
@@ -150,14 +197,14 @@ win = visual.Window(
 
 # Display welcome message
 welcome_text = visual.TextStim(win, text=welcome_text, font=font, pos=(0, 0), height=0.12, wrapWidth=1.5, ori=0.0,
-                               color='black', colorSpace='rgb', opacity=None, languageStyle='LTR', depth=0.0);
+                               color='black', colorSpace='rgb', opacity=None, languageStyle=sentence_language_style, depth=0.0);
 welcome_text.draw()
 win.flip()
 event.waitKeys()
 
 # Display instructions
 instructions = visual.TextStim(win, text=instructions, font=font, pos=(0, 0), height=0.07, wrapWidth=1.5, ori=0.0,
-                               color='black', colorSpace='rgb', opacity=None, languageStyle='LTR', depth=0.0);
+                               color='black', colorSpace='rgb', opacity=None, languageStyle=sentence_language_style, depth=0.0);
 instructions.draw()
 win.flip()
 event.waitKeys()
@@ -168,7 +215,7 @@ for trial in range(num_trials):
     # Display fixation screen
     fixation = visual.TextStim(win=win, name='fix_cross', text='+', font='Courier New', pos=(0, 0), height=0.1,
                                wrapWidth=None, ori=0.0, color='black', colorSpace='rgb', opacity=None,
-                               languageStyle='LTR', depth=0.0);
+                               languageStyle=sentence_language_style, depth=0.0);
     fixation.draw()
     win.flip()
     core.wait(0.5)  # Show fixation for 1 second
@@ -227,7 +274,7 @@ with open(csv_filename, 'w', newline='') as csvfile:
 
 # End of task message
 end_text = visual.TextStim(win, text=done_text, font=font, pos=(0, 0), height=0.07, wrapWidth=1.5, ori=0.0,
-                           color='black', colorSpace='rgb', opacity=None, languageStyle='LTR', depth=0.0)
+                           color='black', colorSpace='rgb', opacity=None, languageStyle=sentence_language_style, depth=0.0)
 end_text.draw()
 win.flip()
 keys = event.waitKeys(keyList=['space'])
