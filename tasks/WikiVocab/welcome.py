@@ -13,6 +13,7 @@ Copyright (C) 2024-2026 MultiplEYE Project
 import os
 import re
 from datetime import datetime
+from pathlib import Path
 
 import yaml
 from PyQt6 import QtCore, QtGui, QtWidgets
@@ -20,6 +21,8 @@ from PyQt6.QtWidgets import QMainWindow
 
 from main import MyMainWindow
 from table_loader import load_table_file, resolve_table_file
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
 def is_rtl_language(language: str) -> bool:
@@ -50,7 +53,13 @@ class MyWelcomeWindow(QMainWindow):
         self.filename = exp[4]
 
         instructions_path = resolve_table_file(
-            f'languages/{self.language.upper()}/instructions/WikiVocab_instructions_{self.language.lower()}',
+            str(
+                PROJECT_ROOT
+                / 'languages'
+                / self.language.upper()
+                / 'instructions'
+                / f'WikiVocab_instructions_{self.language.lower()}'
+            ),
             file_label='WikiVocab instructions file'
         )
         instructions_df = load_table_file(instructions_path, index_col='screen')
@@ -130,8 +139,9 @@ class MyWelcomeWindow(QMainWindow):
     def get_languages(self) -> list:
         result = set()
         template = re.compile(r'(.+)\.(csv|xlsx)$')
-        for file in os.listdir("tasks/WikiVocab/vocab"):
-            m = template.match(file)
+        vocab_dir = PROJECT_ROOT / "tasks" / "WikiVocab" / "vocab"
+        for file in vocab_dir.iterdir():
+            m = template.match(file.name)
             if m:
                 result.add(m.group(1))
         return sorted(result)
@@ -140,19 +150,19 @@ class MyWelcomeWindow(QMainWindow):
         date = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
 
         # Path to the YAML file contains the language and experiment configurations
-        config_path = f'configs/config.yaml'
-        experiment_config_path = f'configs/experiment.yaml'
+        config_path = PROJECT_ROOT / 'configs' / 'config.yaml'
+        experiment_config_path = PROJECT_ROOT / 'configs' / 'experiment.yaml'
 
         # Load the YAML file
-        with open(config_path, 'r', encoding="utf-8") as file:
+        with config_path.open('r', encoding='utf-8') as file:
             config_data = yaml.safe_load(file)
         language = config_data['language']
         country_code = config_data['country_code']
         lab_number = config_data['lab_number']
 
-        if os.path.exists(experiment_config_path):
+        if experiment_config_path.exists():
             # Load the experiment configuration if the file exists
-            with open(experiment_config_path, 'r', encoding="utf-8") as file:
+            with experiment_config_path.open('r', encoding='utf-8') as file:
                 expInfo = yaml.safe_load(file)
                 participant_id_str = str(expInfo['participant_id'])
                 while len(participant_id_str) < 3:
@@ -177,11 +187,14 @@ class MyWelcomeWindow(QMainWindow):
         results_folder = self.result_folder
 
         # Create folder for audio and csv data
-        output_path = f'data/{results_folder}/WikiVocab/'
-        os.makedirs(output_path, exist_ok=True)
+        output_path = PROJECT_ROOT / 'data' / results_folder / 'WikiVocab'
+        output_path.mkdir(parents=True, exist_ok=True)
 
         # Data file name stem = absolute path + name; later add .psyexp, .csv, .log, etc
-        filename = f"{output_path}" \
-                   f"{language}{country_code}{lab_number}" \
-                   f"_{participant_id}_PT{expInfo['session_id']}_{date}"
+        filename = str(
+            output_path / (
+                f"{language}{country_code}{lab_number}"
+                f"_{participant_id}_PT{expInfo['session_id']}_{date}"
+            )
+        )
         return language, participant_id, psychopyVersion, expName, filename

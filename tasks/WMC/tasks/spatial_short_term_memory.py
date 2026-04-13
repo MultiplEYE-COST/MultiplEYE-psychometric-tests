@@ -1,6 +1,6 @@
-import os
 import random
 from itertools import product
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -409,9 +409,8 @@ class SpatialShortTermMemoryTask(GenericTask):
             self.current_trial.show(show)
 
     def write_results(self, filepath):
-        dirpath = os.path.dirname(filepath)
-        if not os.path.isdir(dirpath):
-            os.makedirs(dirpath)
+        output_path = Path(filepath)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
 
         self.scorer.compute_scores()
 
@@ -420,28 +419,27 @@ class SpatialShortTermMemoryTask(GenericTask):
         self.scorer.trial_scores['NumDot'] = pd.to_numeric(
             self.scorer.trial_scores['NumDot'], downcast='integer')
 
-        with open(filepath, 'w') as f:
+        with output_path.open('w') as f:
             f.write(f'{self.scorer.date} Spatual Short-Term Memory Task data\n')
 
-        self.scorer.trial_scores.to_csv(filepath, mode='a', sep=' ',
+        self.scorer.trial_scores.to_csv(output_path, mode='a', sep=' ',
                                         float_format='%.3f')
 
-        with open(filepath, 'a') as f:
+        with output_path.open('a') as f:
             f.write('\n')
             f.write('------------------------------------------\n')
             f.write('\n')
 
-        self.scorer.dot_scores.to_csv(filepath, mode='a', sep=' ')
+        self.scorer.dot_scores.to_csv(output_path, mode='a', sep=' ')
 
     def write_overall_results(self, filepath):
-        dirpath = os.path.dirname(filepath)
-        if not os.path.isdir(dirpath):
-            os.makedirs(dirpath)
+        output_path = Path(filepath)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
 
         max_possible_score = sum([len(trial.sequence) * 2 - 2
                                   for trial in self.trials])
 
-        with open(filepath, 'a') as f:
+        with output_path.open('a') as f:
             f.write(f'SubID Score Date Time {max_possible_score}\n')
             f.write(f'{self.scorer.subject_id} '
                     f'{self.scorer.trial_scores.Score.sum()} '

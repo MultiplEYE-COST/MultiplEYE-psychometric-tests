@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-import os
 import platform
 import subprocess
 import sys
@@ -13,14 +12,14 @@ import yaml
 from gooey import Gooey, GooeyParser
 from psychopy import core
 
-PARENT_FOLDER = Path(__file__).parent
+PARENT_FOLDER = Path(__file__).resolve().parent
 
 # Path to the YAML file contains the language and experiment configurations
-config_path = f'{PARENT_FOLDER}/configs/config.yaml'
-experiment_config_path = f'{PARENT_FOLDER}/configs/experiment.yaml'
+CONFIG_PATH = PARENT_FOLDER / 'configs' / 'config.yaml'
+EXPERIMENT_CONFIG_PATH = PARENT_FOLDER / 'configs' / 'experiment.yaml'
 
 # Load the YAML file
-with open(config_path, 'r', encoding="utf-8") as file:
+with CONFIG_PATH.open('r', encoding='utf-8') as file:
     config_data = yaml.safe_load(file)
 language = config_data['language']
 full_language = config_data['full_language']
@@ -33,14 +32,14 @@ stroop_flanker = config_data['stroop_flanker']
 plab = config_data['plab']
 wiki_vocab = config_data['wiki_vocab']
 
-LANG_DIR = f'{PARENT_FOLDER}/languages/{language}/ui_data/interface_language/'
-IMAGE_DIR = f'{PARENT_FOLDER}/languages/{language}/ui_data/interface_icons/'
-if not os.path.exists(f'{LANG_DIR}/experiment_interface_{language.lower()}.json'):
+LANG_DIR = PARENT_FOLDER / 'languages' / language / 'ui_data' / 'interface_language'
+IMAGE_DIR = PARENT_FOLDER / 'languages' / language / 'ui_data' / 'interface_icons'
+if not (LANG_DIR / f'experiment_interface_{language.lower()}.json').exists():
     GUI_LANG = 'experiment_interface_en'
 else:
     GUI_LANG = f'experiment_interface_{language.lower()}'
 
-with open(f'{LANG_DIR}/{GUI_LANG}.json', 'r', encoding='utf-8') as translation_file:
+with (LANG_DIR / f'{GUI_LANG}.json').open('r', encoding='utf-8') as translation_file:
     translations = json.load(translation_file)
 
 
@@ -207,9 +206,11 @@ def parse_args():
     return args
 
 
-def run_script(script_path, part_folder=None):
+def run_script(script_path: Path, part_folder: str | None = None):
     try:
-        command = ['python', script_path, '--participant_folder', part_folder]
+        command = [sys.executable, str(script_path)]
+        if part_folder is not None:
+            command.extend(['--participant_folder', part_folder])
         result = subprocess.run(command, check=True, text=True, capture_output=False)
         print("Output:", result.stdout)
         print("Errors:", result.stderr)
@@ -225,24 +226,29 @@ if __name__ == '__main__':
     arguments = parse_args()
     arguments['system'] = system
 
-    data_collection_folder = f'{PARENT_FOLDER}/data/MultiplEYE_{arguments["language"].upper()}_{arguments["country_code"].upper()}_{arguments["lab_number"]}_{arguments["year"]}'
-    participant_folder = (f'{data_collection_folder}/{arguments["participant_id"]:03}_{arguments["language"].upper()}_'
-                          f'{arguments["country_code"].upper()}_{arguments["lab_number"]}_PT{arguments["session_id"]}/')
+    study_folder_name = (
+        f'MultiplEYE_{arguments["language"].upper()}_{arguments["country_code"].upper()}_'
+        f'{arguments["lab_number"]}_{arguments["year"]}'
+    )
+    participant_folder_name = (
+        f'{arguments["participant_id"]:03}_{arguments["language"].upper()}_'
+        f'{arguments["country_code"].upper()}_{arguments["lab_number"]}_PT{arguments["session_id"]}'
+    )
+    data_collection_folder = PARENT_FOLDER / 'data' / study_folder_name
+    participant_folder = data_collection_folder / participant_folder_name
+    participant_folder_relative = str(Path(study_folder_name) / participant_folder_name)
 
-    participant_folder_relative = (f'MultiplEYE_{arguments["language"].upper()}_{arguments["country_code"].upper()}_{arguments["lab_number"]}_{arguments["year"]}/{arguments["participant_id"]:03}_{arguments["language"].upper()}_'
-                                f'{arguments["country_code"].upper()}_{arguments["lab_number"]}_PT{arguments["session_id"]}/')
+    participant_folder.mkdir(parents=True, exist_ok=True)
+    participant_config_path = participant_folder / (
+        f'{arguments["participant_id"]:03}_{arguments["language"].upper()}_'
+        f'{arguments["country_code"].upper()}_{arguments["lab_number"]}_PT{arguments["session_id"]}.yaml'
+    )
 
-
-    os.makedirs(participant_folder, exist_ok=True)
-    participant_config_path = f'{participant_folder}/' \
-                              f'{arguments["participant_id"]:03}_{arguments["language"].upper()}_{arguments["country_code"].upper()}' \
-                              f'_{arguments["lab_number"]}_PT{arguments["session_id"]}.yaml'
-
-    with open(experiment_config_path, 'w', encoding='utf-8') as file:  # cache the arguments
+    with EXPERIMENT_CONFIG_PATH.open('w', encoding='utf-8') as file:  # cache the arguments
         yaml.dump(arguments, file)
 
-    path_to_tasks = os.path.abspath('tasks/')
-    sys.path.insert(0, path_to_tasks)  # Add tasks directory to Python path
+    path_to_tasks = (PARENT_FOLDER / 'tasks').resolve()
+    sys.path.insert(0, str(path_to_tasks))  # Add tasks directory to Python path
 
     # this is some work around to make sure that the arguments are set correctly.
     # see https://github.com/chriskiehl/Gooey/issues/148
@@ -255,58 +261,60 @@ if __name__ == '__main__':
     # save the random seed used for the participant
     arguments['random_seed'] = random_seed
 
-    with open(participant_config_path, 'w') as file:
+    with participant_config_path.open('w', encoding='utf-8') as file:
         yaml.dump(arguments, file)
 
     if wmc and arguments['wmc']:
         print("Running WMC")
         if system == 'Windows':
             print("Running WMC on Windows")
-            run_script('tasks/WMC/wmc_windows.py', part_folder=participant_folder_relative)
+            run_script(PARENT_FOLDER / 'tasks' / 'WMC' / 'wmc_windows.py', part_folder=participant_folder_relative)
         elif system == 'Linux':
-            print("Running WMC on Linux")
-            run_script('tasks/WMC/wmc_linux.py', part_folder=participant_folder_relative)
+            raise RuntimeError(
+                "The WMC (Working Memory Capacity) task is not currently supported on Linux systems.\n"
+                "To continue, please run the experiment on a Mac or Windows computer. "
+            )
         else:
             print("Running WMC on Mac")
-            run_script('tasks/WMC/wmc_mac.py', part_folder=participant_folder_relative)
+            run_script(PARENT_FOLDER / 'tasks' / 'WMC' / 'wmc_mac.py', part_folder=participant_folder_relative)
         arguments['run_wmc'] = 'success'
 
-        with open(participant_config_path, 'w') as file:
+        with participant_config_path.open('w', encoding='utf-8') as file:
             yaml.dump(arguments, file)
 
     if ran and arguments['ran']:
         print("Running RAN")
-        run_script('tasks/RAN/ran_task.py', part_folder=participant_folder_relative)
+        run_script(PARENT_FOLDER / 'tasks' / 'RAN' / 'ran_task.py', part_folder=participant_folder_relative)
         arguments['run_ran'] = 'success'
 
-        with open(participant_config_path, 'w') as file:
+        with participant_config_path.open('w', encoding='utf-8') as file:
             yaml.dump(arguments, file)
 
     if stroop_flanker and arguments['stroop_flanker']:
         print("Running Stroop Flanker")
-        run_script('tasks/Stroop-Flanker/stroop_flanker.py', part_folder=participant_folder_relative)
+        run_script(PARENT_FOLDER / 'tasks' / 'Stroop-Flanker' / 'Stroop_Flanker.py', part_folder=participant_folder_relative)
         arguments['run_stroop_flanker'] = 'success'
 
-        with open(participant_config_path, 'w') as file:
+        with participant_config_path.open('w', encoding='utf-8') as file:
             yaml.dump(arguments, file)
 
     if plab and arguments['plab']:
         print("Running PLAB")
-        run_script('tasks/PLAB/plab.py', part_folder=participant_folder_relative)
+        run_script(PARENT_FOLDER / 'tasks' / 'PLAB' / 'plab.py', part_folder=participant_folder_relative)
         arguments['run_plab'] = 'success'
 
-        with open(participant_config_path, 'w') as file:
+        with participant_config_path.open('w', encoding='utf-8') as file:
             yaml.dump(arguments, file)
 
     if wiki_vocab and arguments['wiki_vocab']:
         print("Running WikiVocab")
-        run_script('tasks/WikiVocab/app.py', part_folder=participant_folder_relative)
+        run_script(PARENT_FOLDER / 'tasks' / 'WikiVocab' / 'app.py', part_folder=participant_folder_relative)
         arguments['run_wiki_vocab'] = 'success'
 
-        with open(participant_config_path, 'w') as file:
+        with participant_config_path.open('w', encoding='utf-8') as file:
             yaml.dump(arguments, file)
 
-    with open(participant_config_path, 'w') as file:
+    with participant_config_path.open('w', encoding='utf-8') as file:
         yaml.dump(arguments, file)
 
     core.quit()

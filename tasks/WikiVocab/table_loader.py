@@ -2,6 +2,7 @@ import os
 import re
 import tempfile
 import zipfile
+from pathlib import Path
 
 import pandas as pd
 
@@ -11,12 +12,13 @@ def resolve_table_file(base_path_without_ext, file_label='input file'):
     Resolve a table file path, preferring xlsx but allowing csv.
     """
     candidate_extensions = ('.xlsx', '.csv')
+    base_path = Path(base_path_without_ext)
     for extension in candidate_extensions:
-        candidate_path = f'{base_path_without_ext}{extension}'
-        if os.path.exists(candidate_path):
-            return candidate_path
+        candidate_path = base_path.with_suffix(extension)
+        if candidate_path.exists():
+            return str(candidate_path)
 
-    tried_paths = ", ".join(f"{base_path_without_ext}{ext}" for ext in candidate_extensions)
+    tried_paths = ", ".join(str(base_path.with_suffix(ext)) for ext in candidate_extensions)
     raise FileNotFoundError(f"Could not find {file_label}. Tried: {tried_paths}")
 
 
@@ -24,7 +26,8 @@ def load_table_file(table_path, **kwargs):
     """
     Load a tabular file from csv/xlsx based on file extension.
     """
-    if table_path.endswith('.csv'):
+    table_path = Path(table_path)
+    if table_path.suffix.lower() == '.csv':
         return pd.read_csv(table_path, **kwargs)
 
     # pandas/openpyxl can fail on malformed xlsx merge metadata in some files.
@@ -33,9 +36,8 @@ def load_table_file(table_path, **kwargs):
     try:
         return pd.read_excel(table_path, **excel_kwargs)
     except Exception as excel_error:
-        base_path, _ = os.path.splitext(table_path)
-        fallback_csv_path = f'{base_path}.csv'
-        if os.path.exists(fallback_csv_path):
+        fallback_csv_path = table_path.with_suffix('.csv')
+        if fallback_csv_path.exists():
             return pd.read_csv(fallback_csv_path, **kwargs)
 
         # Final fallback: strip malformed merge metadata from workbook XML
@@ -61,7 +63,7 @@ def load_table_file(table_path, **kwargs):
             try:
                 return pd.read_excel(sanitized_path, **excel_kwargs)
             finally:
-                if os.path.exists(sanitized_path):
+                if Path(sanitized_path).exists():
                     os.remove(sanitized_path)
         except Exception:
             raise excel_error

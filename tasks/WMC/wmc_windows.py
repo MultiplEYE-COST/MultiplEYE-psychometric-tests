@@ -20,6 +20,7 @@ import argparse
 import os
 import re
 import unicodedata
+from pathlib import Path
 
 from psychopy import prefs 
 
@@ -53,11 +54,12 @@ results_folder = args.participant_folder
 date = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')  # add a simple timestamp
 
 # Path to the YAML file contains the language and experiment configurations
-config_path = f'configs/config.yaml'
-experiment_config_path = f'configs/experiment.yaml'
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+config_path = PROJECT_ROOT / 'configs' / 'config.yaml'
+experiment_config_path = PROJECT_ROOT / 'configs' / 'experiment.yaml'
 
 # Load the YAML file
-with open(config_path, 'r', encoding="utf-8") as file:
+with config_path.open('r', encoding='utf-8') as file:
     config_data = yaml.safe_load(file)
 language = config_data['language']
 country_code = config_data['country_code']
@@ -68,9 +70,9 @@ font = config_data['font']
 rtl_langs = {'fa', 'fas', 'ar', 'he', 'ur'}
 sentence_language_style = 'Arabic' if str(language).lower() in rtl_langs else 'LTR'
 
-if os.path.exists(experiment_config_path):
+if experiment_config_path.exists():
     # Load the experiment configuration if the file exists
-    with open(experiment_config_path, 'r', encoding="utf-8") as file:
+    with experiment_config_path.open('r', encoding='utf-8') as file:
         expInfo = yaml.safe_load(file)
         participant_id_str = str(expInfo['participant_id'])
         while len(participant_id_str) < 3:
@@ -100,15 +102,18 @@ else:
     core.quit()
 
 # Create folder for audio and csv data
-output_path = f'data/{results_folder}/WMC/'
-os.makedirs(output_path, exist_ok=True)
-rendered_text_dir = os.path.join(output_path, f"rendered_text_{date}")
-os.makedirs(rendered_text_dir, exist_ok=True)
+output_path = PROJECT_ROOT / 'data' / results_folder / 'WMC'
+output_path.mkdir(parents=True, exist_ok=True)
+rendered_text_dir = output_path / f"rendered_text_{date}"
+rendered_text_dir.mkdir(parents=True, exist_ok=True)
 
 # Data file name stem = absolute path + name; later add .psyexp, .csv, .log, etc
-filename = f"{output_path}" \
-           f"{language}{country_code}{lab_number}" \
-           f"_{participant_id}_PT{expInfo['session_id']}_{date}"
+filename = str(
+    output_path / (
+        f"{language}{country_code}{lab_number}"
+        f"_{participant_id}_PT{expInfo['session_id']}_{date}"
+    )
+)
 
 # An ExperimentHandler isn't essential but helps with data saving
 thisExp = data.ExperimentHandler(
@@ -256,13 +261,13 @@ def prepare_psychopy_text(value):
 def resolve_font_path(preferred_font_name):
     try:
         path = font_manager.findfont(preferred_font_name, fallback_to_default=False)
-        if path and os.path.exists(path):
+        if path and Path(path).exists():
             return path
     except Exception:
         pass
 
     fallback = font_manager.findfont("DejaVu Sans")
-    if fallback and os.path.exists(fallback):
+    if fallback and Path(fallback).exists():
         return fallback
     raise FileNotFoundError(f"Could not resolve a font path for '{preferred_font_name}'.")
 
@@ -386,7 +391,7 @@ def render_rtl_text_for_stim(stim, text):
         draw.text((x, y), line, font=font_obj, fill=(0, 0, 0, 255))
         y += h + line_spacing_px
 
-    out_path = os.path.join(rendered_text_dir, f"{stim.name}_{rtl_image_counter}.png")
+    out_path = str(rendered_text_dir / f"{stim.name}_{rtl_image_counter}.png")
     rtl_image_counter += 1
     image.save(out_path)
     stim.setImage(out_path)
@@ -2661,7 +2666,7 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
     # ------Prepare to start Routine "base_task_end"-------
     continueRoutine = True
     # update component parameters for each repeat
-    output_filepath = os.path.join(output_path, f'{current_task.name}-{subject_id}.dat')
+    output_filepath = str(output_path / f'{current_task.name}-{subject_id}.dat')
     current_task.write_results(output_filepath)
     safe_set_text(base_text_task_end, expmsgs.task_over)
     base_key_resp_task_end.keys = []
@@ -4082,7 +4087,7 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
     # ------Prepare to start Routine "base_task_end"-------
     continueRoutine = True
     # update component parameters for each repeat
-    output_filepath = os.path.join(output_path, f'{current_task.name}-{subject_id}.dat')
+    output_filepath = str(output_path / f'{current_task.name}-{subject_id}.dat')
     current_task.write_results(output_filepath)
     safe_set_text(base_text_task_end, expmsgs.task_over)
     base_key_resp_task_end.keys = []
@@ -5512,7 +5517,7 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
     # ------Prepare to start Routine "base_task_end"-------
     continueRoutine = True
     # update component parameters for each repeat
-    output_filepath = os.path.join(output_path, f'{current_task.name}-{subject_id}.dat')
+    output_filepath = str(output_path / f'{current_task.name}-{subject_id}.dat')
     current_task.write_results(output_filepath)
     safe_set_text(base_text_task_end, expmsgs.task_over)
     base_key_resp_task_end.keys = []
@@ -6806,10 +6811,10 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
     # ------Prepare to start Routine "sstm_task_end"-------
     continueRoutine = True
     # update component parameters for each repeat
-    detailed_output_filepath = os.path.join(output_path, 'sstm_detailed', f'{current_task.name}-{subject_id}.dat')
+    detailed_output_filepath = str(output_path / 'sstm_detailed' / f'{current_task.name}-{subject_id}.dat')
     current_task.write_results(detailed_output_filepath)
 
-    overall_output_filepath = os.path.join(output_path, f'{current_task.name}-{subject_id}.dat')
+    overall_output_filepath = str(output_path / f'{current_task.name}-{subject_id}.dat')
     current_task.write_overall_results(overall_output_filepath)
     safe_set_text(text_sstm_task_end, expmsgs.task_over)
     sstm_key_resp_task_end.keys = []

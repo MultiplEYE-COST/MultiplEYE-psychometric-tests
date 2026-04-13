@@ -17,6 +17,7 @@ import os
 import re
 import unicodedata
 from datetime import datetime
+from pathlib import Path
 
 import arabic_reshaper
 import numpy as np
@@ -40,11 +41,12 @@ results_folder = args.participant_folder
 
 # ========================================= Config =========================================================
 
-config_path = 'configs/config.yaml'
-experiment_config_path = 'configs/experiment.yaml'
-digits_path = 'tasks/RAN/digits.yaml'
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+config_path = PROJECT_ROOT / 'configs' / 'config.yaml'
+experiment_config_path = PROJECT_ROOT / 'configs' / 'experiment.yaml'
+digits_path = PROJECT_ROOT / 'tasks' / 'RAN' / 'digits.yaml'
 
-with open(config_path, 'r', encoding="utf-8") as file:
+with config_path.open('r', encoding='utf-8') as file:
     config_data = yaml.safe_load(file)
 
 language = str(config_data['language']).strip()
@@ -55,7 +57,7 @@ font_name = config_data['font']
 
 np.random.seed(random_seed)
 
-with open(digits_path, 'r', encoding="utf-8") as file:
+with digits_path.open('r', encoding='utf-8') as file:
     ran_data = yaml.safe_load(file)
 
 digits = [
@@ -63,8 +65,8 @@ digits = [
     for block in ran_data['items']['numbers']
 ]
 
-if os.path.exists(experiment_config_path):
-    with open(experiment_config_path, 'r', encoding="utf-8") as file:
+if experiment_config_path.exists():
+    with experiment_config_path.open('r', encoding='utf-8') as file:
         expInfo = yaml.safe_load(file)
         participant_id_str = str(expInfo['participant_id'])
         while len(participant_id_str) < 3:
@@ -81,12 +83,13 @@ rtl_langs = {'fa', 'fas', 'ar', 'ara', 'ur', 'urd', 'he', 'heb'}
 
 def resolve_table_file(base_path_without_ext, file_label='input file'):
     candidate_extensions = ('.xlsx', '.csv')
+    base_path = Path(base_path_without_ext)
     for extension in candidate_extensions:
-        candidate_path = f'{base_path_without_ext}{extension}'
-        if os.path.exists(candidate_path):
-            return candidate_path
+        candidate_path = base_path.with_suffix(extension)
+        if candidate_path.exists():
+            return str(candidate_path)
 
-    tried_paths = ", ".join(f"{base_path_without_ext}{ext}" for ext in candidate_extensions)
+    tried_paths = ", ".join(str(base_path.with_suffix(ext)) for ext in candidate_extensions)
     raise FileNotFoundError(f"Could not find {file_label}. Tried: {tried_paths}")
 
 
@@ -185,13 +188,13 @@ def resolve_font_path(preferred_font_name):
     """
     try:
         path = font_manager.findfont(preferred_font_name, fallback_to_default=False)
-        if path and os.path.exists(path):
+        if path and Path(path).exists():
             return path
     except Exception:
         pass
 
     fallback = font_manager.findfont("DejaVu Sans")
-    if fallback and os.path.exists(fallback):
+    if fallback and Path(fallback).exists():
         return fallback
 
     raise FileNotFoundError(
@@ -354,7 +357,7 @@ def show_rendered_text_screen(
     image_name,
     font_size
 ):
-    img_path = os.path.join(output_dir, image_name)
+    img_path = Path(output_dir) / image_name
 
     render_text_screen_to_image(
         text=text,
@@ -365,12 +368,12 @@ def show_rendered_text_screen(
         font_size=font_size,
         margin_px=180,
         line_spacing_px=max(20, font_size // 3),
-        out_path=img_path
+        out_path=str(img_path)
     )
 
     stim = visual.ImageStim(
         win=win,
-        image=img_path,
+        image=str(img_path),
         pos=(0, 0),
         size=(1.8, 1.1),
         units='norm'
@@ -428,23 +431,24 @@ def show_text_screen(win, text, language_code, font_name, font_path, output_dir,
 
 # ========================================= Paths / outputs =========================================================
 
-output_path = f'data/{results_folder}/RAN/'
-os.makedirs(output_path, exist_ok=True)
+output_path = PROJECT_ROOT / 'data' / results_folder / 'RAN'
+output_path.mkdir(parents=True, exist_ok=True)
 
-filename = (
-    f"{output_path}"
+filename = str(
+    output_path / (
     f"{language}{country_code}{lab_number}"
     f"_{participant_id}_PT{expInfo['session_id']}_{date}"
+    )
 )
 
-save_audio_path = (
-    f"{output_path}/audio_{language}{country_code}{lab_number}"
-    f"_{participant_id}_PT{expInfo['session_id']}_{date}/"
+save_audio_path = output_path / (
+    f"audio_{language}{country_code}{lab_number}"
+    f"_{participant_id}_PT{expInfo['session_id']}_{date}"
 )
-os.makedirs(save_audio_path, exist_ok=True)
+save_audio_path.mkdir(parents=True, exist_ok=True)
 
-rendered_text_dir = os.path.join(output_path, f"rendered_text_{date}")
-os.makedirs(rendered_text_dir, exist_ok=True)
+rendered_text_dir = output_path / f"rendered_text_{date}"
+rendered_text_dir.mkdir(parents=True, exist_ok=True)
 
 save_csv_path = output_path
 
@@ -490,7 +494,7 @@ def stop_and_save_recording(stream, filename_out, samplerate=44100):
 print(sd.query_devices())
 
 instructions_path = resolve_table_file(
-    f'languages/{language}/instructions/RAN_instructions_{language.lower()}',
+    str(PROJECT_ROOT / 'languages' / language / 'instructions' / f'RAN_instructions_{language.lower()}'),
     file_label='RAN instructions file'
 )
 
@@ -612,8 +616,7 @@ for trial in range(num_trials):
     matrix_display.draw()
     win.flip()
 
-    audio_filename = (
-        f"{save_audio_path}"
+    audio_filename = save_audio_path / (
         f"{language}{country_code}{lab_number}_{expInfo['participant_id']}"
         f"_S{expInfo['session_id']}_trial{trial + 1}.wav"
     )
@@ -645,13 +648,12 @@ for trial in range(num_trials):
 
 # ========================================= Save results =========================================================
 
-csv_filename = (
-    f"{save_csv_path}"
+csv_filename = save_csv_path / (
     f"{language}{country_code}{lab_number}_{expInfo['participant_id']}"
     f"_S{expInfo['session_id']}_{date}.csv"
 )
 
-with open(csv_filename, 'w', newline='', encoding='utf-8') as csvfile:
+with csv_filename.open('w', newline='', encoding='utf-8') as csvfile:
     csvwriter = csv.writer(csvfile)
     csvwriter.writerow(['Participant_id', 'Session_id', 'Trial', 'Reading_Time', 'Digits_Matrix'])
     csvwriter.writerows(results)

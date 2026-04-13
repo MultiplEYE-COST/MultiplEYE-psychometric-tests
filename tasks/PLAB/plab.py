@@ -27,6 +27,7 @@ import os
 import re
 import unicodedata
 from datetime import datetime
+from pathlib import Path
 
 import pandas as pd
 import yaml
@@ -54,10 +55,11 @@ results_folder = args.participant_folder
 
 # ========================================= Config =========================================================
 
-config_path = 'configs/config.yaml'
-experiment_config_path = 'configs/experiment.yaml'
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+config_path = PROJECT_ROOT / 'configs' / 'config.yaml'
+experiment_config_path = PROJECT_ROOT / 'configs' / 'experiment.yaml'
 
-with open(config_path, 'r', encoding="utf-8") as file:
+with config_path.open('r', encoding='utf-8') as file:
     config_data = yaml.safe_load(file)
 
 language = str(config_data['language']).strip()
@@ -69,8 +71,8 @@ font = config_data['font']
 RTL_LANGS = {'fa', 'fas', 'ar', 'ara', 'he', 'heb', 'ur', 'urd'}
 is_rtl = str(language).lower() in RTL_LANGS
 
-if os.path.exists(experiment_config_path):
-    with open(experiment_config_path, 'r', encoding="utf-8") as file:
+if experiment_config_path.exists():
+    with experiment_config_path.open('r', encoding='utf-8') as file:
         expInfo = yaml.safe_load(file)
         participant_id_str = str(expInfo['participant_id'])
         while len(participant_id_str) < 3:
@@ -82,16 +84,17 @@ else:
 
 # ========================================= Paths =========================================================
 
-output_path = f'data/{results_folder}/PLAB/'
-os.makedirs(output_path, exist_ok=True)
+output_path = PROJECT_ROOT / 'data' / results_folder / 'PLAB'
+output_path.mkdir(parents=True, exist_ok=True)
 
-rendered_text_dir = os.path.join(output_path, f"rendered_text_{date}")
-os.makedirs(rendered_text_dir, exist_ok=True)
+rendered_text_dir = output_path / f'rendered_text_{date}'
+rendered_text_dir.mkdir(parents=True, exist_ok=True)
 
-filename = (
-    f"{output_path}"
+filename = str(
+    output_path / (
     f"{language}{country_code}{lab_number}"
     f"_{participant_id}_PT{expInfo['session_id']}_{date}"
+    )
 )
 
 # ========================================= Helpers =========================================================
@@ -173,25 +176,26 @@ def visual_line(line, rtl=False):
 
 def resolve_conditions_file(base_path_without_ext, file_label='input file'):
     candidate_extensions = ('.xlsx', '.csv')
+    base_path = Path(base_path_without_ext)
     for extension in candidate_extensions:
-        candidate_path = f'{base_path_without_ext}{extension}'
-        if os.path.exists(candidate_path):
-            return candidate_path
+        candidate_path = base_path.with_suffix(extension)
+        if candidate_path.exists():
+            return str(candidate_path)
 
-    tried_paths = ", ".join(f"{base_path_without_ext}{ext}" for ext in candidate_extensions)
+    tried_paths = ", ".join(str(base_path.with_suffix(ext)) for ext in candidate_extensions)
     raise FileNotFoundError(f"Could not find {file_label}. Tried: {tried_paths}")
 
 
 def resolve_font_path(preferred_font_name):
     try:
         path = font_manager.findfont(preferred_font_name, fallback_to_default=False)
-        if path and os.path.exists(path):
+        if path and Path(path).exists():
             return path
     except Exception:
         pass
 
     fallback = font_manager.findfont("DejaVu Sans")
-    if fallback and os.path.exists(fallback):
+    if fallback and Path(fallback).exists():
         return fallback
 
     raise FileNotFoundError(f"Could not resolve a font path for '{preferred_font_name}'.")
@@ -344,12 +348,12 @@ def show_text_screen(
     LTR languages: keep original PsychoPy TextStim style
     """
     if str(language_code).lower() in RTL_LANGS:
-        img_path = os.path.join(output_dir, image_name)
+        img_path = Path(output_dir) / image_name
         render_text_screen_to_image(
             text=text,
             language_code=language_code,
             font_path=font_path,
-            out_path=img_path,
+            out_path=str(img_path),
             image_width=image_width,
             image_height=image_height,
             font_size=rtl_font_size_large if height >= 0.05 else rtl_font_size_small,
@@ -357,7 +361,7 @@ def show_text_screen(
         )
         stim = visual.ImageStim(
             win=win,
-            image=img_path,
+            image=str(img_path),
             pos=(0, 0),
             size=(1.8, 1.5),
             units='norm',
@@ -570,7 +574,7 @@ psychopyVersion = '2025.1.1'
 expName = 'PLAB'
 
 instructions_path = resolve_conditions_file(
-    f'languages/{language}/instructions/PLAB_instructions_{language.lower()}',
+    str(PROJECT_ROOT / 'languages' / language / 'instructions' / f'PLAB_instructions_{language.lower()}'),
     file_label='PLAB instructions file'
 )
 if instructions_path.endswith('.csv'):
@@ -583,10 +587,10 @@ done_text_str = normalize_text(instructions_df.loc['done_text', language])
 Goodbyetext_str = normalize_text(instructions_df.loc['Goodbye_text', language])
 PLAB_instructions_str = normalize_text(instructions_df.loc['PLAB_instructions', language])
 
-task1_img = f'languages/{language}/PLAB/Plab_part4_task1_{language.lower()}.png'
-task2_img = f'languages/{language}/PLAB/Plab_part4_task2_{language.lower()}.png'
+task1_img = str(PROJECT_ROOT / 'languages' / language / 'PLAB' / f'Plab_part4_task1_{language.lower()}.png')
+task2_img = str(PROJECT_ROOT / 'languages' / language / 'PLAB' / f'Plab_part4_task2_{language.lower()}.png')
 PlabStim = resolve_conditions_file(
-    f'languages/{language}/PLAB/PlabStim_{language.lower()}',
+    str(PROJECT_ROOT / 'languages' / language / 'PLAB' / f'PlabStim_{language.lower()}'),
     file_label='PLAB stimulus file'
 )
 
@@ -720,13 +724,13 @@ def run_plab_block(trials, task_name, task_image_stim, keyboard_component):
         ]
         correct_key = str(this_trial['correct_key'])
 
-        block_img_path = os.path.join(rendered_text_dir, f"{task_name}_{question_id}_block.png")
+        block_img_path = rendered_text_dir / f"{task_name}_{question_id}_block.png"
         block_img_path, option_boxes_px = render_question_option_block_to_image(
             question=question,
             options=options,
             language_code=language,
             font_path=font_path,
-            out_path=block_img_path,
+            out_path=str(block_img_path),
             image_width=1600,
             image_height=700,
             question_font_size=42 if is_rtl else 44,
@@ -738,7 +742,7 @@ def run_plab_block(trials, task_name, task_image_stim, keyboard_component):
 
         block_stim = visual.ImageStim(
             win=win,
-            image=block_img_path,
+            image=str(block_img_path),
             pos=(0, -0.28),
             size=(1.15, 0.48),
             units='height',
@@ -884,18 +888,18 @@ show_text_screen(
 )
 
 if is_rtl:
-    goodbye_img_path = os.path.join(rendered_text_dir, 'goodbye.png')
+    goodbye_img_path = rendered_text_dir / 'goodbye.png'
     render_text_screen_to_image(
         text=Goodbyetext_str,
         language_code=language,
         font_path=font_path,
-        out_path=goodbye_img_path,
+        out_path=str(goodbye_img_path),
         font_size=52,
         line_spacing_px=24
     )
     goodbye_stim = visual.ImageStim(
         win=win,
-        image=goodbye_img_path,
+        image=str(goodbye_img_path),
         pos=(0, 0),
         size=(1.8, 1.1),
         units='norm',

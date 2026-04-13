@@ -1,5 +1,5 @@
-import os
 import random
+from pathlib import Path
 
 import pandas as pd
 import yaml
@@ -118,8 +118,9 @@ class SentenceSpanTask(GenericTask):
         self.init_results(config)
 
     def load_sentences(self, language, encoding):
-        filepath = os.path.join('languages/', f'{language}/WMC/sentence_span_sentences_{language.lower()}.yaml')
-        with open(filepath, mode='r', encoding=encoding) as f:
+        project_root = Path(__file__).resolve().parents[3]
+        filepath = project_root / 'languages' / language / 'WMC' / f'sentence_span_sentences_{language.lower()}.yaml'
+        with filepath.open(mode='r', encoding=encoding) as f:
             self.sentences = yaml.safe_load(f)
 
         self.sentences['practice'][True] = SentenceSpanTask.strip_sentences(

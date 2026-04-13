@@ -7,7 +7,7 @@ Original License: MIT (see LICENSE file)
 Copyright (C) 2024-2026 MultiplEYE Project
 """
 
-import os
+from pathlib import Path
 
 import pandas as pd
 
@@ -104,9 +104,8 @@ class GenericTask:
         self.current_trial = None
 
     def write_results(self, filepath):
-        dirpath = os.path.dirname(filepath)
-        if not os.path.isdir(dirpath):
-            os.makedirs(dirpath)
+        output_path = Path(filepath)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
 
-        self.results.to_csv(filepath, sep=' ', header=False,
+        self.results.to_csv(output_path, sep=' ', header=False,
                             float_format='%.3f')

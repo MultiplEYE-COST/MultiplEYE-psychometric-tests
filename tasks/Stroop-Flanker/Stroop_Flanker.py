@@ -23,6 +23,7 @@ import re
 import tempfile
 import zipfile
 from datetime import datetime
+from pathlib import Path
 
 import pandas as pd
 import yaml
@@ -69,11 +70,12 @@ args = parser.parse_args()
 results_folder = args.participant_folder
 
 # Path to the YAML file contains the language and experiment configurations
-config_path = f'configs/config.yaml'
-experiment_config_path = f'configs/experiment.yaml'
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+config_path = PROJECT_ROOT / 'configs' / 'config.yaml'
+experiment_config_path = PROJECT_ROOT / 'configs' / 'experiment.yaml'
 
 # Load the YAML file
-with open(config_path, 'r', encoding="utf-8") as file:
+with config_path.open('r', encoding='utf-8') as file:
     config_data = yaml.safe_load(file)
 language = config_data['language']
 country_code = config_data['country_code']
@@ -138,13 +140,13 @@ def normalize_instruction_text(text):
 def resolve_font_path(preferred_font_name):
     try:
         path = font_manager.findfont(preferred_font_name, fallback_to_default=False)
-        if path and os.path.exists(path):
+        if path and Path(path).exists():
             return path
     except Exception:
         pass
 
     fallback = font_manager.findfont("DejaVu Sans")
-    if fallback and os.path.exists(fallback):
+    if fallback and Path(fallback).exists():
         return fallback
     raise FileNotFoundError(f"Could not resolve a font path for '{preferred_font_name}'.")
 
@@ -166,7 +168,7 @@ def pick_rtl_render_font_path():
         ("Al Bayan", "/System/Library/Fonts/Supplemental/Al Bayan.ttc"),
         ("Arial Unicode MS", "/System/Library/Fonts/Supplemental/Arial Unicode.ttf"),
     ):
-        if os.path.exists(path):
+        if Path(path).exists():
             report(family)
             return path
 
@@ -318,16 +320,17 @@ def convert_text_screen_to_image_stim(source_stim, image_name, font_path, output
     if not text:
         return source_stim
 
-    os.makedirs(output_dir, exist_ok=True)
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
     image_width_px = 1800
     image_height_px = 1000 if source_stim.height >= 0.05 else 850
     font_size_px = 62 if source_stim.height >= 0.05 else 48
-    image_path = os.path.join(output_dir, image_name)
+    image_path = output_dir / image_name
     render_text_screen_to_image(
         text=text,
         language_code=language_code,
         font_path=font_path,
-        out_path=image_path,
+        out_path=str(image_path),
         image_width=image_width_px,
         image_height=image_height_px,
         font_size=font_size_px,
@@ -340,7 +343,7 @@ def convert_text_screen_to_image_stim(source_stim, image_name, font_path, output
     return visual.ImageStim(
         win=win,
         name=source_stim.name,
-        image=image_path,
+        image=str(image_path),
         units='height',
         pos=source_stim.pos,
         size=(width_units, height_units),
@@ -533,12 +536,13 @@ def resolve_table_file(base_path_without_ext, file_label='input file'):
     Resolve a table file path, preferring xlsx but allowing csv.
     """
     candidate_extensions = ('.xlsx', '.csv')
+    base_path = Path(base_path_without_ext)
     for extension in candidate_extensions:
-        candidate_path = f'{base_path_without_ext}{extension}'
-        if os.path.exists(candidate_path):
-            return candidate_path
+        candidate_path = base_path.with_suffix(extension)
+        if candidate_path.exists():
+            return str(candidate_path)
 
-    tried_paths = ", ".join(f"{base_path_without_ext}{ext}" for ext in candidate_extensions)
+    tried_paths = ", ".join(str(base_path.with_suffix(ext)) for ext in candidate_extensions)
     raise FileNotFoundError(f"Could not find {file_label}. Tried: {tried_paths}")
 
 
@@ -546,7 +550,8 @@ def load_table_file(table_path, **kwargs):
     """
     Load a tabular file from csv/xlsx based on file extension.
     """
-    if table_path.endswith('.csv'):
+    table_path = Path(table_path)
+    if table_path.suffix.lower() == '.csv':
         return pd.read_csv(table_path, **kwargs)
 
     # pandas/openpyxl can fail on malformed xlsx merge metadata in some files.
@@ -555,9 +560,8 @@ def load_table_file(table_path, **kwargs):
     try:
         return pd.read_excel(table_path, **excel_kwargs)
     except Exception as excel_error:
-        base_path, _ = os.path.splitext(table_path)
-        fallback_csv_path = f'{base_path}.csv'
-        if os.path.exists(fallback_csv_path):
+        fallback_csv_path = table_path.with_suffix('.csv')
+        if fallback_csv_path.exists():
             return pd.read_csv(fallback_csv_path, **kwargs)
 
         # Final fallback: strip malformed merge metadata from worksheet XML.
@@ -580,15 +584,15 @@ def load_table_file(table_path, **kwargs):
             try:
                 return pd.read_excel(sanitized_path, **excel_kwargs)
             finally:
-                if os.path.exists(sanitized_path):
+                if Path(sanitized_path).exists():
                     os.remove(sanitized_path)
         except Exception:
             raise excel_error
 
 
-if os.path.exists(experiment_config_path):
+if experiment_config_path.exists():
     # Load the experiment configuration if the file exists
-    with open(experiment_config_path, 'r', encoding="utf-8") as file:
+    with experiment_config_path.open('r', encoding='utf-8') as file:
         expInfo = yaml.safe_load(file)
         participant_id = str(expInfo['participant_id']).zfill(3)
 else:
@@ -597,30 +601,33 @@ else:
     participant_id = "999"
 
 # Create folder for audio and csv data
-output_path = f'data/{results_folder}/Stroop_Flanker/'
-os.makedirs(output_path, exist_ok=True)
-rendered_text_dir = os.path.join(output_path, f"rendered_text_{date}")
-os.makedirs(rendered_text_dir, exist_ok=True)
+output_path = PROJECT_ROOT / 'data' / results_folder / 'Stroop_Flanker'
+output_path.mkdir(parents=True, exist_ok=True)
+rendered_text_dir = output_path / f"rendered_text_{date}"
+rendered_text_dir.mkdir(parents=True, exist_ok=True)
 # Data file name stem = absolute path + name; later add .psyexp, .csv, .log, etc
-filename = f"{output_path}" \
-           f"{language}{country_code}{lab_number}" \
-           f"_{participant_id}_PT{expInfo['session_id']}_{date}"
+filename = str(
+    output_path / (
+        f"{language}{country_code}{lab_number}"
+        f"_{participant_id}_PT{expInfo['session_id']}_{date}"
+    )
+)
 print(filename)
 # Load instruction/stimulus tables from xlsx or csv
 instructions_path = resolve_table_file(
-    f'languages/{language}/instructions/Stroop_Flanker_instructions_{language.lower()}',
+    str(PROJECT_ROOT / 'languages' / language / 'instructions' / f'Stroop_Flanker_instructions_{language.lower()}'),
     file_label='Stroop-Flanker instructions file'
 )
 stroop_practice_path = resolve_table_file(
-    f'languages/{language}/Stroop-Flanker/Stroop_practice_trials_{language.lower()}',
+    str(PROJECT_ROOT / 'languages' / language / 'Stroop-Flanker' / f'Stroop_practice_trials_{language.lower()}'),
     file_label='Stroop practice trials file'
 )
 stroop_stim_path = resolve_table_file(
-    f'languages/{language}/Stroop-Flanker/StroopStim_{language.lower()}',
+    str(PROJECT_ROOT / 'languages' / language / 'Stroop-Flanker' / f'StroopStim_{language.lower()}'),
     file_label='Stroop stimulus file'
 )
 flanker_stim_path = resolve_table_file(
-    f'languages/{language}/Stroop-Flanker/FlankerStim_{language.lower()}',
+    str(PROJECT_ROOT / 'languages' / language / 'Stroop-Flanker' / f'FlankerStim_{language.lower()}'),
     file_label='Flanker stimulus file'
 )
 
