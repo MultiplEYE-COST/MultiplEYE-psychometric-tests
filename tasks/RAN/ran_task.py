@@ -537,7 +537,26 @@ win = visual.Window(
     units='norm',
     checkTiming=False
 )
+
+# Warm up the window on Windows / some backends before first real screen
+startup_text = visual.TextStim(
+    win=win,
+    text='',
+    color='black',
+    pos=(0, 0),
+    height=0.05,
+    units='norm'
+)
+
+for i in range(3):
+    startup_text.draw()
+    win.flip()
+    core.wait(0.2)
+
+event.clearEvents(eventType='keyboard')
+
 win.recordFrameIntervals = False
+expInfo['frameRate'] = None
 
 if is_rtl_language(language):
     font_path = resolve_font_path("DejaVu Sans")

@@ -101,6 +101,10 @@ def sanitize_text(value):
     for ch in s:
         code = ord(ch)
         cat = unicodedata.category(ch)
+        # Windows/Pyglet text rendering can fail on non-BMP code points
+        # (e.g., emoji), raising: ord() expected a character, but string of length 2.
+        if os.name == 'nt' and code > 0xFFFF:
+            continue
         if 0xD800 <= code <= 0xDFFF:
             continue
         if code > 0x10FFFF:
@@ -715,6 +719,24 @@ win = visual.Window(
     monitor='testMonitor', color=[0, 0, 0], colorSpace='rgb',
     blendMode='avg', useFBO=True,
     units='height')
+    
+# Warm up the window on Windows / some backends before first real screen
+startup_text = visual.TextStim(
+    win=win,
+    text='',
+    color='black',
+    pos=(0, 0),
+    height=0.05,
+    units='norm'
+)
+
+for i in range(3):
+    startup_text.draw()
+    win.flip()
+    core.wait(0.2)
+
+event.clearEvents(eventType='keyboard')
+
 # Avoid runtime frame-rate probing to reduce startup warnings on macOS.
 expInfo['frameRate'] = None
 
@@ -729,7 +751,7 @@ except Exception as exc:
 # Initialize components for Routine "WelcomeScreen"
 WelcomeScreenClock = core.Clock()
 Welcome_text = visual.TextStim(win=win, name='Welcome_text',
-                               text=welcome_text,
+                               text='' if is_rtl else welcome_text_raw,
                                font=display_font,
                                pos=(0, 0), height=0.05, wrapWidth=None, ori=0.0,
                                color='black', colorSpace='rgb', opacity=None,
@@ -740,7 +762,7 @@ Welcome_resp = keyboard.Keyboard()
 # Initialize components for Routine "StroopInstructions"
 StroopInstructionsClock = core.Clock()
 stroop_instructions = visual.TextStim(win=win, name='stroop_instructions',
-                                      text=stroop_instructions,
+                                      text='' if is_rtl else stroop_instructions_raw,
                                       font=display_font,
                                       pos=(0, 0), height=0.035, wrapWidth=1.5, ori=0.0,
                                       color='black', colorSpace='rgb', opacity=None,
@@ -792,7 +814,7 @@ stroop_feedback_text = visual.TextStim(win=win, name='stroop_feedback_text',
 # Initialize components for Routine "StartWarning"
 StartWarningClock = core.Clock()
 start_warning_text = visual.TextStim(win=win, name='start_warning_text',
-                                     text=start_warning_text,
+                                     text='' if is_rtl else start_warning_text_raw,
                                      font=display_font,
                                      pos=(0, 0), height=0.035, wrapWidth=1.5, ori=0.0,
                                      color='black', colorSpace='rgb', opacity=None,
@@ -813,7 +835,7 @@ stroop_key = keyboard.Keyboard()
 # Initialize components for Routine "Done"
 DoneClock = core.Clock()
 done_text = visual.TextStim(win=win, name='done_text',
-                            text=done_text,
+                            text='' if is_rtl else done_text_raw,
                             font=display_font,
                             pos=(0, 0), height=0.035, wrapWidth=None, ori=0.0,
                             color='black', colorSpace='rgb', opacity=None,
@@ -824,7 +846,7 @@ done_key = keyboard.Keyboard()
 # Initialize components for Routine "FlankerInstruction"
 FlankerInstructionClock = core.Clock()
 Flanker_instructions = visual.TextStim(win=win, name='Flanker_instructions',
-                                       text=flanker_instructions,
+                                       text='' if is_rtl else flanker_instructions_raw,
                                        font=display_font,
                                        pos=(0, 0), height=0.035, wrapWidth=1.5, ori=0.0,
                                        color='black', colorSpace='rgb', opacity=None,
@@ -868,7 +890,7 @@ Flanker_key = keyboard.Keyboard()
 # Initialize components for Routine "GoodbyeScreen"
 GoodbyeScreenClock = core.Clock()
 Goodbyetext = visual.TextStim(win=win, name='Goodbyetext',
-                              text=Goodbyetext,
+                              text='' if is_rtl else goodbye_text_raw,
                               font=display_font,
                               pos=(0, 0), height=0.05, wrapWidth=1.5, ori=0.0,
                               color='black', colorSpace='rgb', opacity=None,

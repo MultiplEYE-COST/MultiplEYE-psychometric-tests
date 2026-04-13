@@ -614,6 +614,23 @@ win = visual.Window(
     units='height', checkTiming=False
 )
 
+# Warm up the window on Windows / some backends before first real screen
+startup_text = visual.TextStim(
+    win=win,
+    text='',
+    color='black',
+    pos=(0, 0),
+    height=0.05,
+    units='norm'
+)
+
+for i in range(3):
+    startup_text.draw()
+    win.flip()
+    core.wait(0.2)
+
+event.clearEvents(eventType='keyboard')
+
 expInfo['frameRate'] = None
 defaultKeyboard = keyboard.Keyboard()
 font_path = choose_font_path(language, font)
