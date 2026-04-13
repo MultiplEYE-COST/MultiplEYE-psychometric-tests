@@ -10,22 +10,25 @@ Around the world in 60 words: A generative vocabulary test for online research.
 Copyright (C) 2024-2026 MultiplEYE Project
 """
 
-import pandas as pd
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtWidgets import QMainWindow
+
+from table_loader import load_table_file, resolve_table_file
 
 
 class MyResultWindow(QMainWindow):
     def __init__(self, name, result, language):
-        super(MyResultWindow, self).__init__()
+        super().__init__()
         self.name = name
         self.result = result
         self.language = language
-        instructions_df = pd.read_excel(
-            f'languages/{self.language.upper()}/instructions/WikiVocab_instructions_{self.language}.xlsx',
-            index_col='screen')
-        Goodbye_text = instructions_df.loc['Goodbye_text', self.language.upper()]
-        self.Goodbye_text = Goodbye_text.replace('\\n', '\n')
+        instructions_path = resolve_table_file(
+            f'languages/{self.language.upper()}/instructions/WikiVocab_instructions_{self.language.lower()}',
+            file_label='WikiVocab instructions file'
+        )
+        instructions_df = load_table_file(instructions_path, index_col='screen')
+        goodbye_text = instructions_df.loc['Goodbye_text', self.language.upper()]
+        self.goodbye_text = goodbye_text.replace('\\n', '\n')
 
         self.initUI()
 
@@ -56,7 +59,7 @@ class MyResultWindow(QMainWindow):
         self.resultLabel.setObjectName("result")
 
         # Set the text with formatted result
-        self.resultLabel.setText(self.Goodbye_text
+        self.resultLabel.setText(self.goodbye_text
                                  # + f"\n\nYour result - \n{self.format_result()}"
                                  )
 

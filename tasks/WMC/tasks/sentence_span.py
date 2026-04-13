@@ -207,24 +207,29 @@ class SentenceSpanTask(GenericTask):
         super().finish_trial()
 
     def copy_trial_results(self, trial, trial_id):
-        trial_row = self.results.iloc[trial_id]
         list_length = trial.get_presentation_count()
-        trial_row.loc['list_length'] = list_length
+        self.results.loc[trial_id, 'list_length'] = list_length
 
         letters = [l.upper() for l in trial.letters]
-        trial_row.loc[self.letter_cols[:list_length]] = letters
+        letter_cols = self.letter_cols[:list_length]
+        self.results.loc[trial_id, letter_cols] = letters
         letter_resps = [l.upper() for l in trial.letter_resps]
-        trial_row.loc[self.letter_resp_cols[:list_length]] = letter_resps
+        letter_resp_cols = self.letter_resp_cols[:list_length]
+        self.results.loc[trial_id, letter_resp_cols] = letter_resps
         letter_rts = trial.letter_rts
-        trial_row.loc[self.letter_rt_cols[:list_length]] = letter_rts
+        letter_rt_cols = self.letter_rt_cols[:list_length]
+        self.results.loc[trial_id, letter_rt_cols] = letter_rts
 
         sentences = trial.sentences
         sentences_correct = [int(s.correct) for s in sentences]
-        trial_row.loc[self.sentence_correct_cols[:list_length]] = sentences_correct
+        sentence_correct_cols = self.sentence_correct_cols[:list_length]
+        self.results.loc[trial_id, sentence_correct_cols] = sentences_correct
         sentence_resps = trial.sentence_resps
-        trial_row.loc[self.sentence_resp_cols[:list_length]] = sentence_resps
+        sentence_resp_cols = self.sentence_resp_cols[:list_length]
+        self.results.loc[trial_id, sentence_resp_cols] = sentence_resps
         sentence_rts = trial.sentence_rts
-        trial_row.loc[self.sentence_rt_cols[:list_length]] = sentence_rts
+        sentence_rt_cols = self.sentence_rt_cols[:list_length]
+        self.results.loc[trial_id, sentence_rt_cols] = sentence_rts
 
     def get_sentence_keys(self):
         return list(self.key_map.values())

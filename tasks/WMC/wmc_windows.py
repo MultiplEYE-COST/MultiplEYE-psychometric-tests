@@ -18,17 +18,8 @@ from __future__ import absolute_import, division
 
 import argparse
 import os
+import re
 import unicodedata
-
-try:
-    import arabic_reshaper
-except ImportError:
-    arabic_reshaper = None
-
-try:
-    from bidi.algorithm import get_display
-except ImportError:
-    get_display = None
 
 from psychopy import prefs 
 
@@ -43,8 +34,17 @@ from datetime import datetime
 from common.config import WMCConfig
 from common.experiment_messages import ExperimentMessages
 from common.instructions import Instructions
+from PIL import Image, ImageDraw, ImageFont
+from matplotlib import font_manager
 
-parser = argparse.ArgumentParser(description="Run the RAN digit test.")
+try:
+    import arabic_reshaper
+    from bidi.algorithm import get_display
+    HAS_RTL_SUPPORT = True
+except Exception:
+    HAS_RTL_SUPPORT = False
+
+parser = argparse.ArgumentParser(description="Run the WMC test.")
 parser.add_argument('--participant_folder', type=str, required=True, help="Path to the participant folder.")
 args = parser.parse_args()
 results_folder = args.participant_folder
@@ -66,7 +66,7 @@ random_seed = config_data['random_seed']
 font = config_data['font']
 
 rtl_langs = {'fa', 'fas', 'ar', 'he', 'ur'}
-sentence_language_style = 'RTL' if str(language).lower() in rtl_langs else 'LTR'
+sentence_language_style = 'Arabic' if str(language).lower() in rtl_langs else 'LTR'
 
 if os.path.exists(experiment_config_path):
     # Load the experiment configuration if the file exists
@@ -102,6 +102,8 @@ else:
 # Create folder for audio and csv data
 output_path = f'data/{results_folder}/WMC/'
 os.makedirs(output_path, exist_ok=True)
+rendered_text_dir = os.path.join(output_path, f"rendered_text_{date}")
+os.makedirs(rendered_text_dir, exist_ok=True)
 
 # Data file name stem = absolute path + name; later add .psyexp, .csv, .log, etc
 filename = f"{output_path}" \
@@ -170,31 +172,21 @@ do_os_task = thisExp.extraInfo['Operation Span']
 do_ss_task = thisExp.extraInfo['Sentence Span']
 do_sstm_task = thisExp.extraInfo['Spatial Short Term Memory']
 
+def normalize_mu_digit_key(raw_key):
+    key = str(raw_key).strip().lower().replace('-', '_')
+    if len(key) == 1 and key.isdigit():
+        return key
+    if key.startswith('num_'):
+        digit_part = key[4:]
+        if len(digit_part) == 1 and digit_part.isdigit():
+            return digit_part
+    return None
+
 if random_seed is None or random_seed == '':
     random_seed = subject_id
 
 # set text wrap width to 90% of screen width (in height units)
 text_wrap_width = win.size[0] / win.size[1] * 0.9
-    
-def _contains_rtl_script(value):
-    """
-    Return True if the string contains Arabic/Hebrew script characters.
-    """
-    if not value:
-        return False
-    for ch in str(value):
-        code = ord(ch)
-        if (
-            0x0590 <= code <= 0x05FF or   # Hebrew
-            0x0600 <= code <= 0x06FF or   # Arabic
-            0x0750 <= code <= 0x077F or   # Arabic Supplement
-            0x08A0 <= code <= 0x08FF or   # Arabic Extended-A
-            0xFB50 <= code <= 0xFDFF or   # Arabic Presentation Forms-A
-            0xFE70 <= code <= 0xFEFF      # Arabic Presentation Forms-B
-        ):
-            return True
-    return False
-
 
 def sanitize_pyglet_text(value):
     """
@@ -228,10 +220,11 @@ def sanitize_pyglet_text(value):
         if code > 0xFFFF:
             continue
 
-        # Remove formatting/private/unassigned chars.
-        # This also removes ZWNJ and bidi control marks that can trigger
-        # pyglet/font issues on Windows.
-        if cat in {'Cf', 'Cs', 'Co', 'Cn'}:
+        # Remove formatting/private/unassigned chars, but keep
+        # ZWNJ/ZWJ for Persian orthography.
+        if cat in {'Cs', 'Co', 'Cn'}:
+            continue
+        if cat == 'Cf' and ch not in ('\u200c', '\u200d'):
             continue
 
         # Remove control chars except newline/tab
@@ -253,35 +246,188 @@ def sanitize_pyglet_text(value):
 
 def prepare_psychopy_text(value):
     """
-    Sanitize text and optionally reshape/reorder RTL script text for more
-    reliable display in PsychoPy/pyglet on Windows.
+    Sanitize text for PsychoPy/pyglet on Windows.
+    For RTL runs we rely on PsychoPy's `languageStyle='Arabic'` shaping.
     """
     s = sanitize_pyglet_text(value)
-
-    if _contains_rtl_script(s):
-        for bad in (
-            '\u200c', '\u200d', '\u200e', '\u200f',
-            '\u202a', '\u202b', '\u202c', '\u202d', '\u202e'
-        ):
-            s = s.replace(bad, '')
-
-        if arabic_reshaper is not None:
-            try:
-                s = arabic_reshaper.reshape(s)
-            except Exception:
-                pass
-
-        if get_display is not None:
-            try:
-                s = get_display(s)
-            except Exception:
-                pass
-
     return s
+
+
+def resolve_font_path(preferred_font_name):
+    try:
+        path = font_manager.findfont(preferred_font_name, fallback_to_default=False)
+        if path and os.path.exists(path):
+            return path
+    except Exception:
+        pass
+
+    fallback = font_manager.findfont("DejaVu Sans")
+    if fallback and os.path.exists(fallback):
+        return fallback
+    raise FileNotFoundError(f"Could not resolve a font path for '{preferred_font_name}'.")
+
+
+rtl_enabled = sentence_language_style != 'LTR'
+rtl_font_path = resolve_font_path(config_data.get('font', 'Arial Unicode MS') if rtl_enabled else font)
+rtl_image_counter = 0
+RTL_FONT_SCALE = 0.75
+RTL_SSTM_NEXT_Y_OFFSET = -0.01
+
+
+def normalize_instruction_text(text):
+    text = prepare_psychopy_text(text).strip()
+    if not text:
+        return ''
+    lines = text.split('\n')
+    cleaned_lines = []
+    for line in lines:
+        line = re.sub(r'[ \t]+', ' ', line).strip()
+        cleaned_lines.append(line)
+    return '\n'.join(cleaned_lines)
+
+
+def shape_rtl_line(line):
+    if not HAS_RTL_SUPPORT:
+        return line
+    try:
+        return get_display(arabic_reshaper.reshape(line))
+    except Exception:
+        return line
+
+
+def measure_text_pil(draw, text, font_obj):
+    bbox = draw.textbbox((0, 0), text, font=font_obj)
+    return bbox[2] - bbox[0], bbox[3] - bbox[1]
+
+
+def wrap_paragraph_rtl(draw, paragraph, font_obj, max_width_px):
+    words = paragraph.split()
+    if not words:
+        return []
+
+    lines = []
+    current = []
+    for word in words:
+        candidate_logical = ' '.join(current + [word])
+        candidate_visual = shape_rtl_line(candidate_logical)
+        width, _ = measure_text_pil(draw, candidate_visual, font_obj)
+        if width <= max_width_px or not current:
+            current.append(word)
+        else:
+            lines.append(' '.join(current))
+            current = [word]
+
+    if current:
+        lines.append(' '.join(current))
+    return lines
+
+
+def wrap_text_to_lines_rtl(text, draw, font_obj, max_width_px):
+    text = normalize_instruction_text(text)
+    if not text:
+        return []
+
+    raw_lines = text.split('\n')
+    all_lines = []
+    for line in raw_lines:
+        if not line.strip():
+            all_lines.append('')
+            continue
+        all_lines.extend(wrap_paragraph_rtl(draw, line.strip(), font_obj, max_width_px))
+    return all_lines
+
+
+def render_rtl_text_for_stim(stim, text):
+    global rtl_image_counter
+    text = prepare_psychopy_text(text)
+
+    image_width_px = getattr(stim, "_rtl_image_width_px", int(win.size[0] * 0.9))
+    image_height_px = getattr(stim, "_rtl_image_height_px", int(win.size[1] * 0.28))
+    font_size_px = getattr(stim, "_rtl_font_size_px", max(24, int(win.size[1] * 0.06)))
+
+    # Transparent canvas avoids visible rectangle/border around RTL text images.
+    image = Image.new('RGBA', (image_width_px, image_height_px), color=(255, 255, 255, 0))
+    draw = ImageDraw.Draw(image)
+    font_obj = ImageFont.truetype(rtl_font_path, font_size_px)
+
+    max_width_px = int(image_width_px * 0.9)
+    logical_lines = wrap_text_to_lines_rtl(text, draw, font_obj, max_width_px)
+
+    display_lines = []
+    line_heights = []
+    for line in logical_lines:
+        if line == '':
+            display_lines.append('')
+            line_heights.append(max(8, font_size_px // 2))
+            continue
+        display_line = shape_rtl_line(line)
+        _, h = measure_text_pil(draw, display_line, font_obj)
+        display_lines.append(display_line)
+        line_heights.append(h)
+
+    line_spacing_px = max(8, font_size_px // 3)
+    total_height = 0
+    for i, h in enumerate(line_heights):
+        total_height += h
+        if i < len(line_heights) - 1:
+            total_height += line_spacing_px
+
+    vertical_align = getattr(stim, "_rtl_vertical_align", "center")
+    if vertical_align == "top":
+        y = 6
+    else:
+        y = max(10, (image_height_px - total_height) // 2)
+    for i, line in enumerate(display_lines):
+        if line == '':
+            y += line_heights[i] + line_spacing_px
+            continue
+        w, h = measure_text_pil(draw, line, font_obj)
+        x = (image_width_px - w) // 2
+        draw.text((x, y), line, font=font_obj, fill=(0, 0, 0, 255))
+        y += h + line_spacing_px
+
+    out_path = os.path.join(rendered_text_dir, f"{stim.name}_{rtl_image_counter}.png")
+    rtl_image_counter += 1
+    image.save(out_path)
+    stim.setImage(out_path)
+    return text
+
+
+def convert_text_stim_to_rtl_image_stim(stim, name):
+    if not rtl_enabled:
+        return stim
+    font_size_px = max(20, int(stim.height * win.size[1] * 1.15 * RTL_FONT_SCALE))
+    image_height_px = max(int(font_size_px * 3.6), int(win.size[1] * 0.2))
+    if getattr(stim, 'wrapWidth', None):
+        image_height_px = max(image_height_px, int(win.size[1] * 0.28))
+
+    image_width_units = win.size[0] / win.size[1] * 0.9
+    image_height_units = image_height_px / win.size[1]
+
+    image_stim = visual.ImageStim(
+        win=win,
+        name=name,
+        image=None,
+        units='height',
+        pos=stim.pos,
+        size=(image_width_units, image_height_units),
+        ori=stim.ori,
+        color=[1, 1, 1],
+        colorSpace='rgb',
+        opacity=stim.opacity,
+        interpolate=True,
+        depth=stim.depth
+    )
+    image_stim._rtl_font_size_px = font_size_px
+    image_stim._rtl_image_width_px = int(win.size[0] * 0.9)
+    image_stim._rtl_image_height_px = image_height_px
+    return image_stim
 
 
 def safe_set_text(stim, value):
     txt = prepare_psychopy_text(value)
+    if rtl_enabled and isinstance(stim, visual.ImageStim):
+        return render_rtl_text_for_stim(stim, txt)
     stim.setText(txt)
     return txt
 
@@ -927,6 +1073,8 @@ text_sstm_presentation_end = visual.TextStim(
     languageStyle=sentence_language_style,
     depth=-2.0
     );
+# Make "word_end" slightly smaller for all languages.
+text_sstm_presentation_end.height *= 0.84
 
 # Initialize components for Routine "sstm_recall"
 sstm_recallClock = core.Clock()
@@ -998,6 +1146,51 @@ base_text_end = visual.TextStim(
     depth=-1.0
     );
 base_key_resp_end = keyboard.Keyboard()
+
+if rtl_enabled:
+    base_text_begin_task = convert_text_stim_to_rtl_image_stim(base_text_begin_task, 'base_text_begin_task')
+    base_text_next_trial = convert_text_stim_to_rtl_image_stim(base_text_next_trial, 'base_text_next_trial')
+    base_text_task_end = convert_text_stim_to_rtl_image_stim(base_text_task_end, 'base_text_task_end')
+    base_text_self_paced_break = convert_text_stim_to_rtl_image_stim(
+        base_text_self_paced_break, 'base_text_self_paced_break'
+    )
+    text_sstm_draw_dots = convert_text_stim_to_rtl_image_stim(text_sstm_draw_dots, 'text_sstm_draw_dots')
+    text_sstm_presentation_end = convert_text_stim_to_rtl_image_stim(
+        text_sstm_presentation_end, 'text_sstm_presentation_end'
+    )
+    sstm_text_next = convert_text_stim_to_rtl_image_stim(sstm_text_next, 'sstm_text_next')
+    text_sstm_task_end = convert_text_stim_to_rtl_image_stim(text_sstm_task_end, 'text_sstm_task_end')
+    base_text_end = convert_text_stim_to_rtl_image_stim(base_text_end, 'base_text_end')
+    ss_text_sentence = convert_text_stim_to_rtl_image_stim(ss_text_sentence, 'ss_text_sentence')
+
+    # SSTM visual tuning:
+    # - draw_dots: slightly smaller text
+    # - word_next / word_end: compact image boxes so they do not overlap the grid
+    text_sstm_draw_dots._rtl_font_size_px = max(16, int(text_sstm_draw_dots._rtl_font_size_px * 0.78))
+    text_sstm_draw_dots._rtl_image_height_px = max(90, int(text_sstm_draw_dots._rtl_image_height_px * 0.65))
+    text_sstm_draw_dots.size = (
+        text_sstm_draw_dots._rtl_image_width_px / win.size[1],
+        text_sstm_draw_dots._rtl_image_height_px / win.size[1]
+    )
+
+    # word_end: smaller and compact.
+    text_sstm_presentation_end._rtl_font_size_px = max(12, int(text_sstm_presentation_end._rtl_font_size_px * 0.68))
+    text_sstm_presentation_end._rtl_image_width_px = min(360, int(win.size[0] * 0.28))
+    text_sstm_presentation_end._rtl_image_height_px = max(58, int(text_sstm_presentation_end._rtl_font_size_px * 2.2))
+    text_sstm_presentation_end.size = (
+        text_sstm_presentation_end._rtl_image_width_px / win.size[1],
+        text_sstm_presentation_end._rtl_image_height_px / win.size[1]
+    )
+
+    # word_next: bigger in RTL and slightly higher on screen.
+    sstm_text_next._rtl_font_size_px = max(18, int(sstm_text_next._rtl_font_size_px * 1.15))
+    sstm_text_next._rtl_image_width_px = min(320, int(win.size[0] * 0.25))
+    sstm_text_next._rtl_image_height_px = max(56, int(sstm_text_next._rtl_font_size_px * 1.55))
+    sstm_text_next._rtl_vertical_align = "top"
+    sstm_text_next.size = (
+        sstm_text_next._rtl_image_width_px / win.size[1],
+        sstm_text_next._rtl_image_height_px / win.size[1]
+    )
 
 # Create some handy timers
 globalClock = core.Clock()  # to track the time since experiment started
@@ -2131,12 +2324,16 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
                             )  # clear events on next screen flip
                     if mu_key_resp_recall.status == STARTED and not waitOnFlip:
                         theseKeys = mu_key_resp_recall.getKeys(keyList=None, waitRelease=False)
-                        _mu_key_resp_recall_allKeys.extend(theseKeys)
-                        if len(_mu_key_resp_recall_allKeys):
-                            mu_key_resp_recall.keys = _mu_key_resp_recall_allKeys[-1].name  # just the last key pressed
-                            mu_key_resp_recall.rt = _mu_key_resp_recall_allKeys[-1].rt
-                            # a response ends the routine
+                        for key_event in theseKeys:
+                            digit_response = normalize_mu_digit_key(key_event.name)
+                            if digit_response is None:
+                                continue
+                            _mu_key_resp_recall_allKeys.append(key_event)
+                            mu_key_resp_recall.keys = digit_response  # normalized digit only
+                            mu_key_resp_recall.rt = key_event.rt
+                            # a valid numeric response ends the routine
                             continueRoutine = False
+                            break
 
                     # check if all components have finished
                     if not continueRoutine:  # a component has requested a forced-end of Routine
@@ -2157,7 +2354,7 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
                         thisComponent.setAutoDraw(False)
 
                 # the first index is the key name, the second is the duration
-                keyboard_response = mu_key_resp_recall.keys[0]
+                keyboard_response = mu_key_resp_recall.keys if isinstance(mu_key_resp_recall.keys, str) else ''
                 is_correct = keyboard_response == str(current_recall['result'])
 
                 thisExp.addData('mu_key_resp_recall.response', keyboard_response)
@@ -2179,10 +2376,8 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
                 # ------Prepare to start Routine "mu_display_recall"-------
                 continueRoutine = True
                 # update component parameters for each repeat
-                keyboard_response = mu_key_resp_recall.keys[0]
-                if keyboard_response.isspace():
-                    keyboard_response = '.'
-                if len(keyboard_response) > 1:
+                keyboard_response = mu_key_resp_recall.keys if isinstance(mu_key_resp_recall.keys, str) else '.'
+                if len(keyboard_response) != 1 or not keyboard_response.isdigit():
                     keyboard_response = '.'
                 keyboard_response = keyboard_response.upper()
                 current_trial.save_response(keyboard_response)
@@ -6270,6 +6465,7 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
             sstm_mouse.time = []
             sstm_mouse.clicked_name = []
             gotValidClick = False  # until a click is received
+            sstm_next_armed = False
             sstm_mouse.mouseClock.reset()
             # keep track of which components have finished
             sstm_recallComponents = [sstm_text_next, sstm_mouse]
@@ -6300,10 +6496,21 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
                 current_trial.process_mouse_event(sstm_mouse)
 
                 active_position = config.spatial_short_term_memory.text.next_button.position
-                if current_trial.selected_required_count():
-                    sstm_text_next.pos = active_position
+                ready_for_next = current_trial.selected_required_count()
+                current_buttons = sstm_mouse.getPressed()
+                if ready_for_next and sum(current_buttons) == 0:
+                    # Arm "next" only after required dots are complete and click is released.
+                    sstm_next_armed = True
+
+                if sstm_next_armed:
+                    if rtl_enabled and isinstance(sstm_text_next, visual.ImageStim):
+                        sstm_text_next.pos = (active_position[0], active_position[1] + RTL_SSTM_NEXT_Y_OFFSET)
+                    else:
+                        sstm_text_next.pos = active_position
+                    sstm_text_next.opacity = 1
                 else:
                     sstm_text_next.pos = (10, 10)
+                    sstm_text_next.opacity = 0
 
                 # *sstm_text_next* updates
                 if sstm_text_next.status == NOT_STARTED and tThisFlip >= 0.0 - frameTolerance:
@@ -6329,15 +6536,16 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
                         if sum(buttons) > 0:  # state changed to a new click
                             # check if the mouse was inside our 'clickable' objects
                             gotValidClick = False
-                            try:
-                                iter(sstm_text_next)
-                                clickableList = sstm_text_next
-                            except:
-                                clickableList = [sstm_text_next]
-                            for obj in clickableList:
-                                if obj.contains(sstm_mouse):
-                                    gotValidClick = True
-                                    sstm_mouse.clicked_name.append(obj.name)
+                            if sstm_next_armed:
+                                try:
+                                    iter(sstm_text_next)
+                                    clickableList = sstm_text_next
+                                except:
+                                    clickableList = [sstm_text_next]
+                                for obj in clickableList:
+                                    if obj.contains(sstm_mouse):
+                                        gotValidClick = True
+                                        sstm_mouse.clicked_name.append(obj.name)
                             x, y = sstm_mouse.getPos()
                             sstm_mouse.x.append(x)
                             sstm_mouse.y.append(y)

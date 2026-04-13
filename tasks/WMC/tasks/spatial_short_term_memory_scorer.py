@@ -114,29 +114,51 @@ class SpatialShortTermMemoryScorer:
         response_dots = trial.response_dots
         correct_dots = trial.sequence
 
+        if response_dots is None:
+            response_dots = []
+
+        # Work on a per-trial view so we can safely fill variable-length results.
+        trial_rows = self.dot_scores.loc[trial_id + 1, :].copy()
+
         candidates = self.get_candidates(response_dots, correct_dots)
         best_candidate = self.get_best_candidate(candidates)
+
+        # Keep expected answer positions available even when responses are partial.
+        ans_rows = [dot[0] for dot in correct_dots]
+        ans_cols = [dot[1] for dot in correct_dots]
+        for i in range(min(len(trial_rows), len(ans_rows))):
+            trial_rows.iloc[i, trial_rows.columns.get_loc('AnsRow')] = ans_rows[i]
+            trial_rows.iloc[i, trial_rows.columns.get_loc('AnsCol')] = ans_cols[i]
+
+        if best_candidate is None:
+            self.dot_scores.loc[trial_id + 1, :] = trial_rows
+            return
 
         # we now have found the best candidate with a corresponding permutation
         # now save the information into the dot score data frame
         # remember, trial ids start with 1 for legacy reasons
-        self.dot_scores.loc[trial_id + 1, 'Score'] = best_candidate.dot_scores
-
-        correct_dots_rows = [dot[0] for dot in best_candidate.correct_dots]
-        correct_dots_cols = [dot[1] for dot in best_candidate.correct_dots]
-        self.dot_scores.loc[trial_id + 1, 'AnsRow'] = correct_dots_rows
-        self.dot_scores.loc[trial_id + 1, 'AnsCol'] = correct_dots_cols
-
-        response_rows = [dot[0] for dot in best_candidate.response_dots]
-        response_cols = [dot[1] for dot in best_candidate.response_dots]
-        self.dot_scores.loc[trial_id + 1, 'ResRow'] = response_rows
-        self.dot_scores.loc[trial_id + 1, 'ResCol'] = response_cols
-
-        shifted_response_dots = best_candidate.shifted_response_dots
+        dot_scores = list(best_candidate.dot_scores)
+        response_rows = [dot[0] for dot in list(best_candidate.response_dots)]
+        response_cols = [dot[1] for dot in list(best_candidate.response_dots)]
+        shifted_response_dots = list(best_candidate.shifted_response_dots)
         shifted_resp_rows = [dot[0] for dot in shifted_response_dots]
         shifted_resp_cols = [dot[1] for dot in shifted_response_dots]
-        self.dot_scores.loc[trial_id + 1, 'TrasfResRow'] = shifted_resp_rows
-        self.dot_scores.loc[trial_id + 1, 'TrasfResCol'] = shifted_resp_cols
+
+        n_rows = len(trial_rows)
+        n_scores = min(n_rows, len(dot_scores))
+        n_resp = min(n_rows, len(response_rows))
+        n_shift = min(n_rows, len(shifted_resp_rows))
+
+        for i in range(n_scores):
+            trial_rows.iloc[i, trial_rows.columns.get_loc('Score')] = int(dot_scores[i])
+        for i in range(n_resp):
+            trial_rows.iloc[i, trial_rows.columns.get_loc('ResRow')] = int(response_rows[i])
+            trial_rows.iloc[i, trial_rows.columns.get_loc('ResCol')] = int(response_cols[i])
+        for i in range(n_shift):
+            trial_rows.iloc[i, trial_rows.columns.get_loc('TrasfResRow')] = int(shifted_resp_rows[i])
+            trial_rows.iloc[i, trial_rows.columns.get_loc('TrasfResCol')] = int(shifted_resp_cols[i])
+
+        self.dot_scores.loc[trial_id + 1, :] = trial_rows
 
     def get_candidates(self, response_dots, correct_dots):
         # each swap first positions of response and correct dots

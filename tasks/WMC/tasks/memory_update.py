@@ -251,11 +251,12 @@ class MemoryUpdateTask(GenericTask):
         super().finish_trial()
 
     def copy_trial_results(self, trial):
-        trial_row = self.results.iloc[self.current_trial_id]
         responses = trial.responses
-        trial_row.loc[self.response_cols[:len(responses)]] = responses
+        response_cols = self.response_cols[:len(responses)]
+        self.results.loc[self.current_trial_id, response_cols] = responses
         is_correct = trial.is_correct
-        trial_row.loc[self.is_correct_cols[:len(is_correct)]] = is_correct
+        is_correct_cols = self.is_correct_cols[:len(is_correct)]
+        self.results.loc[self.current_trial_id, is_correct_cols] = is_correct
 
     def hide_frames(self):
         for n_frames in self.frames.keys():

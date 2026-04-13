@@ -220,24 +220,29 @@ class OperationSpanTask(GenericTask):
         super().finish_trial()
 
     def copy_trial_results(self, trial, trial_id):
-        trial_row = self.results.iloc[trial_id]
         list_length = trial.get_presentation_count()
-        trial_row.loc['list_length'] = list_length
+        self.results.loc[trial_id, 'list_length'] = list_length
 
         letters = [l.upper() for l in trial.letters]
-        trial_row.loc[self.letter_cols[:list_length]] = letters
+        letter_cols = self.letter_cols[:list_length]
+        self.results.loc[trial_id, letter_cols] = letters
         letter_resps = [l.upper() for l in trial.letter_resps]
-        trial_row.loc[self.letter_resp_cols[:list_length]] = letter_resps
+        letter_resp_cols = self.letter_resp_cols[:list_length]
+        self.results.loc[trial_id, letter_resp_cols] = letter_resps
         letter_rts = trial.letter_rts
-        trial_row.loc[self.letter_rt_cols[:list_length]] = letter_rts
+        letter_rt_cols = self.letter_rt_cols[:list_length]
+        self.results.loc[trial_id, letter_rt_cols] = letter_rts
 
         equations = trial.equations
         equations_correct = [int(e.correct) for e in equations]
-        trial_row.loc[self.equation_correct_cols[:list_length]] = equations_correct
+        equation_correct_cols = self.equation_correct_cols[:list_length]
+        self.results.loc[trial_id, equation_correct_cols] = equations_correct
         equation_resps = trial.equation_resps
-        trial_row.loc[self.equation_resp_cols[:list_length]] = equation_resps
+        equation_resp_cols = self.equation_resp_cols[:list_length]
+        self.results.loc[trial_id, equation_resp_cols] = equation_resps
         equation_rts = trial.equation_rts
-        trial_row.loc[self.equation_rt_cols[:list_length]] = equation_rts
+        equation_rt_cols = self.equation_rt_cols[:list_length]
+        self.results.loc[trial_id, equation_rt_cols] = equation_rts
 
     def get_equation_keys(self):
         return list(self.key_map.values())

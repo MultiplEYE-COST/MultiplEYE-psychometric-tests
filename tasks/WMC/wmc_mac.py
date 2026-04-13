@@ -17,7 +17,20 @@ Copyright (C) 2024-2026 MultiplEYE Project
 from __future__ import absolute_import, division
 
 import argparse
+import ast
 import os
+import re
+import unicodedata
+
+try:
+    import arabic_reshaper
+except ImportError:
+    arabic_reshaper = None
+
+try:
+    from bidi.algorithm import get_display
+except ImportError:
+    get_display = None
 
 from psychopy import prefs
 
@@ -32,9 +45,28 @@ from datetime import datetime
 from common.config import WMCConfig
 from common.experiment_messages import ExperimentMessages
 from common.instructions import Instructions
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
+from matplotlib import font_manager
 
-parser = argparse.ArgumentParser(description="Run the RAN digit test.")
+# Work around an intermittent pyglet/Cocoa event bug on macOS where
+# keyboard polling can raise:
+# "ObjCInstance ... has no attribute ... type".
+_ORIG_KEYBOARD_GET_KEYS = keyboard.Keyboard.getKeys
+
+
+def _safe_keyboard_get_keys(self, *args, **kwargs):
+    try:
+        return _ORIG_KEYBOARD_GET_KEYS(self, *args, **kwargs)
+    except AttributeError as err:
+        err_msg = str(err)
+        if "has no attribute" in err_msg and "type" in err_msg:
+            return []
+        raise
+
+
+keyboard.Keyboard.getKeys = _safe_keyboard_get_keys
+
+parser = argparse.ArgumentParser(description="Run the WMC test.")
 parser.add_argument('--participant_folder', type=str, required=True, help="Path to the participant folder.")
 args = parser.parse_args()
 results_folder = args.participant_folder
@@ -53,6 +85,8 @@ country_code = config_data['country_code']
 lab_number = config_data['lab_number']
 random_seed = config_data['random_seed']
 font = config_data['font']
+rtl_langs = {'fa', 'fas', 'ar', 'he', 'ur'}
+text_language_style = 'Arabic' if str(language).lower() in rtl_langs else 'LTR'
 
 if os.path.exists(experiment_config_path):
     # Load the experiment configuration if the file exists
@@ -70,27 +104,82 @@ else:
 
 expName = 'WMC'
 
-dlg = gui.Dlg(title=expName)
-dlg.addText('Please choose the tasks you want to run; we recommend running all tasks.')
-dlg.addField('Memory Update', True)
-dlg.addField('Operation Span', True)
-dlg.addField('Sentence Span', True)
-dlg.addField('Spatial Short Term Memory', True)
+wmcInfo = {
+    'Memory Update': True,
+    'Operation Span': True,
+    'Sentence Span': True,
+    'Spatial Short Term Memory': True,
+}
 
-ok_data = dlg.show()
-if dlg.OK:  # The user pressed OK
-    user_entered = dlg.data
-    field_names = ['Memory Update', 'Operation Span', 'Sentence Span',
-                   'Spatial Short Term Memory', 'Random Seed']
-    wmcInfo = dict(zip(field_names, user_entered))
-    expInfo.update(wmcInfo)
-    print("User entered:", wmcInfo)
-else:
+dlg = gui.DlgFromDict(
+    dictionary=wmcInfo,
+    title=expName,
+    sortKeys=False
+)
+if not dlg.OK:
     core.quit()
+
+expInfo.update(wmcInfo)
+print("User selected tasks:", wmcInfo)
+
+
+def task_selected(value):
+    """
+    Normalize dialog values to booleans across PsychoPy backends.
+    """
+    if isinstance(value, bool):
+        return value
+    if value is None:
+        return False
+    if isinstance(value, (int, float)):
+        return bool(value)
+
+    normalized = str(value).strip().lower()
+    return normalized not in {'', '0', 'false', 'no', 'off', 'none'}
+
+
+def normalize_key_name(raw_key):
+    if isinstance(raw_key, (list, tuple)) and len(raw_key) > 0:
+        raw_key = raw_key[0]
+    elif isinstance(raw_key, str) and raw_key.startswith('[') and raw_key.endswith(']'):
+        try:
+            parsed = ast.literal_eval(raw_key)
+            if isinstance(parsed, (list, tuple)) and len(parsed) > 0:
+                raw_key = parsed[0]
+        except (SyntaxError, ValueError):
+            pass
+
+    key = str(raw_key).strip().lower().replace('-', '_')
+    key_map = {
+        'spacebar': 'space',
+        'enter': 'return',
+    }
+    return key_map.get(key, key)
+
+
+def key_rt_value(key_event):
+    rt = key_event.rt
+    if isinstance(rt, (list, tuple)) and len(rt) > 0:
+        return rt[0]
+    return rt
+
+
+def normalize_mu_digit_key(raw_key):
+    normalized = normalize_key_name(raw_key)
+    if isinstance(normalized, str) and len(normalized) == 1 and normalized.isdigit():
+        return normalized
+    if isinstance(normalized, str) and normalized.startswith('num_'):
+        digit_part = normalized[4:]
+        if len(digit_part) == 1 and digit_part.isdigit():
+            return digit_part
+    return None
+
 
 # Create folder for audio and csv data
 output_path = f'data/{results_folder}/WMC/'
 os.makedirs(output_path, exist_ok=True)
+rendered_text_dir = os.path.join(output_path, f"rendered_text_{date}")
+os.makedirs(rendered_text_dir, exist_ok=True)
 
 # Data file name stem = absolute path + name; later add .psyexp, .csv, .log, etc
 filename = f"{output_path}" \
@@ -105,20 +194,45 @@ thisExp = data.ExperimentHandler(name='WMC', version='',
                                  dataFileName=filename)
 # save a log file for detail verbose info
 logFile = logging.LogFile(filename + '.log', level=logging.EXP)
-logging.console.setLevel(logging.WARNING)  # this outputs to the screen, not a file
+logging.console.setLevel(logging.ERROR)  # keep console output concise for operators
 frameTolerance = 0.001  # how close to onset before 'same' frame
 
 # Start Code - component code to be run after the window creation
 
+# Use actual screen size to avoid fullscreen mismatch warnings.
+try:
+    import pyglet
+    _screen = pyglet.canvas.get_display().get_default_screen()
+    _window_size = [_screen.width, _screen.height]
+except Exception:
+    _window_size = [1440, 900]
+
 # Setup the Window
 win = visual.Window(
-    size=[1440, 900], fullscr=True, screen=0,
+    size=_window_size, fullscr=True, screen=0,
     winType='pyglet', allowGUI=False, allowStencil=True,
     monitor='testMonitor', color='white', colorSpace='rgb',
     blendMode='avg', useFBO=True,
     units='height')
-# store frame rate of monitor if we can measure it
-expInfo['frameRate'] = win.getActualFrameRate()
+
+# Work around intermittent pyglet/cocoa event-dispatch crashes on macOS:
+# AttributeError: ObjCInstance ... has no attribute ... type
+if hasattr(win, "winHandle") and hasattr(win.winHandle, "dispatch_events"):
+    _orig_dispatch_events = win.winHandle.dispatch_events
+
+    def _safe_dispatch_events():
+        try:
+            return _orig_dispatch_events()
+        except AttributeError as err:
+            err_msg = str(err)
+            if "has no attribute" in err_msg and "type" in err_msg:
+                return None
+            raise
+
+    win.winHandle.dispatch_events = _safe_dispatch_events
+
+# Skip runtime frame-rate probing to reduce startup warnings on macOS.
+expInfo['frameRate'] = None
 
 # Initialize components for Routine "base_init"
 base_initClock = core.Clock()
@@ -139,16 +253,231 @@ expmsgs = ExperimentMessages(language=language,
                              encoding=config.experiment_messages.encoding)
 instructions = Instructions(language)
 
-do_mu_task = thisExp.extraInfo['Memory Update']
-do_os_task = thisExp.extraInfo['Operation Span']
-do_ss_task = thisExp.extraInfo['Sentence Span']
-do_sstm_task = thisExp.extraInfo['Spatial Short Term Memory']
+do_mu_task = task_selected(thisExp.extraInfo.get('Memory Update'))
+do_os_task = task_selected(thisExp.extraInfo.get('Operation Span'))
+do_ss_task = task_selected(thisExp.extraInfo.get('Sentence Span'))
+do_sstm_task = task_selected(thisExp.extraInfo.get('Spatial Short Term Memory'))
 
 if random_seed is None or random_seed == '':
     random_seed = subject_id
 
 # set text wrap width to 90% of screen width (in height units)
 text_wrap_width = win.size[0] / win.size[1] * 0.9
+
+
+def prepare_psychopy_text(value):
+    """
+    Normalize text and keep only characters that are safe for pyglet/TextStim.
+    Persian/Arabic shaping is handled by PsychoPy via languageStyle='Arabic'.
+    """
+    if value is None:
+        return ''
+
+    s = str(value).replace('\r\n', '\n').replace('\r', '\n')
+    s = unicodedata.normalize("NFC", s)
+    cleaned = []
+    for ch in s:
+        code = ord(ch)
+        cat = unicodedata.category(ch)
+
+        if 0xD800 <= code <= 0xDFFF:
+            continue
+        if code > 0xFFFF:
+            continue
+        if cat in {'Cs', 'Co', 'Cn'}:
+            continue
+        if cat == 'Cc' and ch not in ('\n', '\t'):
+            continue
+
+        cleaned.append(ch)
+    return ''.join(cleaned)
+
+
+def resolve_font_path(preferred_font_name):
+    try:
+        path = font_manager.findfont(preferred_font_name, fallback_to_default=False)
+        if path and os.path.exists(path):
+            return path
+    except Exception:
+        pass
+
+    fallback = font_manager.findfont("DejaVu Sans")
+    if fallback and os.path.exists(fallback):
+        return fallback
+    raise FileNotFoundError(f"Could not resolve a font path for '{preferred_font_name}'.")
+
+
+rtl_enabled = text_language_style != 'LTR'
+rtl_font_path = resolve_font_path(config.experiment_messages.font if rtl_enabled else font)
+rtl_image_counter = 0
+RTL_FONT_SCALE = 0.75
+RTL_SSTM_NEXT_Y_OFFSET = -0.01
+
+
+def normalize_instruction_text(text):
+    text = prepare_psychopy_text(text).strip()
+    if not text:
+        return ''
+    lines = text.split('\n')
+    cleaned_lines = []
+    for line in lines:
+        line = re.sub(r'[ \t]+', ' ', line).strip()
+        cleaned_lines.append(line)
+    return '\n'.join(cleaned_lines)
+
+
+def shape_rtl_line(line):
+    if arabic_reshaper is None or get_display is None:
+        return line
+    try:
+        return get_display(arabic_reshaper.reshape(line))
+    except Exception:
+        return line
+
+
+def measure_text_pil(draw, text, font_obj):
+    bbox = draw.textbbox((0, 0), text, font=font_obj)
+    return bbox[2] - bbox[0], bbox[3] - bbox[1]
+
+
+def wrap_paragraph_rtl(draw, paragraph, font_obj, max_width_px):
+    words = paragraph.split()
+    if not words:
+        return []
+
+    lines = []
+    current = []
+    for word in words:
+        candidate_logical = ' '.join(current + [word])
+        candidate_visual = shape_rtl_line(candidate_logical)
+        width, _ = measure_text_pil(draw, candidate_visual, font_obj)
+        if width <= max_width_px or not current:
+            current.append(word)
+        else:
+            lines.append(' '.join(current))
+            current = [word]
+
+    if current:
+        lines.append(' '.join(current))
+    return lines
+
+
+def wrap_text_to_lines_rtl(text, draw, font_obj, max_width_px):
+    text = normalize_instruction_text(text)
+    if not text:
+        return []
+
+    raw_lines = text.split('\n')
+    all_lines = []
+    for line in raw_lines:
+        if not line.strip():
+            all_lines.append('')
+            continue
+        all_lines.extend(wrap_paragraph_rtl(draw, line.strip(), font_obj, max_width_px))
+    return all_lines
+
+
+def render_rtl_text_for_stim(stim, text):
+    global rtl_image_counter
+    text = prepare_psychopy_text(text)
+
+    image_width_px = getattr(stim, "_rtl_image_width_px", int(win.size[0] * 0.9))
+    image_height_px = getattr(stim, "_rtl_image_height_px", int(win.size[1] * 0.28))
+    font_size_px = getattr(stim, "_rtl_font_size_px", max(24, int(win.size[1] * 0.06)))
+
+    # Transparent canvas avoids visible rectangle/border around RTL text images.
+    image = Image.new('RGBA', (image_width_px, image_height_px), color=(255, 255, 255, 0))
+    draw = ImageDraw.Draw(image)
+    font_obj = ImageFont.truetype(rtl_font_path, font_size_px)
+
+    max_width_px = int(image_width_px * 0.9)
+    logical_lines = wrap_text_to_lines_rtl(text, draw, font_obj, max_width_px)
+
+    display_lines = []
+    line_heights = []
+    for line in logical_lines:
+        if line == '':
+            display_lines.append('')
+            line_heights.append(max(8, font_size_px // 2))
+            continue
+        display_line = shape_rtl_line(line)
+        _, h = measure_text_pil(draw, display_line, font_obj)
+        display_lines.append(display_line)
+        line_heights.append(h)
+
+    line_spacing_px = max(8, font_size_px // 3)
+    total_height = 0
+    for i, h in enumerate(line_heights):
+        total_height += h
+        if i < len(line_heights) - 1:
+            total_height += line_spacing_px
+
+    vertical_align = getattr(stim, "_rtl_vertical_align", "center")
+    if vertical_align == "top":
+        y = 6
+    else:
+        y = max(10, (image_height_px - total_height) // 2)
+    for i, line in enumerate(display_lines):
+        if line == '':
+            y += line_heights[i] + line_spacing_px
+            continue
+        w, h = measure_text_pil(draw, line, font_obj)
+        x = (image_width_px - w) // 2
+        draw.text((x, y), line, font=font_obj, fill=(0, 0, 0, 255))
+        y += h + line_spacing_px
+
+    out_path = os.path.join(rendered_text_dir, f"{stim.name}_{rtl_image_counter}.png")
+    rtl_image_counter += 1
+    image.save(out_path)
+    stim.setImage(out_path)
+    return text
+
+
+def convert_text_stim_to_rtl_image_stim(stim, name):
+    if not rtl_enabled:
+        return stim
+    font_size_px = max(20, int(stim.height * win.size[1] * 1.15 * RTL_FONT_SCALE))
+    image_height_px = max(int(font_size_px * 3.6), int(win.size[1] * 0.2))
+    if getattr(stim, 'wrapWidth', None):
+        image_height_px = max(image_height_px, int(win.size[1] * 0.28))
+
+    image_width_units = win.size[0] / win.size[1] * 0.9
+    image_height_units = image_height_px / win.size[1]
+
+    image_stim = visual.ImageStim(
+        win=win,
+        name=name,
+        image=None,
+        units='height',
+        pos=stim.pos,
+        size=(image_width_units, image_height_units),
+        ori=stim.ori,
+        color=[1, 1, 1],
+        colorSpace='rgb',
+        opacity=stim.opacity,
+        interpolate=True,
+        depth=stim.depth
+    )
+    image_stim._rtl_font_size_px = font_size_px
+    image_stim._rtl_image_width_px = int(win.size[0] * 0.9)
+    image_stim._rtl_image_height_px = image_height_px
+    return image_stim
+
+
+def safe_set_text(stim, value):
+    txt = prepare_psychopy_text(value)
+    if rtl_enabled and isinstance(stim, visual.ImageStim):
+        return render_rtl_text_for_stim(stim, txt)
+    try:
+        stim.setText(txt)
+    except AttributeError as err:
+        if "arabic_reshaper" not in str(err):
+            raise
+        # Some PsychoPy builds expose Arabic languageStyle but miss arabic_reshaper internals.
+        stim.languageStyle = 'LTR'
+        stim.setText(shape_rtl_line(txt) if rtl_enabled else txt)
+    return txt
+
 
 # Initialize components for Routine "mu_init"
 mu_initClock = core.Clock()
@@ -554,6 +883,8 @@ text_sstm_presentation_end = visual.TextStim(win=win, name='text_sstm_presentati
                                              color='black', colorSpace='rgb', opacity=1,
                                              languageStyle='LTR',
                                              depth=-2.0)
+# Make "word_end" slightly smaller for all languages.
+text_sstm_presentation_end.height *= 0.84
 
 # Initialize components for Routine "sstm_recall"
 sstm_recallClock = core.Clock()
@@ -595,7 +926,7 @@ base_text_intertrial = visual.TextStim(win=win, name='base_text_intertrial',
 # Initialize components for Routine "sstm_task_end"
 sstm_task_endClock = core.Clock()
 text_sstm_task_end = visual.TextStim(win=win, name='text_sstm_task_end',
-                                     text=expmsgs.task_over,
+                                     text=prepare_psychopy_text(expmsgs.task_over),
                                      font=config.experiment_messages.font,
                                      units='height', pos=(0, 0), height=config.experiment_messages.size,
                                      wrapWidth=text_wrap_width, ori=0,
@@ -615,6 +946,53 @@ base_text_end = visual.TextStim(win=win, name='base_text_end',
                                 languageStyle='LTR',
                                 depth=-1.0)
 base_key_resp_end = keyboard.Keyboard()
+
+if rtl_enabled:
+    base_text_begin_task = convert_text_stim_to_rtl_image_stim(base_text_begin_task, 'base_text_begin_task')
+    base_text_next_trial = convert_text_stim_to_rtl_image_stim(base_text_next_trial, 'base_text_next_trial')
+    base_text_task_end = convert_text_stim_to_rtl_image_stim(base_text_task_end, 'base_text_task_end')
+    base_text_self_paced_break = convert_text_stim_to_rtl_image_stim(
+        base_text_self_paced_break, 'base_text_self_paced_break'
+    )
+    text_sstm_draw_dots = convert_text_stim_to_rtl_image_stim(text_sstm_draw_dots, 'text_sstm_draw_dots')
+    text_sstm_presentation_end = convert_text_stim_to_rtl_image_stim(
+        text_sstm_presentation_end, 'text_sstm_presentation_end'
+    )
+    sstm_text_next = convert_text_stim_to_rtl_image_stim(sstm_text_next, 'sstm_text_next')
+    text_sstm_task_end = convert_text_stim_to_rtl_image_stim(text_sstm_task_end, 'text_sstm_task_end')
+    base_text_end = convert_text_stim_to_rtl_image_stim(base_text_end, 'base_text_end')
+    ss_text_sentence = convert_text_stim_to_rtl_image_stim(ss_text_sentence, 'ss_text_sentence')
+
+    # SSTM visual tuning:
+    # - draw_dots: slightly smaller text
+    # - word_next / word_end: compact image boxes so they do not overlap the grid
+    text_sstm_draw_dots._rtl_font_size_px = max(16, int(text_sstm_draw_dots._rtl_font_size_px * 0.78))
+    text_sstm_draw_dots._rtl_image_height_px = max(90, int(text_sstm_draw_dots._rtl_image_height_px * 0.65))
+    text_sstm_draw_dots.size = (
+        text_sstm_draw_dots._rtl_image_width_px / win.size[1],
+        text_sstm_draw_dots._rtl_image_height_px / win.size[1]
+    )
+
+    # word_end: smaller and compact.
+    text_sstm_presentation_end._rtl_font_size_px = max(12, int(text_sstm_presentation_end._rtl_font_size_px * 0.68))
+    text_sstm_presentation_end._rtl_image_width_px = min(360, int(win.size[0] * 0.28))
+    text_sstm_presentation_end._rtl_image_height_px = max(58, int(text_sstm_presentation_end._rtl_font_size_px * 2.2))
+    text_sstm_presentation_end.size = (
+        text_sstm_presentation_end._rtl_image_width_px / win.size[1],
+        text_sstm_presentation_end._rtl_image_height_px / win.size[1]
+    )
+
+    # word_next: bigger in RTL and slightly higher on screen.
+    sstm_text_next._rtl_font_size_px = max(18, int(sstm_text_next._rtl_font_size_px * 1.15))
+    sstm_text_next._rtl_image_width_px = min(320, int(win.size[0] * 0.25))
+    sstm_text_next._rtl_image_height_px = max(56, int(sstm_text_next._rtl_font_size_px * 1.55))
+    sstm_text_next._rtl_vertical_align = "top"
+    sstm_text_next.size = (
+        sstm_text_next._rtl_image_width_px / win.size[1],
+        sstm_text_next._rtl_image_height_px / win.size[1]
+    )
+
+    safe_set_text(text_sstm_task_end, expmsgs.task_over)
 
 # Create some handy timers
 globalClock = core.Clock()  # to track the time since experiment started
@@ -1085,7 +1463,7 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
             msg_task_begin = expmsgs.begin_task
 
         n_trials = current_task.get_trial_count()
-        base_text_begin_task.setText(msg_task_begin)
+        safe_set_text(base_text_begin_task, msg_task_begin)
         base_key_resp_task_begin.keys = []
         base_key_resp_task_begin.rt = []
         _base_key_resp_task_begin_allKeys = []
@@ -1740,13 +2118,16 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
                                        eventType='keyboard')  # clear events on next screen flip
                     if mu_key_resp_recall.status == STARTED and not waitOnFlip:
                         theseKeys = mu_key_resp_recall.getKeys(keyList=None, waitRelease=False)
-                        _mu_key_resp_recall_allKeys.extend(theseKeys)
-                        if len(_mu_key_resp_recall_allKeys):
-                            mu_key_resp_recall.keys = _mu_key_resp_recall_allKeys[
-                                -1].name  # just the last key pressed
-                            mu_key_resp_recall.rt = _mu_key_resp_recall_allKeys[-1].rt
-                            # a response ends the routine
+                        for key_event in theseKeys:
+                            digit_response = normalize_mu_digit_key(key_event.name)
+                            if digit_response is None:
+                                continue
+                            _mu_key_resp_recall_allKeys.append(key_event)
+                            mu_key_resp_recall.keys = digit_response  # normalized digit only
+                            mu_key_resp_recall.rt = key_rt_value(key_event)
+                            # a valid numeric response ends the routine
                             continueRoutine = False
+                            break
 
                     # check if all components have finished
                     if not continueRoutine:  # a component has requested a forced-end of Routine
@@ -1767,7 +2148,7 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
                         thisComponent.setAutoDraw(False)
 
                 # the first index is the key name, the second is the duration
-                keyboard_response = mu_key_resp_recall.keys[0]
+                keyboard_response = mu_key_resp_recall.keys if isinstance(mu_key_resp_recall.keys, str) else ''
                 is_correct = keyboard_response == str(current_recall['result'])
 
                 thisExp.addData('mu_key_resp_recall.response', keyboard_response)
@@ -1789,10 +2170,8 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
                 # ------Prepare to start Routine "mu_display_recall"-------
                 continueRoutine = True
                 # update component parameters for each repeat
-                keyboard_response = mu_key_resp_recall.keys[0]
-                if keyboard_response.isspace():
-                    keyboard_response = '.'
-                if len(keyboard_response) > 1:
+                keyboard_response = mu_key_resp_recall.keys if isinstance(mu_key_resp_recall.keys, str) else '.'
+                if len(keyboard_response) != 1 or not keyboard_response.isdigit():
                     keyboard_response = '.'
                 keyboard_response = keyboard_response.upper()
                 current_trial.save_response(keyboard_response)
@@ -1892,7 +2271,7 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
                 # ------Prepare to start Routine "base_next_trial"-------
                 continueRoutine = True
                 # update component parameters for each repeat
-                base_text_next_trial.setText(expmsgs.next_trial)
+                safe_set_text(base_text_next_trial, expmsgs.next_trial)
                 base_next_trial_key_resp.keys = []
                 base_next_trial_key_resp.rt = []
                 _base_next_trial_key_resp_allKeys = []
@@ -2077,7 +2456,7 @@ for thisDo_memory_update_dummy in do_memory_update_dummy:
     # update component parameters for each repeat
     output_filepath = os.path.join(output_path, f'{current_task.name}-{subject_id}.dat')
     current_task.write_results(output_filepath)
-    base_text_task_end.setText(expmsgs.task_over)
+    safe_set_text(base_text_task_end, expmsgs.task_over)
     base_key_resp_task_end.keys = []
     base_key_resp_task_end.rt = []
     _base_key_resp_task_end_allKeys = []
@@ -2443,7 +2822,7 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
             msg_task_begin = expmsgs.begin_task
 
         n_trials = current_task.get_trial_count()
-        base_text_begin_task.setText(msg_task_begin)
+        safe_set_text(base_text_begin_task, msg_task_begin)
         base_key_resp_task_begin.keys = []
         base_key_resp_task_begin.rt = []
         _base_key_resp_task_begin_allKeys = []
@@ -2793,15 +3172,20 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
                             win.timeOnFlip(os_key_resp_equation, 'tStopRefresh')  # time at next scr refresh
                             os_key_resp_equation.status = FINISHED
                     if os_key_resp_equation.status == STARTED and not waitOnFlip:
-                        theseKeys = os_key_resp_equation.getKeys(keyList=list(equation_keys), waitRelease=False)
-                        _os_key_resp_equation_allKeys.extend(theseKeys)
+                        theseKeys = os_key_resp_equation.getKeys(keyList=None, waitRelease=False)
+                        allowed_equation_keys = {normalize_key_name(k) for k in equation_keys}
+                        matching_keys = [
+                            key for key in theseKeys
+                            if normalize_key_name(key.name) in allowed_equation_keys
+                        ]
+                        _os_key_resp_equation_allKeys.extend(matching_keys)
                         if len(_os_key_resp_equation_allKeys):
-                            os_key_resp_equation.keys = _os_key_resp_equation_allKeys[
-                                -1].name  # just the last key pressed
-                            os_key_resp_equation.rt = _os_key_resp_equation_allKeys[-1].rt
+                            os_key_resp_equation.keys = normalize_key_name(
+                                _os_key_resp_equation_allKeys[-1].name
+                            )
+                            os_key_resp_equation.rt = key_rt_value(_os_key_resp_equation_allKeys[-1])
                             # was this correct?
-                            if (os_key_resp_equation.keys[0] == str(correct_key)) or (
-                                    os_key_resp_equation.keys[0] == correct_key):
+                            if os_key_resp_equation.keys == normalize_key_name(correct_key):
                                 os_key_resp_equation.corr = 1
                             else:
                                 os_key_resp_equation.corr = 0
@@ -3091,15 +3475,20 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
                         win.callOnFlip(os_key_resp_recall.clearEvents,
                                        eventType='keyboard')  # clear events on next screen flip
                     if os_key_resp_recall.status == STARTED and not waitOnFlip:
-                        theseKeys = os_key_resp_recall.getKeys(keyList=list(os_allowed_keys), waitRelease=False)
-                        _os_key_resp_recall_allKeys.extend(theseKeys)
+                        theseKeys = os_key_resp_recall.getKeys(keyList=None, waitRelease=False)
+                        allowed_recall_keys = {normalize_key_name(k) for k in os_allowed_keys}
+                        matching_keys = [
+                            key for key in theseKeys
+                            if normalize_key_name(key.name) in allowed_recall_keys
+                        ]
+                        _os_key_resp_recall_allKeys.extend(matching_keys)
                         if len(_os_key_resp_recall_allKeys):
-                            os_key_resp_recall.keys = _os_key_resp_recall_allKeys[
-                                -1].name[0]  # just the last key pressed
-                            os_key_resp_recall.rt = _os_key_resp_recall_allKeys[-1].rt[0]
+                            os_key_resp_recall.keys = normalize_key_name(
+                                _os_key_resp_recall_allKeys[-1].name
+                            )
+                            os_key_resp_recall.rt = key_rt_value(_os_key_resp_recall_allKeys[-1])
                             # was this correct?
-                            if (os_key_resp_recall.keys == str(correct_letter)) or (
-                                    os_key_resp_recall.keys == correct_letter):
+                            if os_key_resp_recall.keys == normalize_key_name(correct_letter):
                                 os_key_resp_recall.corr = 1
                             else:
                                 os_key_resp_recall.corr = 0
@@ -3312,7 +3701,7 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
                 # ------Prepare to start Routine "base_self_paced_break"-------
                 continueRoutine = True
                 # update component parameters for each repeat
-                base_text_self_paced_break.setText(expmsgs.self_paced_break)
+                safe_set_text(base_text_self_paced_break, expmsgs.self_paced_break)
                 base_key_resp_self_paced_break.keys = []
                 base_key_resp_self_paced_break.rt = []
                 _base_key_resp_self_paced_break_allKeys = []
@@ -3501,7 +3890,7 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
     # update component parameters for each repeat
     output_filepath = os.path.join(output_path, f'{current_task.name}-{subject_id}.dat')
     current_task.write_results(output_filepath)
-    base_text_task_end.setText(expmsgs.task_over)
+    safe_set_text(base_text_task_end, expmsgs.task_over)
     base_key_resp_task_end.keys = []
     base_key_resp_task_end.rt = []
     _base_key_resp_task_end_allKeys = []
@@ -3603,7 +3992,7 @@ for thisDo_operation_span_dummy in do_operation_span_dummy:
 # completed do_os_task repeats of 'do_operation_span_dummy'
 
 # set up handler to look after randomisation of conditions etc
-do_sentence_span_dummy = data.TrialHandler(nReps=do_ss_task, method='random',
+do_sentence_span_dummy = data.TrialHandler(nReps=1 if do_ss_task else 0, method='random',
                                            extraInfo=expInfo, originPath=-1,
                                            trialList=[None],
                                            seed=None, name='do_sentence_span_dummy')
@@ -3786,9 +4175,10 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
                 theseKeys = base_key_resp_instruction.getKeys(keyList=None, waitRelease=False)
                 _base_key_resp_instruction_allKeys.extend(theseKeys)
                 if len(_base_key_resp_instruction_allKeys):
-                    base_key_resp_instruction.keys = _base_key_resp_instruction_allKeys[
-                        -1].name[0]  # just the last key pressed
-                    base_key_resp_instruction.rt = _base_key_resp_instruction_allKeys[-1].rt[0]
+                    base_key_resp_instruction.keys = normalize_key_name(
+                        _base_key_resp_instruction_allKeys[-1].name
+                    )  # just the last key pressed
+                    base_key_resp_instruction.rt = key_rt_value(_base_key_resp_instruction_allKeys[-1])
                     # a response ends the routine
                     continueRoutine = False
 
@@ -3867,7 +4257,7 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
             msg_task_begin = expmsgs.begin_task
 
         n_trials = current_task.get_trial_count()
-        base_text_begin_task.setText(msg_task_begin)
+        safe_set_text(base_text_begin_task, msg_task_begin)
         base_key_resp_task_begin.keys = []
         base_key_resp_task_begin.rt = []
         _base_key_resp_task_begin_allKeys = []
@@ -4137,10 +4527,11 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
                 thisExp.addData('ss_key_resp_sentence.sentence_correct', sentence.correct)
                 thisExp.addData('ss_key_resp_sentence.correct_answer', correct_key)
 
-                ss_text_sentence.setText(sentence_string)
+                safe_set_text(ss_text_sentence, sentence_string)
                 ss_key_resp_sentence.keys = []
                 ss_key_resp_sentence.rt = []
                 _ss_key_resp_sentence_allKeys = []
+                sentence_allowed_keys = None
                 # keep track of which components have finished
                 ss_sentenceComponents = [ss_text_sentence, ss_key_resp_sentence]
                 for thisComponent in ss_sentenceComponents:
@@ -4203,6 +4594,7 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
                                 sentence_keys = (sentence_keys,)
                             else:
                                 sentence_keys = eval(sentence_keys)
+                        sentence_allowed_keys = {normalize_key_name(k) for k in sentence_keys}
                         # keyboard checking is just starting
                         waitOnFlip = True
                         win.callOnFlip(ss_key_resp_sentence.clock.reset)  # t=0 on next screen flip
@@ -4217,12 +4609,17 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
                             win.timeOnFlip(ss_key_resp_sentence, 'tStopRefresh')  # time at next scr refresh
                             ss_key_resp_sentence.status = FINISHED
                     if ss_key_resp_sentence.status == STARTED and not waitOnFlip:
-                        theseKeys = ss_key_resp_sentence.getKeys(keyList=list(sentence_keys), waitRelease=False)
-                        _ss_key_resp_sentence_allKeys.extend(theseKeys)
+                        theseKeys = ss_key_resp_sentence.getKeys(keyList=None, waitRelease=False)
+                        matching_keys = [
+                            key for key in theseKeys
+                            if normalize_key_name(key.name) in sentence_allowed_keys
+                        ]
+                        _ss_key_resp_sentence_allKeys.extend(matching_keys)
                         if len(_ss_key_resp_sentence_allKeys):
-                            ss_key_resp_sentence.keys = _ss_key_resp_sentence_allKeys[
-                                -1].name[0]  # just the last key pressed
-                            ss_key_resp_sentence.rt = _ss_key_resp_sentence_allKeys[-1].rt[0]
+                            ss_key_resp_sentence.keys = normalize_key_name(
+                                _ss_key_resp_sentence_allKeys[-1].name
+                            )  # just the last key pressed
+                            ss_key_resp_sentence.rt = key_rt_value(_ss_key_resp_sentence_allKeys[-1])
                             # was this correct?
                             if (ss_key_resp_sentence.keys == str(correct_key)) or (
                                     ss_key_resp_sentence.keys == correct_key):
@@ -4516,16 +4913,19 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
                                        eventType='keyboard')  # clear events on next screen flip
                     if ss_key_resp_recall.status == STARTED and not waitOnFlip:
                         theseKeys = ss_key_resp_recall.getKeys(keyList=None, waitRelease=False)
-                        key = theseKeys[-1].name[0]
-                        if key in ss_allowed_keys:
-                            _ss_key_resp_recall_allKeys.extend(theseKeys)
-                            if len(_ss_key_resp_recall_allKeys):
-                                ss_key_resp_recall.keys = _ss_key_resp_recall_allKeys[
-                                    -1].name  # just the last key pressed
-                                ss_key_resp_recall.rt = _ss_key_resp_recall_allKeys[-1].rt
+                        allowed_recall_keys = {normalize_key_name(k) for k in ss_allowed_keys}
+                        matching_keys = [
+                            key for key in theseKeys
+                            if normalize_key_name(key.name) in allowed_recall_keys
+                        ]
+                        _ss_key_resp_recall_allKeys.extend(matching_keys)
+                        if len(_ss_key_resp_recall_allKeys):
+                                ss_key_resp_recall.keys = normalize_key_name(
+                                    _ss_key_resp_recall_allKeys[-1].name
+                                )
+                                ss_key_resp_recall.rt = key_rt_value(_ss_key_resp_recall_allKeys[-1])
                                 # was this correct?
-                                if (ss_key_resp_recall.keys == str(correct_letter)) or (
-                                        ss_key_resp_recall.keys == correct_letter):
+                                if ss_key_resp_recall.keys == normalize_key_name(correct_letter):
                                     ss_key_resp_recall.corr = 1
                                 else:
                                     ss_key_resp_recall.corr = 0
@@ -4738,7 +5138,7 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
                 # ------Prepare to start Routine "base_self_paced_break"-------
                 continueRoutine = True
                 # update component parameters for each repeat
-                base_text_self_paced_break.setText(expmsgs.self_paced_break)
+                safe_set_text(base_text_self_paced_break, expmsgs.self_paced_break)
                 base_key_resp_self_paced_break.keys = []
                 base_key_resp_self_paced_break.rt = []
                 _base_key_resp_self_paced_break_allKeys = []
@@ -4927,7 +5327,7 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
     # update component parameters for each repeat
     output_filepath = os.path.join(output_path, f'{current_task.name}-{subject_id}.dat')
     current_task.write_results(output_filepath)
-    base_text_task_end.setText(expmsgs.task_over)
+    safe_set_text(base_text_task_end, expmsgs.task_over)
     base_key_resp_task_end.keys = []
     base_key_resp_task_end.rt = []
     _base_key_resp_task_end_allKeys = []
@@ -5029,7 +5429,7 @@ for thisDo_sentence_span_dummy in do_sentence_span_dummy:
 # completed do_ss_task repeats of 'do_sentence_span_dummy'
 
 # set up handler to look after randomisation of conditions etc
-do_spatial_short_term_memory_dummy = data.TrialHandler(nReps=do_sstm_task, method='random',
+do_spatial_short_term_memory_dummy = data.TrialHandler(nReps=1 if do_sstm_task else 0, method='random',
                                                        extraInfo=expInfo, originPath=-1,
                                                        trialList=[None],
                                                        seed=None, name='do_spatial_short_term_memory_dummy')
@@ -5294,7 +5694,7 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
             msg_task_begin = expmsgs.begin_task
 
         n_trials = current_task.get_trial_count()
-        base_text_begin_task.setText(msg_task_begin)
+        safe_set_text(base_text_begin_task, msg_task_begin)
         base_key_resp_task_begin.keys = []
         base_key_resp_task_begin.rt = []
         _base_key_resp_task_begin_allKeys = []
@@ -5776,8 +6176,8 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
             continueRoutine = True
             # update component parameters for each repeat
             current_trial.grid.show(False)
-            text_sstm_draw_dots.setText(expmsgs.draw_dots)
-            text_sstm_presentation_end.setText(expmsgs.word_end)
+            safe_set_text(text_sstm_draw_dots, expmsgs.draw_dots)
+            safe_set_text(text_sstm_presentation_end, expmsgs.word_end)
             # keep track of which components have finished
             sstm_draw_requestComponents = [text_sstm_draw_dots, text_sstm_presentation_end]
             for thisComponent in sstm_draw_requestComponents:
@@ -5869,7 +6269,7 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
             current_trial.grid.show(True)
             win.mouseVisible = True
             sstm_mouse.setVisible(True)
-            sstm_text_next.setText(expmsgs.word_next)
+            safe_set_text(sstm_text_next, expmsgs.word_next)
             # setup some python lists for storing info about the sstm_mouse
             sstm_mouse.x = []
             sstm_mouse.y = []
@@ -5879,6 +6279,7 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
             sstm_mouse.time = []
             sstm_mouse.clicked_name = []
             gotValidClick = False  # until a click is received
+            sstm_next_armed = False
             sstm_mouse.mouseClock.reset()
             # keep track of which components have finished
             sstm_recallComponents = [sstm_text_next, sstm_mouse]
@@ -5910,10 +6311,21 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
                 current_trial.process_mouse_event(sstm_mouse)
 
                 active_position = config.spatial_short_term_memory.text.next_button.position
-                if current_trial.selected_required_count():
-                    sstm_text_next.pos = active_position
+                ready_for_next = current_trial.selected_required_count()
+                current_buttons = sstm_mouse.getPressed()
+                if ready_for_next and sum(current_buttons) == 0:
+                    # Arm "next" only after required dots are complete and click is released.
+                    sstm_next_armed = True
+
+                if sstm_next_armed:
+                    if rtl_enabled and isinstance(sstm_text_next, visual.ImageStim):
+                        sstm_text_next.pos = (active_position[0], active_position[1] + RTL_SSTM_NEXT_Y_OFFSET)
+                    else:
+                        sstm_text_next.pos = active_position
+                    sstm_text_next.opacity = 1
                 else:
                     sstm_text_next.pos = (10, 10)
+                    sstm_text_next.opacity = 0
 
                 # *sstm_text_next* updates
                 if sstm_text_next.status == NOT_STARTED and tThisFlip >= 0.0 - frameTolerance:
@@ -5939,15 +6351,16 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
                         if sum(buttons) > 0:  # state changed to a new click
                             # check if the mouse was inside our 'clickable' objects
                             gotValidClick = False
-                            try:
-                                iter(sstm_text_next)
-                                clickableList = sstm_text_next
-                            except:
-                                clickableList = [sstm_text_next]
-                            for obj in clickableList:
-                                if obj.contains(sstm_mouse):
-                                    gotValidClick = True
-                                    sstm_mouse.clicked_name.append(obj.name)
+                            if sstm_next_armed:
+                                try:
+                                    iter(sstm_text_next)
+                                    clickableList = sstm_text_next
+                                except:
+                                    clickableList = [sstm_text_next]
+                                for obj in clickableList:
+                                    if obj.contains(sstm_mouse):
+                                        gotValidClick = True
+                                        sstm_mouse.clicked_name.append(obj.name)
                             x, y = sstm_mouse.getPos()
                             sstm_mouse.x.append(x)
                             sstm_mouse.y.append(y)
@@ -6027,7 +6440,7 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
                 # ------Prepare to start Routine "base_next_trial"-------
                 continueRoutine = True
                 # update component parameters for each repeat
-                base_text_next_trial.setText(expmsgs.next_trial)
+                safe_set_text(base_text_next_trial, expmsgs.next_trial)
                 base_next_trial_key_resp.keys = []
                 base_next_trial_key_resp.rt = []
                 _base_next_trial_key_resp_allKeys = []
@@ -6320,7 +6733,7 @@ for thisDo_spatial_short_term_memory_dummy in do_spatial_short_term_memory_dummy
 # ------Prepare to start Routine "base_end"-------
 continueRoutine = True
 # update component parameters for each repeat
-base_text_end.setText(expmsgs.experiment_over)
+safe_set_text(base_text_end, expmsgs.experiment_over)
 base_key_resp_end.keys = []
 base_key_resp_end.rt = []
 _base_key_resp_end_allKeys = []

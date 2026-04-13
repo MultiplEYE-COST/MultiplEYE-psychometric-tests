@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
 This experiment implements the Stroop and Flanker tasks.
@@ -16,18 +16,46 @@ Modifications:
 Copyright (C) 2024-2026 MultiplEYE Projects
 """
 
-from __future__ import absolute_import, division
-
 import argparse
+import ast
 import os  # handy system and path functions
+import re
+import tempfile
+import zipfile
 from datetime import datetime
 
 import pandas as pd
 import yaml
 import unicodedata
-from psychopy import visual, core, data, logging
+from matplotlib import font_manager
+from PIL import Image, ImageDraw, ImageFont
+from psychopy import visual, core, data, event, logging, prefs
 from psychopy.constants import (NOT_STARTED, STARTED, FINISHED)
+
+# Avoid psychtoolbox import warning by forcing event backend.
+prefs.hardware['keyboardBackend'] = 'event'
 from psychopy.hardware import keyboard
+
+try:
+    import pyglet
+except Exception:
+    pyglet = None
+
+try:
+    import arabic_reshaper
+except Exception:
+    arabic_reshaper = None
+
+try:
+    from bidi.algorithm import get_display
+except Exception:
+    try:
+        from bidi import algorithm as bidialg
+        get_display = bidialg.get_display
+    except Exception:
+        get_display = None
+
+HAS_RTL_SUPPORT = arabic_reshaper is not None and get_display is not None
 
 # # Ensure that relative paths start from the same directory as this script
 # _thisDir = os.path.dirname(os.path.abspath(__file__))
@@ -35,7 +63,7 @@ from psychopy.hardware import keyboard
 date = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
 
 # Parse command-line arguments
-parser = argparse.ArgumentParser(description="Run the RAN digit test.")
+parser = argparse.ArgumentParser(description="Run the Stroop and Flanker test.")
 parser.add_argument('--participant_folder', type=str, required=True, help="Path to the participant folder.")
 args = parser.parse_args()
 results_folder = args.participant_folder
@@ -50,63 +78,583 @@ with open(config_path, 'r', encoding="utf-8") as file:
 language = config_data['language']
 country_code = config_data['country_code']
 lab_number = config_data['lab_number']
-random_seed = config_data['random_seed']
 font = config_data['font']
 
-rtl_langs = {'fa', 'fas', 'ar', 'he', 'ur'}
-language_style = 'RTL' if str(language).lower() in rtl_langs else 'LTR'
-display_font = 'Arial' if str(language).lower() in rtl_langs else font
+rtl_langs = {'fa', 'fas', 'persian', 'ar', 'ara', 'he', 'heb', 'ur', 'urd'}
+language_code = str(language).strip().lower()
+is_rtl = language_code in rtl_langs
+language_style = 'Arabic' if is_rtl else 'LTR'
+display_font = font if font else "Arial Unicode MS"
+
+
+def sanitize_text(value):
+    if value is None:
+        return ''
+
+    s = str(value).replace('\\n', '\n')
+    s = s.replace('\r\n', '\n').replace('\r', '\n')
+    s = unicodedata.normalize("NFC", s)
+
+    cleaned = []
+    for ch in s:
+        code = ord(ch)
+        cat = unicodedata.category(ch)
+        if 0xD800 <= code <= 0xDFFF:
+            continue
+        if code > 0x10FFFF:
+            continue
+        if cat in {'Cs', 'Co', 'Cn'}:
+            continue
+        if cat == 'Cc' and ch not in ('\n', '\t'):
+            continue
+        cleaned.append(ch)
+    return ''.join(cleaned)
+
+
+def is_rtl_language(value):
+    return str(value).strip().lower() in rtl_langs
+
+
+def normalize_instruction_text(text):
+    """
+    Match RAN behavior:
+    - blank lines separate paragraphs
+    - single newlines become spaces inside paragraph
+    """
+    text = sanitize_text(text).strip()
+    if not text:
+        return ''
+
+    paragraphs = re.split(r'\n\s*\n+', text)
+    cleaned = []
+    for paragraph in paragraphs:
+        paragraph = re.sub(r'[\n\t]+', ' ', paragraph)
+        paragraph = re.sub(r'\s+', ' ', paragraph).strip()
+        if paragraph:
+            cleaned.append(paragraph)
+    return '\n\n'.join(cleaned)
+
+
+def resolve_font_path(preferred_font_name):
+    try:
+        path = font_manager.findfont(preferred_font_name, fallback_to_default=False)
+        if path and os.path.exists(path):
+            return path
+    except Exception:
+        pass
+
+    fallback = font_manager.findfont("DejaVu Sans")
+    if fallback and os.path.exists(fallback):
+        return fallback
+    raise FileNotFoundError(f"Could not resolve a font path for '{preferred_font_name}'.")
+
+
+def pick_rtl_render_font_path():
+    def report(family):
+        logging.warning(f"Using RTL font family: {family}")
+        print(f"Using RTL font family: {family}", flush=True)
+
+    for family in ("DejaVu Sans", "Vazirmatn", "Noto Naskh Arabic", "Noto Sans Arabic", "Tahoma"):
+        try:
+            path = resolve_font_path(family)
+            report(family)
+            return path
+        except Exception:
+            continue
+
+    for family, path in (
+        ("Al Bayan", "/System/Library/Fonts/Supplemental/Al Bayan.ttc"),
+        ("Arial Unicode MS", "/System/Library/Fonts/Supplemental/Arial Unicode.ttf"),
+    ):
+        if os.path.exists(path):
+            report(family)
+            return path
+
+    fallback_family = display_font if display_font else "DejaVu Sans"
+    path = resolve_font_path(fallback_family)
+    logging.warning(f"No preferred RTL font found, fallback family: {fallback_family}")
+    print(f"No preferred RTL font found, fallback family: {fallback_family}", flush=True)
+    return path
+
+
+def shape_rtl_line(line):
+    reshaped = arabic_reshaper.reshape(line)
+    return get_display(reshaped)
+
+
+def set_text_with_rtl_fallback(stim, value):
+    text = sanitize_text(value)
+    try:
+        stim.setText(text)
+    except AttributeError as exc:
+        # Some PsychoPy builds expose Arabic style but miss internal reshaper.
+        if is_rtl and "arabic_reshaper" in str(exc):
+            stim.languageStyle = 'LTR'
+            stim.setText(shape_rtl_line(text))
+            return
+        raise
+
+
+def measure_text_pil(draw, text, font_obj):
+    bbox = draw.textbbox((0, 0), text, font=font_obj)
+    return bbox[2] - bbox[0], bbox[3] - bbox[1]
+
+
+def wrap_paragraph_ltr(draw, paragraph, font_obj, max_width_px):
+    words = paragraph.split()
+    if not words:
+        return []
+
+    lines = []
+    current = []
+    for word in words:
+        candidate = ' '.join(current + [word])
+        width, _ = measure_text_pil(draw, candidate, font_obj)
+        if width <= max_width_px or not current:
+            current.append(word)
+        else:
+            lines.append(' '.join(current))
+            current = [word]
+    if current:
+        lines.append(' '.join(current))
+    return lines
+
+
+def wrap_paragraph_rtl(draw, paragraph, font_obj, max_width_px):
+    words = paragraph.split()
+    if not words:
+        return []
+
+    lines = []
+    current = []
+    for word in words:
+        candidate_logical = ' '.join(current + [word])
+        candidate_visual = shape_rtl_line(candidate_logical)
+        width, _ = measure_text_pil(draw, candidate_visual, font_obj)
+        if width <= max_width_px or not current:
+            current.append(word)
+        else:
+            lines.append(' '.join(current))
+            current = [word]
+
+    if current:
+        lines.append(' '.join(current))
+    return lines
+
+
+def text_to_logical_lines(text, rtl, draw, font_obj, max_width_px):
+    text = normalize_instruction_text(text)
+    if not text:
+        return []
+
+    paragraphs = text.split('\n\n')
+    all_lines = []
+    for i, paragraph in enumerate(paragraphs):
+        if rtl:
+            all_lines.extend(wrap_paragraph_rtl(draw, paragraph, font_obj, max_width_px))
+        else:
+            all_lines.extend(wrap_paragraph_ltr(draw, paragraph, font_obj, max_width_px))
+        if i < len(paragraphs) - 1:
+            all_lines.append('')
+    return all_lines
+
+
+def render_text_screen_to_image(
+    text,
+    language_code,
+    font_path,
+    out_path,
+    image_width=1800,
+    image_height=1100,
+    font_size=62,
+    margin_px=180,
+    line_spacing_px=26,
+    bg_color='white',
+    text_color='black'
+):
+    rtl = is_rtl_language(language_code)
+
+    image = Image.new('RGBA', (image_width, image_height), color=(0, 0, 0, 0))
+    draw = ImageDraw.Draw(image)
+    font_obj = ImageFont.truetype(font_path, font_size)
+
+    max_width_px = image_width - 2 * margin_px
+    logical_lines = text_to_logical_lines(text, rtl, draw, font_obj, max_width_px)
+
+    display_lines = []
+    line_heights = []
+    for line in logical_lines:
+        if line == '':
+            display_lines.append('')
+            line_heights.append(font_size // 2)
+            continue
+        display_line = shape_rtl_line(line) if rtl else line
+        _, h = measure_text_pil(draw, display_line, font_obj)
+        display_lines.append(display_line)
+        line_heights.append(h)
+
+    total_height = 0
+    for i, h in enumerate(line_heights):
+        total_height += h
+        if i < len(line_heights) - 1:
+            total_height += line_spacing_px
+
+    y = (image_height - total_height) // 2
+    for i, line in enumerate(display_lines):
+        if line == '':
+            y += line_heights[i] + line_spacing_px
+            continue
+        w, h = measure_text_pil(draw, line, font_obj)
+        x = (image_width - w) // 2
+        draw.text((x, y), line, font=font_obj, fill=(0, 0, 0, 255) if text_color == 'black' else text_color)
+        y += h + line_spacing_px
+
+    image.save(out_path)
+
+
+def convert_text_screen_to_image_stim(source_stim, image_name, font_path, output_dir, text_override=None):
+    text_source = text_override if text_override is not None else getattr(source_stim, 'text', '')
+    text = sanitize_text(text_source)
+    if not text:
+        return source_stim
+
+    os.makedirs(output_dir, exist_ok=True)
+    image_width_px = 1800
+    image_height_px = 1000 if source_stim.height >= 0.05 else 850
+    font_size_px = 62 if source_stim.height >= 0.05 else 48
+    image_path = os.path.join(output_dir, image_name)
+    render_text_screen_to_image(
+        text=text,
+        language_code=language_code,
+        font_path=font_path,
+        out_path=image_path,
+        image_width=image_width_px,
+        image_height=image_height_px,
+        font_size=font_size_px,
+        margin_px=180,
+        line_spacing_px=max(20, font_size_px // 3)
+    )
+
+    width_units = source_stim.wrapWidth if source_stim.wrapWidth else min(win.size[0] / win.size[1] * 0.9, 1.45)
+    height_units = 0.65 if source_stim.height >= 0.05 else 0.55
+    return visual.ImageStim(
+        win=win,
+        name=source_stim.name,
+        image=image_path,
+        units='height',
+        pos=source_stim.pos,
+        size=(width_units, height_units),
+        ori=source_stim.ori,
+        color=[1, 1, 1],
+        colorSpace='rgb',
+        opacity=source_stim.opacity,
+        interpolate=True,
+        depth=source_stim.depth
+    )
+
+
+def normalize_key_name(key_name):
+    """
+    Normalize key names so comparisons work on macOS and Windows.
+    """
+    if key_name is None:
+        return None
+
+    # Some macOS backends return key names as list/tuple payloads like:
+    # ['space', 19.1098]. Extract the textual key token first.
+    if isinstance(key_name, (list, tuple)) and len(key_name) > 0:
+        key_name = key_name[0]
+
+    # Some backends may stringify that payload:
+    # "['space', 19.1098]". Parse it if possible.
+    elif isinstance(key_name, str) and key_name.startswith('[') and key_name.endswith(']'):
+        try:
+            parsed = ast.literal_eval(key_name)
+            if isinstance(parsed, (list, tuple)) and len(parsed) > 0:
+                key_name = parsed[0]
+        except (SyntaxError, ValueError):
+            pass
+
+    raw_key = str(key_name)
+    raw_key_map = {
+        ' ': 'space',
+        '\n': 'return',
+        '\r': 'return',
+        '\r\n': 'return',
+    }
+    if raw_key in raw_key_map:
+        normalized = raw_key_map[raw_key]
+    else:
+        normalized = raw_key.strip().lower().replace('-', '_')
+
+    key_map = {
+        'spacebar': 'space',
+        'space': 'space',
+        'space_char': 'space',
+        'esc': 'escape',
+        'enter': 'return',
+        'return': 'return',
+        'newline': 'return',
+        'period': '.',
+        'comma': ',',
+        'slash': '/',
+        'leftarrow': 'left',
+        'rightarrow': 'right',
+        'uparrow': 'up',
+        'downarrow': 'down',
+    }
+    normalized = key_map.get(normalized, normalized)
+
+    for prefix in ('num_', 'numpad_', 'kp_'):
+        if normalized.startswith(prefix):
+            suffix = normalized[len(prefix):]
+            if len(suffix) == 1 and suffix.isdigit():
+                return suffix
+
+    return normalized
+
+
+def key_aliases(key_name):
+    normalized = normalize_key_name(key_name)
+    aliases = {normalized}
+
+    if normalized == 'space':
+        aliases.add('spacebar')
+    elif normalized == 'return':
+        aliases.add('enter')
+    elif normalized == '.':
+        aliases.add('period')
+    elif normalized == ',':
+        aliases.add('comma')
+    elif normalized == '/':
+        aliases.add('slash')
+    elif normalized in {'left', 'right', 'up', 'down'}:
+        aliases.add(f'{normalized}arrow')
+    elif normalized and len(normalized) == 1 and normalized.isdigit():
+        aliases.update({f'num_{normalized}', f'numpad_{normalized}', f'kp_{normalized}'})
+
+    aliases.discard(None)
+    return list(aliases)
+
+
+def expand_key_list(*keys):
+    expanded = []
+    seen = set()
+    for key in keys:
+        for alias in key_aliases(key):
+            if alias not in seen:
+                seen.add(alias)
+                expanded.append(alias)
+    return expanded
+
+
+def is_key_match(pressed_key, expected_key):
+    return normalize_key_name(pressed_key) == normalize_key_name(expected_key)
+
+
+def get_first_matching_keypress(key_events, expected_keys):
+    """
+    Return the latest keypress matching any expected key alias.
+    """
+    for key_event in reversed(key_events):
+        if any(is_key_match(key_event.name, expected_key) for expected_key in expected_keys):
+            return key_event
+    return None
+
+
+def get_first_matching_keyname(key_names, expected_keys):
+    """
+    Return the latest key name matching any expected key alias.
+    """
+    for key_name in reversed(key_names):
+        if any(is_key_match(key_name, expected_key) for expected_key in expected_keys):
+            return key_name
+    return None
+
+
+_key_backend_warning_shown = False
+
+
+def _quit_if_escape_in_key_events(key_events):
+    if get_first_matching_keypress(key_events, ("escape",)):
+        core.quit()
+
+
+def _quit_if_escape_in_key_names(key_names):
+    if get_first_matching_keyname(key_names, ("escape",)):
+        core.quit()
+
+
+def safe_event_get_keys(key_list=None):
+    """
+    Read keys via psychopy.event without crashing on backend glitches.
+    """
+    global _key_backend_warning_shown
+    try:
+        keys = event.getKeys(keyList=key_list)
+        _quit_if_escape_in_key_names(keys)
+        return keys
+    except Exception as exc:
+        if not _key_backend_warning_shown:
+            logging.info(f"event.getKeys failed on this backend: {exc}")
+            _key_backend_warning_shown = True
+        return []
+
+
+def safe_keyboard_get_keys(keyboard_component, key_list=None):
+    """
+    Read keys via psychopy.hardware.keyboard safely.
+    """
+    global _key_backend_warning_shown
+    try:
+        keys = keyboard_component.getKeys(keyList=key_list, waitRelease=False)
+        _quit_if_escape_in_key_events(keys)
+        return keys
+    except Exception as exc:
+        if not _key_backend_warning_shown:
+            logging.info(f"keyboard.getKeys failed on this backend: {exc}")
+            _key_backend_warning_shown = True
+        return []
+
+
+def escape_pressed(default_keyboard):
+    """
+    Unified Escape handling across keyboard backends.
+    """
+    keyboard_events = safe_keyboard_get_keys(default_keyboard, ["escape"])
+    if get_first_matching_keypress(keyboard_events, ("escape",)):
+        return True
+    fallback_keys = safe_event_get_keys(["escape"])
+    return get_first_matching_keyname(fallback_keys, ("escape",)) is not None
+
+
+def resolve_table_file(base_path_without_ext, file_label='input file'):
+    """
+    Resolve a table file path, preferring xlsx but allowing csv.
+    """
+    candidate_extensions = ('.xlsx', '.csv')
+    for extension in candidate_extensions:
+        candidate_path = f'{base_path_without_ext}{extension}'
+        if os.path.exists(candidate_path):
+            return candidate_path
+
+    tried_paths = ", ".join(f"{base_path_without_ext}{ext}" for ext in candidate_extensions)
+    raise FileNotFoundError(f"Could not find {file_label}. Tried: {tried_paths}")
+
+
+def load_table_file(table_path, **kwargs):
+    """
+    Load a tabular file from csv/xlsx based on file extension.
+    """
+    if table_path.endswith('.csv'):
+        return pd.read_csv(table_path, **kwargs)
+
+    # pandas/openpyxl can fail on malformed xlsx merge metadata in some files.
+    excel_kwargs = dict(kwargs)
+    excel_kwargs.pop('encoding', None)  # not used by read_excel
+    try:
+        return pd.read_excel(table_path, **excel_kwargs)
+    except Exception as excel_error:
+        base_path, _ = os.path.splitext(table_path)
+        fallback_csv_path = f'{base_path}.csv'
+        if os.path.exists(fallback_csv_path):
+            return pd.read_csv(fallback_csv_path, **kwargs)
+
+        # Final fallback: strip malformed merge metadata from worksheet XML.
+        try:
+            with tempfile.NamedTemporaryFile(suffix='.xlsx', delete=False) as temp_file:
+                sanitized_path = temp_file.name
+
+            with zipfile.ZipFile(table_path, 'r') as source_zip, zipfile.ZipFile(sanitized_path, 'w') as target_zip:
+                for item in source_zip.infolist():
+                    data = source_zip.read(item.filename)
+                    if item.filename.startswith('xl/worksheets/sheet') and item.filename.endswith('.xml'):
+                        try:
+                            xml_text = data.decode('utf-8')
+                            xml_text = re.sub(r'<mergeCells[^>]*>.*?</mergeCells>', '', xml_text, flags=re.DOTALL)
+                            data = xml_text.encode('utf-8')
+                        except UnicodeDecodeError:
+                            pass
+                    target_zip.writestr(item, data)
+
+            try:
+                return pd.read_excel(sanitized_path, **excel_kwargs)
+            finally:
+                if os.path.exists(sanitized_path):
+                    os.remove(sanitized_path)
+        except Exception:
+            raise excel_error
+
 
 if os.path.exists(experiment_config_path):
     # Load the experiment configuration if the file exists
     with open(experiment_config_path, 'r', encoding="utf-8") as file:
         expInfo = yaml.safe_load(file)
-        participant_id_str = str(expInfo['participant_id'])
-        while len(participant_id_str) < 3:
-            participant_id_str = "0" + participant_id_str
-        participant_id = participant_id_str
+        participant_id = str(expInfo['participant_id']).zfill(3)
 else:
     # Set default values if the file does not exist
     expInfo = {'participant_id': 999, 'session_id': 2}
-    participant_id = 999
+    participant_id = "999"
 
 # Create folder for audio and csv data
 output_path = f'data/{results_folder}/Stroop_Flanker/'
 os.makedirs(output_path, exist_ok=True)
+rendered_text_dir = os.path.join(output_path, f"rendered_text_{date}")
+os.makedirs(rendered_text_dir, exist_ok=True)
 # Data file name stem = absolute path + name; later add .psyexp, .csv, .log, etc
 filename = f"{output_path}" \
            f"{language}{country_code}{lab_number}" \
            f"_{participant_id}_PT{expInfo['session_id']}_{date}"
 print(filename)
-# Load the instruction Excel file
-instructions_df = pd.read_excel(
-    f'languages/{language}/instructions/Stroop_Flanker_instructions_{language.lower()}.xlsx',
-    index_col='screen'
+# Load instruction/stimulus tables from xlsx or csv
+instructions_path = resolve_table_file(
+    f'languages/{language}/instructions/Stroop_Flanker_instructions_{language.lower()}',
+    file_label='Stroop-Flanker instructions file'
+)
+stroop_practice_path = resolve_table_file(
+    f'languages/{language}/Stroop-Flanker/Stroop_practice_trials_{language.lower()}',
+    file_label='Stroop practice trials file'
+)
+stroop_stim_path = resolve_table_file(
+    f'languages/{language}/Stroop-Flanker/StroopStim_{language.lower()}',
+    file_label='Stroop stimulus file'
+)
+flanker_stim_path = resolve_table_file(
+    f'languages/{language}/Stroop-Flanker/FlankerStim_{language.lower()}',
+    file_label='Flanker stimulus file'
 )
 
+instructions_df = load_table_file(instructions_path, index_col='screen')
+
 welcome_text = instructions_df.loc['Welcome_text', language]
-welcome_text = unicodedata.normalize('NFC', welcome_text.replace('\\n', '\n').replace('\u200c', ''))
-welcome_text = ''.join(ch for ch in welcome_text if not unicodedata.combining(ch))
+welcome_text = normalize_instruction_text(welcome_text)
+welcome_text_raw = welcome_text
 
 stroop_instructions = instructions_df.loc['stroop_instructions', language]
-stroop_instructions = unicodedata.normalize('NFC', stroop_instructions.replace('\\n', '\n').replace('\u200c', ''))
-stroop_instructions = ''.join(ch for ch in stroop_instructions if not unicodedata.combining(ch))
+stroop_instructions = normalize_instruction_text(stroop_instructions)
+stroop_instructions_raw = stroop_instructions
 
 flanker_instructions = instructions_df.loc['flanker_instructions', language]
-flanker_instructions = unicodedata.normalize('NFC', flanker_instructions.replace('\\n', '\n').replace('\u200c', ''))
-flanker_instructions = ''.join(ch for ch in flanker_instructions if not unicodedata.combining(ch))
+flanker_instructions = normalize_instruction_text(flanker_instructions)
+flanker_instructions_raw = flanker_instructions
 
 done_text = instructions_df.loc['done_text', language]
-done_text = unicodedata.normalize('NFC', done_text.replace('\\n', '\n').replace('\u200c', ''))
-done_text = ''.join(ch for ch in done_text if not unicodedata.combining(ch))
+done_text = normalize_instruction_text(done_text)
+done_text_raw = done_text
 
 start_warning_text = instructions_df.loc['start_warning_text', language]
-start_warning_text = unicodedata.normalize('NFC', start_warning_text.replace('\\n', '\n').replace('\u200c', ''))
-start_warning_text = ''.join(ch for ch in start_warning_text if not unicodedata.combining(ch))
+start_warning_text = normalize_instruction_text(start_warning_text)
+start_warning_text_raw = start_warning_text
 
 Goodbyetext = instructions_df.loc['Goodbyetext', language]
-Goodbyetext = unicodedata.normalize('NFC', Goodbyetext.replace('\\n', '\n').replace('\u200c', ''))
-Goodbyetext = ''.join(ch for ch in Goodbyetext if not unicodedata.combining(ch))
+Goodbyetext = normalize_instruction_text(Goodbyetext)
+goodbye_text_raw = Goodbyetext
+
+if is_rtl and not HAS_RTL_SUPPORT:
+    raise ImportError(
+        "RTL text rendering requires 'arabic_reshaper' and 'python-bidi'. "
+        "Please install both packages in this PsychoPy environment."
+    )
 
 
 # Function to get the correct_key for a given color
@@ -118,10 +666,14 @@ def get_correct_key_for_color(df, color):
         raise ValueError(f"Not all 'correct_key' values are the same for color '{color}'.")
 
 
-stroop_stimulus = pd.read_excel(f'languages/{language}/Stroop-Flanker/Stroop_practice_trials_{language.lower()}.xlsx')
+stroop_stimulus = load_table_file(stroop_practice_path)
 stroop_blue_key = get_correct_key_for_color(stroop_stimulus, 'blue')
 stroop_yellow_key = get_correct_key_for_color(stroop_stimulus, 'yellow')
 stroop_red_key = get_correct_key_for_color(stroop_stimulus, 'red')
+# Accept both Space and Return aliases across platforms.
+CONTINUE_KEYS = tuple(expand_key_list('space', 'return'))
+LEFT_RIGHT_KEYS = expand_key_list('left', 'right')
+STROOP_RESPONSE_KEYS = expand_key_list(stroop_blue_key, stroop_red_key, stroop_yellow_key)
 
 # An ExperimentHandler isn't essential but helps with data saving
 thisExp = data.ExperimentHandler(name='Stroop_Flanker', version='',
@@ -131,32 +683,41 @@ thisExp = data.ExperimentHandler(name='Stroop_Flanker', version='',
                                  dataFileName=filename)
 # save a log file for detail verbose info
 logFile = logging.LogFile(filename + '.log', level=logging.EXP)
-logging.console.setLevel(logging.WARNING)  # this outputs to the screen, not a file
+logging.console.setLevel(logging.ERROR)  # keep console output clean for participants
 
 endExpNow = False  # flag for 'escape' or other condition => quit the exp
 frameTolerance = 0.001  # how close to onset before 'same' frame
 
 # Start Code - component code to be run after the window creation
 
+def detect_fullscreen_size(default_size=(1440, 900)):
+    if pyglet is None:
+        return list(default_size)
+    try:
+        screen = pyglet.canvas.get_display().get_default_screen()
+        return [int(screen.width), int(screen.height)]
+    except Exception:
+        return list(default_size)
+
+
 # Setup the Window
+fullscreen_size = detect_fullscreen_size()
 win = visual.Window(
-    size=[1440, 900], fullscr=True, screen=0,
+    size=fullscreen_size, fullscr=True, screen=0,
     winType='pyglet', allowGUI=False, allowStencil=False,
     monitor='testMonitor', color=[0, 0, 0], colorSpace='rgb',
     blendMode='avg', useFBO=True,
     units='height')
-# store frame rate of monitor if we can measure it
-expInfo['frameRate'] = win.getActualFrameRate()
-if expInfo['frameRate'] != None:
-    frameDur = 1.0 / round(expInfo['frameRate'])
-else:
-    frameDur = 1.0 / 60.0  # could not measure, so guess
-
-# Setup eyetracking
-ioDevice = ioConfig = ioSession = ioServer = eyetracker = None
+# Avoid runtime frame-rate probing to reduce startup warnings on macOS.
+expInfo['frameRate'] = None
 
 # create a default keyboard (e.g. to check for escape)
 defaultKeyboard = keyboard.Keyboard()
+try:
+    event.globalKeys.clear()
+    event.globalKeys.add(key='escape', func=core.quit, name='global_escape_quit')
+except Exception as exc:
+    logging.warning(f"Could not register global Escape handler: {exc}")
 
 # Initialize components for Routine "WelcomeScreen"
 WelcomeScreenClock = core.Clock()
@@ -308,6 +869,29 @@ Goodbyetext = visual.TextStim(win=win, name='Goodbyetext',
                               depth=0.0);
 key_goodbye = keyboard.Keyboard()
 
+if is_rtl:
+    rtl_font_path = pick_rtl_render_font_path()
+    logging.warning(f"Resolved RTL font path: {rtl_font_path}")
+    print(f"Resolved RTL font path: {rtl_font_path}", flush=True)
+    Welcome_text = convert_text_screen_to_image_stim(
+        Welcome_text, "welcome_text.png", rtl_font_path, rendered_text_dir, text_override=welcome_text_raw
+    )
+    stroop_instructions = convert_text_screen_to_image_stim(
+        stroop_instructions, "stroop_instructions.png", rtl_font_path, rendered_text_dir, text_override=stroop_instructions_raw
+    )
+    start_warning_text = convert_text_screen_to_image_stim(
+        start_warning_text, "start_warning_text.png", rtl_font_path, rendered_text_dir, text_override=start_warning_text_raw
+    )
+    done_text = convert_text_screen_to_image_stim(
+        done_text, "done_text.png", rtl_font_path, rendered_text_dir, text_override=done_text_raw
+    )
+    Flanker_instructions = convert_text_screen_to_image_stim(
+        Flanker_instructions, "flanker_instructions.png", rtl_font_path, rendered_text_dir, text_override=flanker_instructions_raw
+    )
+    Goodbyetext = convert_text_screen_to_image_stim(
+        Goodbyetext, "goodbye_text.png", rtl_font_path, rendered_text_dir, text_override=goodbye_text_raw
+    )
+
 # Create some handy timers
 globalClock = core.Clock()  # to track the time since experiment started
 routineTimer = core.CountdownTimer()  # to track time remaining of each (non-slip) routine 
@@ -364,17 +948,26 @@ while continueRoutine:
         waitOnFlip = True
         win.callOnFlip(Welcome_resp.clock.reset)  # t=0 on next screen flip
         win.callOnFlip(Welcome_resp.clearEvents, eventType='keyboard')  # clear events on next screen flip
+        win.callOnFlip(event.clearEvents, eventType='keyboard')  # clear event fallback buffer
     if Welcome_resp.status == STARTED and not waitOnFlip:
-        theseKeys = Welcome_resp.getKeys(keyList=['space'], waitRelease=False)
-        _Welcome_resp_allKeys.extend(theseKeys)
+        theseKeys = safe_keyboard_get_keys(Welcome_resp)
+        matched_key = get_first_matching_keypress(theseKeys, CONTINUE_KEYS)
+        fallback_keys = safe_event_get_keys(CONTINUE_KEYS)
+        matched_fallback_key = get_first_matching_keyname(fallback_keys, CONTINUE_KEYS)
+        if matched_key:
+            _Welcome_resp_allKeys.append(matched_key)
+        elif matched_fallback_key:
+            Welcome_resp.keys = normalize_key_name(matched_fallback_key)
+            Welcome_resp.rt = Welcome_resp.clock.getTime()
+            continueRoutine = False
         if len(_Welcome_resp_allKeys):
-            Welcome_resp.keys = _Welcome_resp_allKeys[-1].name  # just the last key pressed
+            Welcome_resp.keys = normalize_key_name(_Welcome_resp_allKeys[-1].name)
             Welcome_resp.rt = _Welcome_resp_allKeys[-1].rt
             # a response ends the routine
             continueRoutine = False
 
     # check for quit (typically the Esc key)
-    if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
+    if endExpNow or escape_pressed(defaultKeyboard):
         core.quit()
 
     # check if all components have finished
@@ -460,17 +1053,26 @@ while continueRoutine:
         waitOnFlip = True
         win.callOnFlip(stroop_instruction_key.clock.reset)  # t=0 on next screen flip
         win.callOnFlip(stroop_instruction_key.clearEvents, eventType='keyboard')  # clear events on next screen flip
+        win.callOnFlip(event.clearEvents, eventType='keyboard')  # clear event fallback buffer
     if stroop_instruction_key.status == STARTED and not waitOnFlip:
-        theseKeys = stroop_instruction_key.getKeys(keyList=['space'], waitRelease=False)
-        _stroop_instruction_key_allKeys.extend(theseKeys)
+        theseKeys = safe_keyboard_get_keys(stroop_instruction_key)
+        matched_key = get_first_matching_keypress(theseKeys, CONTINUE_KEYS)
+        fallback_keys = safe_event_get_keys(CONTINUE_KEYS)
+        matched_fallback_key = get_first_matching_keyname(fallback_keys, CONTINUE_KEYS)
+        if matched_key:
+            _stroop_instruction_key_allKeys.append(matched_key)
+        elif matched_fallback_key:
+            stroop_instruction_key.keys = normalize_key_name(matched_fallback_key)
+            stroop_instruction_key.rt = stroop_instruction_key.clock.getTime()
+            continueRoutine = False
         if len(_stroop_instruction_key_allKeys):
-            stroop_instruction_key.keys = _stroop_instruction_key_allKeys[-1].name  # just the last key pressed
+            stroop_instruction_key.keys = normalize_key_name(_stroop_instruction_key_allKeys[-1].name)
             stroop_instruction_key.rt = _stroop_instruction_key_allKeys[-1].rt
             # a response ends the routine
             continueRoutine = False
 
     # check for quit (typically the Esc key)
-    if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
+    if endExpNow or escape_pressed(defaultKeyboard):
         core.quit()
 
     # check if all components have finished
@@ -506,7 +1108,7 @@ routineTimer.reset()
 
 # ------Prepare to start Routine "Blank500"-------
 continueRoutine = True
-routineTimer.add(0.500000)
+routineTimer.addTime(0.500000)
 # update component parameters for each repeat
 # keep track of which components have finished
 Blank500Components = [blank]
@@ -550,7 +1152,7 @@ while continueRoutine and routineTimer.getTime() > 0:
             blank.setAutoDraw(False)
 
     # check for quit (typically the Esc key)
-    if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
+    if endExpNow or escape_pressed(defaultKeyboard):
         core.quit()
 
     # check if all components have finished
@@ -577,7 +1179,7 @@ thisExp.addData('blank.stopped', blank.tStopRefresh)
 stroop_practice_trial = data.TrialHandler(nReps=1.0, method='random',
                                           extraInfo=expInfo, originPath=-1,
                                           trialList=data.importConditions(
-                                              f'languages/{language}/Stroop-Flanker/Stroop_practice_trials_{language.lower()}.xlsx'),
+                                              stroop_practice_path),
                                           seed=None, name='stroop_practice_trial')
 thisExp.addLoop(stroop_practice_trial)  # add the loop to the experiment
 thisStroop_practice_trial = stroop_practice_trial.trialList[0]  # so we can initialise stimuli with some values
@@ -595,7 +1197,7 @@ for thisStroop_practice_trial in stroop_practice_trial:
 
     # ------Prepare to start Routine "FixationCross"-------
     continueRoutine = True
-    routineTimer.add(0.350000)
+    routineTimer.addTime(0.350000)
     # update component parameters for each repeat
     # keep track of which components have finished
     FixationCrossComponents = [fix_cross]
@@ -639,7 +1241,7 @@ for thisStroop_practice_trial in stroop_practice_trial:
                 fix_cross.setAutoDraw(False)
 
         # check for quit (typically the Esc key)
-        if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
+        if endExpNow or escape_pressed(defaultKeyboard):
             core.quit()
 
         # check if all components have finished
@@ -666,7 +1268,7 @@ for thisStroop_practice_trial in stroop_practice_trial:
     continueRoutine = True
     # update component parameters for each repeat
     stroop_practice_word.setColor(color, colorSpace='rgb')
-    stroop_practice_word.setText(word)
+    set_text_with_rtl_fallback(stroop_practice_word, word)
     stroop_practice_key.keys = []
     stroop_practice_key.rt = []
     _stroop_practice_key_allKeys = []
@@ -716,15 +1318,24 @@ for thisStroop_practice_trial in stroop_practice_trial:
             waitOnFlip = True
             win.callOnFlip(stroop_practice_key.clock.reset)  # t=0 on next screen flip
             win.callOnFlip(stroop_practice_key.clearEvents, eventType='keyboard')  # clear events on next screen flip
+            win.callOnFlip(event.clearEvents, eventType='keyboard')  # clear event fallback buffer
         if stroop_practice_key.status == STARTED and not waitOnFlip:
-            theseKeys = stroop_practice_key.getKeys(keyList=[stroop_blue_key, stroop_red_key, stroop_yellow_key],
-                                                    waitRelease=False)
-            _stroop_practice_key_allKeys.extend(theseKeys)
+            theseKeys = safe_keyboard_get_keys(stroop_practice_key)
+            matched_key = get_first_matching_keypress(theseKeys, STROOP_RESPONSE_KEYS)
+            fallback_keys = safe_event_get_keys()
+            matched_fallback_key = get_first_matching_keyname(fallback_keys, STROOP_RESPONSE_KEYS)
+            if matched_key:
+                _stroop_practice_key_allKeys.append(matched_key)
+            elif matched_fallback_key:
+                stroop_practice_key.keys = matched_fallback_key
+                stroop_practice_key.rt = stroop_practice_key.clock.getTime()
+                stroop_practice_key.corr = 1 if is_key_match(stroop_practice_key.keys, correct_key) else 0
+                continueRoutine = False
             if len(_stroop_practice_key_allKeys):
                 stroop_practice_key.keys = _stroop_practice_key_allKeys[-1].name  # just the last key pressed
                 stroop_practice_key.rt = _stroop_practice_key_allKeys[-1].rt
                 # was this correct?
-                if (stroop_practice_key.keys == str(correct_key)) or (stroop_practice_key.keys == correct_key):
+                if is_key_match(stroop_practice_key.keys, correct_key):
                     stroop_practice_key.corr = 1
                 else:
                     stroop_practice_key.corr = 0
@@ -732,7 +1343,7 @@ for thisStroop_practice_trial in stroop_practice_trial:
                 continueRoutine = False
 
         # check for quit (typically the Esc key)
-        if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
+        if endExpNow or escape_pressed(defaultKeyboard):
             core.quit()
 
         # check if all components have finished
@@ -774,7 +1385,7 @@ for thisStroop_practice_trial in stroop_practice_trial:
 
     # ------Prepare to start Routine "stroop_practice_feedback"-------
     continueRoutine = True
-    routineTimer.add(1.000000)
+    routineTimer.addTime(1.000000)
     # update component parameters for each repeat
     if (stroop_practice_key.corr == 1):
         feedback_text = "✓"
@@ -823,7 +1434,7 @@ for thisStroop_practice_trial in stroop_practice_trial:
                 stroop_feedback_text.setAutoDraw(False)
 
         # check for quit (typically the Esc key)
-        if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
+        if endExpNow or escape_pressed(defaultKeyboard):
             core.quit()
 
         # check if all components have finished
@@ -852,7 +1463,7 @@ for thisStroop_practice_trial in stroop_practice_trial:
 
 # ------Prepare to start Routine "StartWarning"-------
 continueRoutine = True
-routineTimer.add(6.000000)
+routineTimer.addTime(6.000000)
 # update component parameters for each repeat
 # keep track of which components have finished
 StartWarningComponents = [start_warning_text]
@@ -896,7 +1507,7 @@ while continueRoutine and routineTimer.getTime() > 0:
             start_warning_text.setAutoDraw(False)
 
     # check for quit (typically the Esc key)
-    if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
+    if endExpNow or escape_pressed(defaultKeyboard):
         core.quit()
 
     # check if all components have finished
@@ -923,7 +1534,7 @@ thisExp.addData('start_warning_text.stopped', start_warning_text.tStopRefresh)
 Stroop_trials = data.TrialHandler(nReps=4.0, method='random',
                                   extraInfo=expInfo, originPath=-1,
                                   trialList=data.importConditions(
-                                      f'languages/{language}/Stroop-Flanker/StroopStim_{language.lower()}.xlsx'),
+                                      stroop_stim_path),
                                   seed=None, name='Stroop_trials')
 thisExp.addLoop(Stroop_trials)  # add the loop to the experiment
 thisStroop_trial = Stroop_trials.trialList[0]  # so we can initialise stimuli with some values
@@ -941,7 +1552,7 @@ for thisStroop_trial in Stroop_trials:
 
     # ------Prepare to start Routine "FixationCross"-------
     continueRoutine = True
-    routineTimer.add(0.350000)
+    routineTimer.addTime(0.350000)
     # update component parameters for each repeat
     # keep track of which components have finished
     FixationCrossComponents = [fix_cross]
@@ -985,7 +1596,7 @@ for thisStroop_trial in Stroop_trials:
                 fix_cross.setAutoDraw(False)
 
         # check for quit (typically the Esc key)
-        if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
+        if endExpNow or escape_pressed(defaultKeyboard):
             core.quit()
 
         # check if all components have finished
@@ -1012,7 +1623,7 @@ for thisStroop_trial in Stroop_trials:
     continueRoutine = True
     # update component parameters for each repeat
     stroop_word.setColor(color, colorSpace='rgb')
-    stroop_word.setText(word)
+    set_text_with_rtl_fallback(stroop_word, word)
     stroop_key.keys = []
     stroop_key.rt = []
     _stroop_key_allKeys = []
@@ -1062,15 +1673,24 @@ for thisStroop_trial in Stroop_trials:
             waitOnFlip = True
             win.callOnFlip(stroop_key.clock.reset)  # t=0 on next screen flip
             win.callOnFlip(stroop_key.clearEvents, eventType='keyboard')  # clear events on next screen flip
+            win.callOnFlip(event.clearEvents, eventType='keyboard')  # clear event fallback buffer
         if stroop_key.status == STARTED and not waitOnFlip:
-            theseKeys = stroop_key.getKeys(keyList=[stroop_red_key, stroop_blue_key, stroop_yellow_key],
-                                           waitRelease=False)
-            _stroop_key_allKeys.extend(theseKeys)
+            theseKeys = safe_keyboard_get_keys(stroop_key)
+            matched_key = get_first_matching_keypress(theseKeys, STROOP_RESPONSE_KEYS)
+            fallback_keys = safe_event_get_keys()
+            matched_fallback_key = get_first_matching_keyname(fallback_keys, STROOP_RESPONSE_KEYS)
+            if matched_key:
+                _stroop_key_allKeys.append(matched_key)
+            elif matched_fallback_key:
+                stroop_key.keys = matched_fallback_key
+                stroop_key.rt = stroop_key.clock.getTime()
+                stroop_key.corr = 1 if is_key_match(stroop_key.keys, correct_key) else 0
+                continueRoutine = False
             if len(_stroop_key_allKeys):
                 stroop_key.keys = _stroop_key_allKeys[-1].name  # just the last key pressed
                 stroop_key.rt = _stroop_key_allKeys[-1].rt
                 # was this correct?
-                if (stroop_key.keys == str(correct_key)) or (stroop_key.keys == correct_key):
+                if is_key_match(stroop_key.keys, correct_key):
                     stroop_key.corr = 1
                 else:
                     stroop_key.corr = 0
@@ -1078,7 +1698,7 @@ for thisStroop_trial in Stroop_trials:
                 continueRoutine = False
 
         # check for quit (typically the Esc key)
-        if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
+        if endExpNow or escape_pressed(defaultKeyboard):
             core.quit()
 
         # check if all components have finished
@@ -1174,17 +1794,26 @@ while continueRoutine:
         waitOnFlip = True
         win.callOnFlip(done_key.clock.reset)  # t=0 on next screen flip
         win.callOnFlip(done_key.clearEvents, eventType='keyboard')  # clear events on next screen flip
+        win.callOnFlip(event.clearEvents, eventType='keyboard')  # clear event fallback buffer
     if done_key.status == STARTED and not waitOnFlip:
-        theseKeys = done_key.getKeys(keyList=['space'], waitRelease=False)
-        _done_key_allKeys.extend(theseKeys)
+        theseKeys = safe_keyboard_get_keys(done_key)
+        matched_key = get_first_matching_keypress(theseKeys, CONTINUE_KEYS)
+        fallback_keys = safe_event_get_keys(CONTINUE_KEYS)
+        matched_fallback_key = get_first_matching_keyname(fallback_keys, CONTINUE_KEYS)
+        if matched_key:
+            _done_key_allKeys.append(matched_key)
+        elif matched_fallback_key:
+            done_key.keys = normalize_key_name(matched_fallback_key)
+            done_key.rt = done_key.clock.getTime()
+            continueRoutine = False
         if len(_done_key_allKeys):
-            done_key.keys = _done_key_allKeys[-1].name  # just the last key pressed
+            done_key.keys = normalize_key_name(_done_key_allKeys[-1].name)
             done_key.rt = _done_key_allKeys[-1].rt
             # a response ends the routine
             continueRoutine = False
 
     # check for quit (typically the Esc key)
-    if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
+    if endExpNow or escape_pressed(defaultKeyboard):
         core.quit()
 
     # check if all components have finished
@@ -1270,17 +1899,26 @@ while continueRoutine:
         waitOnFlip = True
         win.callOnFlip(Flanker_instruction_key.clock.reset)  # t=0 on next screen flip
         win.callOnFlip(Flanker_instruction_key.clearEvents, eventType='keyboard')  # clear events on next screen flip
+        win.callOnFlip(event.clearEvents, eventType='keyboard')  # clear event fallback buffer
     if Flanker_instruction_key.status == STARTED and not waitOnFlip:
-        theseKeys = Flanker_instruction_key.getKeys(keyList=['space'], waitRelease=False)
-        _Flanker_instruction_key_allKeys.extend(theseKeys)
+        theseKeys = safe_keyboard_get_keys(Flanker_instruction_key)
+        matched_key = get_first_matching_keypress(theseKeys, CONTINUE_KEYS)
+        fallback_keys = safe_event_get_keys(CONTINUE_KEYS)
+        matched_fallback_key = get_first_matching_keyname(fallback_keys, CONTINUE_KEYS)
+        if matched_key:
+            _Flanker_instruction_key_allKeys.append(matched_key)
+        elif matched_fallback_key:
+            Flanker_instruction_key.keys = normalize_key_name(matched_fallback_key)
+            Flanker_instruction_key.rt = Flanker_instruction_key.clock.getTime()
+            continueRoutine = False
         if len(_Flanker_instruction_key_allKeys):
-            Flanker_instruction_key.keys = _Flanker_instruction_key_allKeys[-1].name  # just the last key pressed
+            Flanker_instruction_key.keys = normalize_key_name(_Flanker_instruction_key_allKeys[-1].name)
             Flanker_instruction_key.rt = _Flanker_instruction_key_allKeys[-1].rt
             # a response ends the routine
             continueRoutine = False
 
     # check for quit (typically the Esc key)
-    if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
+    if endExpNow or escape_pressed(defaultKeyboard):
         core.quit()
 
     # check if all components have finished
@@ -1316,7 +1954,7 @@ routineTimer.reset()
 
 # ------Prepare to start Routine "Blank500"-------
 continueRoutine = True
-routineTimer.add(0.500000)
+routineTimer.addTime(0.500000)
 # update component parameters for each repeat
 # keep track of which components have finished
 Blank500Components = [blank]
@@ -1360,7 +1998,7 @@ while continueRoutine and routineTimer.getTime() > 0:
             blank.setAutoDraw(False)
 
     # check for quit (typically the Esc key)
-    if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
+    if endExpNow or escape_pressed(defaultKeyboard):
         core.quit()
 
     # check if all components have finished
@@ -1387,7 +2025,7 @@ thisExp.addData('blank.stopped', blank.tStopRefresh)
 Flanker_practice_trials = data.TrialHandler(nReps=2.0, method='random',
                                             extraInfo=expInfo, originPath=-1,
                                             trialList=data.importConditions(
-                                                f'languages/{language}/Stroop-Flanker/FlankerStim_{language.lower()}.xlsx'),
+                                                flanker_stim_path),
                                             seed=None, name='Flanker_practice_trials')
 thisExp.addLoop(Flanker_practice_trials)  # add the loop to the experiment
 thisFlanker_practice_trial = Flanker_practice_trials.trialList[0]  # so we can initialise stimuli with some values
@@ -1405,7 +2043,7 @@ for thisFlanker_practice_trial in Flanker_practice_trials:
 
     # ------Prepare to start Routine "FixationCross"-------
     continueRoutine = True
-    routineTimer.add(0.350000)
+    routineTimer.addTime(0.350000)
     # update component parameters for each repeat
     # keep track of which components have finished
     FixationCrossComponents = [fix_cross]
@@ -1449,7 +2087,7 @@ for thisFlanker_practice_trial in Flanker_practice_trials:
                 fix_cross.setAutoDraw(False)
 
         # check for quit (typically the Esc key)
-        if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
+        if endExpNow or escape_pressed(defaultKeyboard):
             core.quit()
 
         # check if all components have finished
@@ -1526,14 +2164,24 @@ for thisFlanker_practice_trial in Flanker_practice_trials:
             waitOnFlip = True
             win.callOnFlip(Flanker_practice_key.clock.reset)  # t=0 on next screen flip
             win.callOnFlip(Flanker_practice_key.clearEvents, eventType='keyboard')  # clear events on next screen flip
+            win.callOnFlip(event.clearEvents, eventType='keyboard')  # clear event fallback buffer
         if Flanker_practice_key.status == STARTED and not waitOnFlip:
-            theseKeys = Flanker_practice_key.getKeys(keyList=['left', 'right'], waitRelease=False)
-            _Flanker_practice_key_allKeys.extend(theseKeys)
+            theseKeys = safe_keyboard_get_keys(Flanker_practice_key)
+            matched_key = get_first_matching_keypress(theseKeys, LEFT_RIGHT_KEYS)
+            fallback_keys = safe_event_get_keys()
+            matched_fallback_key = get_first_matching_keyname(fallback_keys, LEFT_RIGHT_KEYS)
+            if matched_key:
+                _Flanker_practice_key_allKeys.append(matched_key)
+            elif matched_fallback_key:
+                Flanker_practice_key.keys = matched_fallback_key
+                Flanker_practice_key.rt = Flanker_practice_key.clock.getTime()
+                Flanker_practice_key.corr = 1 if is_key_match(Flanker_practice_key.keys, correct_key) else 0
+                continueRoutine = False
             if len(_Flanker_practice_key_allKeys):
                 Flanker_practice_key.keys = _Flanker_practice_key_allKeys[-1].name  # just the last key pressed
                 Flanker_practice_key.rt = _Flanker_practice_key_allKeys[-1].rt
                 # was this correct?
-                if (Flanker_practice_key.keys == str(correct_key)) or (Flanker_practice_key.keys == correct_key):
+                if is_key_match(Flanker_practice_key.keys, correct_key):
                     Flanker_practice_key.corr = 1
                 else:
                     Flanker_practice_key.corr = 0
@@ -1541,7 +2189,7 @@ for thisFlanker_practice_trial in Flanker_practice_trials:
                 continueRoutine = False
 
         # check for quit (typically the Esc key)
-        if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
+        if endExpNow or escape_pressed(defaultKeyboard):
             core.quit()
 
         # check if all components have finished
@@ -1583,7 +2231,7 @@ for thisFlanker_practice_trial in Flanker_practice_trials:
 
     # ------Prepare to start Routine "Flanker_practice_feedback"-------
     continueRoutine = True
-    routineTimer.add(1.000000)
+    routineTimer.addTime(1.000000)
     # update component parameters for each repeat
     if (Flanker_practice_key.corr == 1):
         feedback_text2 = "✓"
@@ -1632,7 +2280,7 @@ for thisFlanker_practice_trial in Flanker_practice_trials:
                 Flanker_feedback_text.setAutoDraw(False)
 
         # check for quit (typically the Esc key)
-        if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
+        if endExpNow or escape_pressed(defaultKeyboard):
             core.quit()
 
         # check if all components have finished
@@ -1661,7 +2309,7 @@ for thisFlanker_practice_trial in Flanker_practice_trials:
 
 # ------Prepare to start Routine "StartWarning"-------
 continueRoutine = True
-routineTimer.add(6.000000)
+routineTimer.addTime(6.000000)
 # update component parameters for each repeat
 # keep track of which components have finished
 StartWarningComponents = [start_warning_text]
@@ -1705,7 +2353,7 @@ while continueRoutine and routineTimer.getTime() > 0:
             start_warning_text.setAutoDraw(False)
 
     # check for quit (typically the Esc key)
-    if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
+    if endExpNow or escape_pressed(defaultKeyboard):
         core.quit()
 
     # check if all components have finished
@@ -1732,7 +2380,7 @@ thisExp.addData('start_warning_text.stopped', start_warning_text.tStopRefresh)
 Flanker_trials = data.TrialHandler(nReps=21.0, method='random',
                                    extraInfo=expInfo, originPath=-1,
                                    trialList=data.importConditions(
-                                       f'languages/{language}/Stroop-Flanker/FlankerStim_{language.lower()}.xlsx'),
+                                       flanker_stim_path),
                                    seed=None, name='Flanker_trials')
 thisExp.addLoop(Flanker_trials)  # add the loop to the experiment
 thisFlanker_trial = Flanker_trials.trialList[0]  # so we can initialise stimuli with some values
@@ -1750,7 +2398,7 @@ for thisFlanker_trial in Flanker_trials:
 
     # ------Prepare to start Routine "FixationCross"-------
     continueRoutine = True
-    routineTimer.add(0.350000)
+    routineTimer.addTime(0.350000)
     # update component parameters for each repeat
     # keep track of which components have finished
     FixationCrossComponents = [fix_cross]
@@ -1794,7 +2442,7 @@ for thisFlanker_trial in Flanker_trials:
                 fix_cross.setAutoDraw(False)
 
         # check for quit (typically the Esc key)
-        if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
+        if endExpNow or escape_pressed(defaultKeyboard):
             core.quit()
 
         # check if all components have finished
@@ -1871,14 +2519,24 @@ for thisFlanker_trial in Flanker_trials:
             waitOnFlip = True
             win.callOnFlip(Flanker_key.clock.reset)  # t=0 on next screen flip
             win.callOnFlip(Flanker_key.clearEvents, eventType='keyboard')  # clear events on next screen flip
+            win.callOnFlip(event.clearEvents, eventType='keyboard')  # clear event fallback buffer
         if Flanker_key.status == STARTED and not waitOnFlip:
-            theseKeys = Flanker_key.getKeys(keyList=['left', 'right'], waitRelease=False)
-            _Flanker_key_allKeys.extend(theseKeys)
+            theseKeys = safe_keyboard_get_keys(Flanker_key)
+            matched_key = get_first_matching_keypress(theseKeys, LEFT_RIGHT_KEYS)
+            fallback_keys = safe_event_get_keys()
+            matched_fallback_key = get_first_matching_keyname(fallback_keys, LEFT_RIGHT_KEYS)
+            if matched_key:
+                _Flanker_key_allKeys.append(matched_key)
+            elif matched_fallback_key:
+                Flanker_key.keys = matched_fallback_key
+                Flanker_key.rt = Flanker_key.clock.getTime()
+                Flanker_key.corr = 1 if is_key_match(Flanker_key.keys, correct_key) else 0
+                continueRoutine = False
             if len(_Flanker_key_allKeys):
                 Flanker_key.keys = _Flanker_key_allKeys[-1].name  # just the last key pressed
                 Flanker_key.rt = _Flanker_key_allKeys[-1].rt
                 # was this correct?
-                if (Flanker_key.keys == str(correct_key)) or (Flanker_key.keys == correct_key):
+                if is_key_match(Flanker_key.keys, correct_key):
                     Flanker_key.corr = 1
                 else:
                     Flanker_key.corr = 0
@@ -1886,7 +2544,7 @@ for thisFlanker_trial in Flanker_trials:
                 continueRoutine = False
 
         # check for quit (typically the Esc key)
-        if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
+        if endExpNow or escape_pressed(defaultKeyboard):
             core.quit()
 
         # check if all components have finished
@@ -1932,7 +2590,7 @@ for thisFlanker_trial in Flanker_trials:
 
 # ------Prepare to start Routine "GoodbyeScreen"-------
 continueRoutine = True
-routineTimer.add(10.000000)
+routineTimer.addTime(10.000000)
 # update component parameters for each repeat
 key_goodbye.keys = []
 key_goodbye.rt = []
@@ -1991,6 +2649,7 @@ while continueRoutine and routineTimer.getTime() > 0:
         waitOnFlip = True
         win.callOnFlip(key_goodbye.clock.reset)  # t=0 on next screen flip
         win.callOnFlip(key_goodbye.clearEvents, eventType='keyboard')  # clear events on next screen flip
+        win.callOnFlip(event.clearEvents, eventType='keyboard')  # clear event fallback buffer
     if key_goodbye.status == STARTED:
         # is it time to stop? (based on global clock, using actual start)
         if tThisFlipGlobal > key_goodbye.tStartRefresh + 10 - frameTolerance:
@@ -2000,16 +2659,24 @@ while continueRoutine and routineTimer.getTime() > 0:
             win.timeOnFlip(key_goodbye, 'tStopRefresh')  # time at next scr refresh
             key_goodbye.status = FINISHED
     if key_goodbye.status == STARTED and not waitOnFlip:
-        theseKeys = key_goodbye.getKeys(keyList=['space'], waitRelease=False)
-        _key_goodbye_allKeys.extend(theseKeys)
+        theseKeys = safe_keyboard_get_keys(key_goodbye)
+        matched_key = get_first_matching_keypress(theseKeys, CONTINUE_KEYS)
+        fallback_keys = safe_event_get_keys(CONTINUE_KEYS)
+        matched_fallback_key = get_first_matching_keyname(fallback_keys, CONTINUE_KEYS)
+        if matched_key:
+            _key_goodbye_allKeys.append(matched_key)
+        elif matched_fallback_key:
+            key_goodbye.keys = normalize_key_name(matched_fallback_key)
+            key_goodbye.rt = key_goodbye.clock.getTime()
+            continueRoutine = False
         if len(_key_goodbye_allKeys):
-            key_goodbye.keys = _key_goodbye_allKeys[-1].name  # just the last key pressed
+            key_goodbye.keys = normalize_key_name(_key_goodbye_allKeys[-1].name)
             key_goodbye.rt = _key_goodbye_allKeys[-1].rt
             # a response ends the routine
             continueRoutine = False
 
     # check for quit (typically the Esc key)
-    if endExpNow or defaultKeyboard.getKeys(keyList=["escape"]):
+    if endExpNow or escape_pressed(defaultKeyboard):
         core.quit()
 
     # check if all components have finished

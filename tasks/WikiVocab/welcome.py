@@ -14,16 +14,21 @@ import os
 import re
 from datetime import datetime
 
-import pandas as pd
 import yaml
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtWidgets import QMainWindow
 
 from main import MyMainWindow
+from table_loader import load_table_file, resolve_table_file
+
+
+def is_rtl_language(language: str) -> bool:
+    return str(language).lower() in {"ar", "fa", "fas", "ur", "ug", "he", "yi"}
+
 
 class MyWelcomeWindow(QMainWindow):
     def __init__(self, result_folder: str) -> None:
-        super(MyWelcomeWindow, self).__init__()
+        super().__init__()
         self.result_folder = result_folder
         self.initUI()
         self.showFullScreen()
@@ -34,11 +39,6 @@ class MyWelcomeWindow(QMainWindow):
         self.centralWidget.setObjectName("centralWidget")
 
         # Define styles
-        font = QtGui.QFont()
-        font.setFamily("Arial Unicode MS")
-        font.setPointSize(26)  # Increase the font size for the main text
-        font.setItalic(False)
-
         # Set up a vertical layout to center widgets
         layout = QtWidgets.QVBoxLayout(self.centralWidget)
 
@@ -49,15 +49,35 @@ class MyWelcomeWindow(QMainWindow):
         self.expName = exp[3]
         self.filename = exp[4]
 
+<<<<<<< HEAD
         instructions_df = pd.read_excel(
             f'languages/{self.language.upper()}/instructions/WikiVocab_instructions_{self.language.lower()}.xlsx',
             index_col='screen', nrows=8)
+=======
+        instructions_path = resolve_table_file(
+            f'languages/{self.language.upper()}/instructions/WikiVocab_instructions_{self.language.lower()}',
+            file_label='WikiVocab instructions file'
+        )
+        instructions_df = load_table_file(instructions_path, index_col='screen')
+>>>>>>> a47797f (Persian; mac)
         welcome_text = instructions_df.loc['Welcome_text', self.language.upper()]
         welcome_text = welcome_text.replace('\\n', '\n')
         WikiVocab_instructions = instructions_df.loc['WikiVocab_instructions', self.language.upper()]
         WikiVocab_instructions = WikiVocab_instructions.replace('\\n', '\n')
         self.welcome_instructions = welcome_text + WikiVocab_instructions
         self.start_text = instructions_df.loc['start_text', self.language.upper()]
+
+        language_code = str(self.language).lower()
+        is_rtl = is_rtl_language(language_code)
+        if is_rtl:
+            instruction_font_size = 24
+        else:
+            instruction_font_size = 26
+
+        font = QtGui.QFont()
+        font.setFamily("Arial Unicode MS")
+        font.setPointSize(instruction_font_size)
+        font.setItalic(False)
 
         # Add main text
         self.mainText = QtWidgets.QLabel(self.centralWidget)
@@ -77,7 +97,6 @@ class MyWelcomeWindow(QMainWindow):
         # Add the combo box
         self.comboBox = QtWidgets.QComboBox(self.centralWidget)
         self.comboBox.setFont(widget_font)
-        self.comboBox.setStyleSheet("color: rgb(0, 0, 0);")  # Set font color to black
         self.comboBox.setStyleSheet("""
                     color: rgb(0, 0, 0);  /* Font color */
                     padding: 10px;       /* Add padding */
@@ -115,13 +134,13 @@ class MyWelcomeWindow(QMainWindow):
         self.close()
 
     def get_languages(self) -> list:
-        result = []
-        template = re.compile(r'(.+)\.csv')
+        result = set()
+        template = re.compile(r'(.+)\.(csv|xlsx)$')
         for file in os.listdir("tasks/WikiVocab/vocab"):
             m = template.match(file)
             if m:
-                result.append(m.group(1))
-        return result
+                result.add(m.group(1))
+        return sorted(result)
 
     def get_exp_info(self) -> tuple:
         date = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
@@ -136,7 +155,6 @@ class MyWelcomeWindow(QMainWindow):
         language = config_data['language']
         country_code = config_data['country_code']
         lab_number = config_data['lab_number']
-        random_seed = config_data['random_seed']
 
         if os.path.exists(experiment_config_path):
             # Load the experiment configuration if the file exists
