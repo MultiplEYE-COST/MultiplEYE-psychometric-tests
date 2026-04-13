@@ -49,17 +49,11 @@ class MyWelcomeWindow(QMainWindow):
         self.expName = exp[3]
         self.filename = exp[4]
 
-<<<<<<< HEAD
-        instructions_df = pd.read_excel(
-            f'languages/{self.language.upper()}/instructions/WikiVocab_instructions_{self.language.lower()}.xlsx',
-            index_col='screen', nrows=8)
-=======
         instructions_path = resolve_table_file(
             f'languages/{self.language.upper()}/instructions/WikiVocab_instructions_{self.language.lower()}',
             file_label='WikiVocab instructions file'
         )
         instructions_df = load_table_file(instructions_path, index_col='screen')
->>>>>>> a47797f (Persian; mac)
         welcome_text = instructions_df.loc['Welcome_text', self.language.upper()]
         welcome_text = welcome_text.replace('\\n', '\n')
         WikiVocab_instructions = instructions_df.loc['WikiVocab_instructions', self.language.upper()]
