@@ -272,6 +272,30 @@ def wrap_text_to_lines(text, rtl, draw, font_obj, max_width_px):
     return all_lines
 
 
+def image_stim_size_height_units(
+    win,
+    image_width,
+    image_height,
+    max_width_fraction=0.92,
+    max_height_fraction=0.88,
+):
+    """
+    Fit a rendered text image on screen without stretching (height units).
+    """
+    img_aspect = image_width / image_height
+    max_w = (win.size[0] / win.size[1]) * max_width_fraction
+    max_h = max_height_fraction
+
+    if img_aspect >= max_w / max_h:
+        width_units = max_w
+        height_units = max_w / img_aspect
+    else:
+        height_units = max_h
+        width_units = max_h * img_aspect
+
+    return width_units, height_units
+
+
 def render_text_screen_to_image(
     text,
     language_code,
@@ -281,7 +305,7 @@ def render_text_screen_to_image(
     image_height=1100,
     font_size=62,
     margin_px=180,
-    line_spacing_px=24,
+    line_spacing_px=34,
     bg_color=(255, 255, 255, 0),
     text_color='black'
 ):
@@ -349,6 +373,7 @@ def show_text_screen(
     """
     if str(language_code).lower() in RTL_LANGS:
         img_path = Path(output_dir) / image_name
+        font_size = rtl_font_size_large if height >= 0.05 else rtl_font_size_small
         render_text_screen_to_image(
             text=text,
             language_code=language_code,
@@ -356,15 +381,20 @@ def show_text_screen(
             out_path=str(img_path),
             image_width=image_width,
             image_height=image_height,
-            font_size=rtl_font_size_large if height >= 0.05 else rtl_font_size_small,
-            line_spacing_px=20
+            font_size=font_size,
+            line_spacing_px=max(32, font_size // 2),
+        )
+        width_units, height_units = image_stim_size_height_units(
+            win,
+            image_width=image_width,
+            image_height=image_height,
         )
         stim = visual.ImageStim(
             win=win,
             image=str(img_path),
             pos=(0, 0),
-            size=(1.8, 1.5),
-            units='norm',
+            size=(width_units, height_units),
+            units='height',
             interpolate=True
         )
     else:
@@ -399,18 +429,22 @@ def show_text_screen(
             break
 
 
+QUESTION_BLOCK_IMAGE_WIDTH = 1600
+QUESTION_BLOCK_IMAGE_HEIGHT = 700
+
+
 def render_question_option_block_to_image(
     question,
     options,
     language_code,
     font_path,
     out_path,
-    image_width=1600,
-    image_height=700,
+    image_width=QUESTION_BLOCK_IMAGE_WIDTH,
+    image_height=QUESTION_BLOCK_IMAGE_HEIGHT,
     question_font_size=36,
     option_font_size=32,
     margin_px=80,
-    line_spacing_px=18,
+    line_spacing_px=26,
     block_gap_px=10,
     bg_color=(255, 255, 255, 0),
     text_color='black'
@@ -749,29 +783,34 @@ def run_plab_block(trials, task_name, task_image_stim, keyboard_component):
             language_code=language,
             font_path=font_path,
             out_path=str(block_img_path),
-            image_width=1600,
-            image_height=700,
             question_font_size=42 if is_rtl else 44,
             option_font_size=42 if is_rtl else 44,
             margin_px=80,
-            line_spacing_px=18,
+            line_spacing_px=26,
             block_gap_px=10
         )
 
+        block_width_units, block_height_units = image_stim_size_height_units(
+            win,
+            image_width=QUESTION_BLOCK_IMAGE_WIDTH,
+            image_height=QUESTION_BLOCK_IMAGE_HEIGHT,
+            max_width_fraction=0.92,
+            max_height_fraction=0.48,
+        )
         block_stim = visual.ImageStim(
             win=win,
             image=str(block_img_path),
             pos=(0, -0.28),
-            size=(1.15, 0.48),
+            size=(block_width_units, block_height_units),
             units='height',
             interpolate=True
         )
 
         rects_for_this_trial = []
-        img_w_px = 1600
-        img_h_px = 700
-        stim_w_h = 1.15
-        stim_h_h = 0.48
+        img_w_px = QUESTION_BLOCK_IMAGE_WIDTH
+        img_h_px = QUESTION_BLOCK_IMAGE_HEIGHT
+        stim_w_h = block_width_units
+        stim_h_h = block_height_units
 
         for (x1, y1, x2, y2) in option_boxes_px:
             cx_px = (x1 + x2) / 2.0
@@ -907,20 +946,26 @@ show_text_screen(
 
 if is_rtl:
     goodbye_img_path = rendered_text_dir / 'goodbye.png'
+    goodbye_font_size = 52
     render_text_screen_to_image(
         text=Goodbyetext_str,
         language_code=language,
         font_path=font_path,
         out_path=str(goodbye_img_path),
-        font_size=52,
-        line_spacing_px=24
+        font_size=goodbye_font_size,
+        line_spacing_px=max(32, goodbye_font_size // 2),
+    )
+    goodbye_width_units, goodbye_height_units = image_stim_size_height_units(
+        win,
+        image_width=1800,
+        image_height=1100,
     )
     goodbye_stim = visual.ImageStim(
         win=win,
         image=str(goodbye_img_path),
         pos=(0, 0),
-        size=(1.8, 1.1),
-        units='norm',
+        size=(goodbye_width_units, goodbye_height_units),
+        units='height',
         interpolate=True
     )
 else:

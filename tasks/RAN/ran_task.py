@@ -280,15 +280,43 @@ def text_to_logical_lines(text, rtl, draw, font, max_width_px):
     return all_lines
 
 
+TEXT_SCREEN_IMAGE_WIDTH = 1800
+TEXT_SCREEN_IMAGE_HEIGHT = 1100
+
+
+def image_stim_size_height_units(
+    win,
+    image_width=TEXT_SCREEN_IMAGE_WIDTH,
+    image_height=TEXT_SCREEN_IMAGE_HEIGHT,
+    max_width_fraction=0.92,
+    max_height_fraction=0.88,
+):
+    """
+    Fit a rendered text image on screen without stretching (height units).
+    """
+    img_aspect = image_width / image_height
+    max_w = (win.size[0] / win.size[1]) * max_width_fraction
+    max_h = max_height_fraction
+
+    if img_aspect >= max_w / max_h:
+        width_units = max_w
+        height_units = max_w / img_aspect
+    else:
+        height_units = max_h
+        width_units = max_h * img_aspect
+
+    return width_units, height_units
+
+
 def render_text_screen_to_image(
     text,
     language_code,
     font_path,
-    image_width=1800,
-    image_height=1100,
+    image_width=TEXT_SCREEN_IMAGE_WIDTH,
+    image_height=TEXT_SCREEN_IMAGE_HEIGHT,
     font_size=62,
     margin_px=180,
-    line_spacing_px=26,
+    line_spacing_px=38,
     bg_color='white',
     text_color='black',
     out_path='text_screen.png'
@@ -363,20 +391,20 @@ def show_rendered_text_screen(
         text=text,
         language_code=language_code,
         font_path=font_path,
-        image_width=1800,
-        image_height=1100,
         font_size=font_size,
         margin_px=180,
-        line_spacing_px=max(20, font_size // 3),
+        line_spacing_px=max(36, font_size // 2),
         out_path=str(img_path)
     )
 
+    width_units, height_units = image_stim_size_height_units(win)
     stim = visual.ImageStim(
         win=win,
         image=str(img_path),
         pos=(0, 0),
-        size=(1.8, 1.1),
-        units='norm'
+        size=(width_units, height_units),
+        units='height',
+        interpolate=True,
     )
     stim.draw()
     win.flip()
@@ -409,7 +437,7 @@ def show_ltr_text_screen(win, text, font_name, height=0.085, wrap_width=1.25):
 
 def show_text_screen(win, text, language_code, font_name, font_path, output_dir, image_name, height=0.07):
     if is_rtl_language(language_code):
-        font_size = 72 if height >= 0.1 else 62
+        font_size = 78 if height >= 0.1 else 68
         show_rendered_text_screen(
             win=win,
             text=text,

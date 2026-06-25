@@ -265,6 +265,36 @@ def text_to_logical_lines(text, rtl, draw, font_obj, max_width_px):
     return all_lines
 
 
+def image_stim_size_height_units(
+    win,
+    image_width,
+    image_height,
+    max_width_fraction=0.92,
+    max_height_fraction=0.88,
+    max_width_units=None,
+    max_height_units=None,
+):
+    """
+    Fit a rendered text image on screen without stretching (height units).
+    """
+    img_aspect = image_width / image_height
+    max_w = (
+        max_width_units
+        if max_width_units is not None
+        else (win.size[0] / win.size[1]) * max_width_fraction
+    )
+    max_h = max_height_units if max_height_units is not None else max_height_fraction
+
+    if img_aspect >= max_w / max_h:
+        width_units = max_w
+        height_units = max_w / img_aspect
+    else:
+        height_units = max_h
+        width_units = max_h * img_aspect
+
+    return width_units, height_units
+
+
 def render_text_screen_to_image(
     text,
     language_code,
@@ -274,18 +304,18 @@ def render_text_screen_to_image(
     image_height=1100,
     font_size=62,
     margin_px=180,
-    line_spacing_px=26,
+    line_spacing_px=34,
     bg_color='white',
     text_color='black'
 ):
     rtl = is_rtl_language(language_code)
 
-    image = Image.new('RGBA', (image_width, image_height), color=(0, 0, 0, 0))
-    draw = ImageDraw.Draw(image)
     font_obj = ImageFont.truetype(font_path, font_size)
-
     max_width_px = image_width - 2 * margin_px
-    logical_lines = text_to_logical_lines(text, rtl, draw, font_obj, max_width_px)
+
+    measure_image = Image.new('RGBA', (image_width, image_height))
+    measure_draw = ImageDraw.Draw(measure_image)
+    logical_lines = text_to_logical_lines(text, rtl, measure_draw, font_obj, max_width_px)
 
     display_lines = []
     line_heights = []
@@ -295,7 +325,7 @@ def render_text_screen_to_image(
             line_heights.append(font_size // 2)
             continue
         display_line = shape_rtl_line(line) if rtl else line
-        _, h = measure_text_pil(draw, display_line, font_obj)
+        _, h = measure_text_pil(measure_draw, display_line, font_obj)
         display_lines.append(display_line)
         line_heights.append(h)
 
@@ -305,7 +335,13 @@ def render_text_screen_to_image(
         if i < len(line_heights) - 1:
             total_height += line_spacing_px
 
-    y = (image_height - total_height) // 2
+    vertical_padding = max(40, margin_px // 3)
+    canvas_height = max(image_height, total_height + 2 * vertical_padding)
+
+    image = Image.new('RGBA', (image_width, canvas_height), color=(0, 0, 0, 0))
+    draw = ImageDraw.Draw(image)
+
+    y = max(vertical_padding, (canvas_height - total_height) // 2)
     for i, line in enumerate(display_lines):
         if line == '':
             y += line_heights[i] + line_spacing_px
@@ -316,6 +352,7 @@ def render_text_screen_to_image(
         y += h + line_spacing_px
 
     image.save(out_path)
+    return image_width, canvas_height
 
 
 def convert_text_screen_to_image_stim(source_stim, image_name, font_path, output_dir, text_override=None):
@@ -327,10 +364,10 @@ def convert_text_screen_to_image_stim(source_stim, image_name, font_path, output
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     image_width_px = 1800
-    image_height_px = 1000 if source_stim.height >= 0.05 else 850
+    image_height_px = 1100 if source_stim.height >= 0.05 else 1200
     font_size_px = 62 if source_stim.height >= 0.05 else 48
     image_path = output_dir / image_name
-    render_text_screen_to_image(
+    rendered_width, rendered_height = render_text_screen_to_image(
         text=text,
         language_code=language_code,
         font_path=font_path,
@@ -339,11 +376,22 @@ def convert_text_screen_to_image_stim(source_stim, image_name, font_path, output
         image_height=image_height_px,
         font_size=font_size_px,
         margin_px=180,
-        line_spacing_px=max(20, font_size_px // 3)
+        line_spacing_px=max(32, font_size_px // 2),
     )
 
-    width_units = source_stim.wrapWidth if source_stim.wrapWidth else min(win.size[0] / win.size[1] * 0.9, 1.45)
-    height_units = 0.65 if source_stim.height >= 0.05 else 0.55
+    max_height_units = 0.78 if source_stim.height >= 0.05 else 0.88
+    if source_stim.wrapWidth:
+        max_width_units = source_stim.wrapWidth
+    else:
+        max_width_units = min(win.size[0] / win.size[1] * 0.92, 1.45)
+
+    width_units, height_units = image_stim_size_height_units(
+        win,
+        rendered_width,
+        rendered_height,
+        max_width_units=max_width_units,
+        max_height_units=max_height_units,
+    )
     return visual.ImageStim(
         win=win,
         name=source_stim.name,
