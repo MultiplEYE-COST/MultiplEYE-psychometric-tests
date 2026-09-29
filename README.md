@@ -77,7 +77,7 @@ Some more environment related errors may occur, and you can find more detailed d
 
 ### Run the tests in English
 
-We provide the English materials for you to test the tests in English. First, download the English language data from the [MultiplEYE SwitchDrive data repository](https://drive.switch.ch/index.php/s/i9ecUhd8ygcRDMg?path=%2FPsychometric%20tests%2Flanguages%2FEN) if you have a password an an account. You can also download the data from the [MultiplEYE PsychArchives data repository](https://pasa.psycharchives.org/reviewonly/c46cc0928e2a20454cd5ad101f5b7c0e22ddb34085691e419743538f0e02327b) which does not require a password. After downloading, unzip the data and place `languages/EN` in the repository root.
+We provide the English materials for you to test the tests in English. First, download the English language data from the [MultiplEYE SwitchDrive data repository](https://drive.switch.ch/index.php/s/i9ecUhd8ygcRDMg?path=%2FPsychometric%20tests%2Flanguages%2FEN) if you have a password an an account. After downloading, unzip the data and place `languages/EN` in the repository root.
 
 Run the launcher from the root directory of the repository:
 ```bash
