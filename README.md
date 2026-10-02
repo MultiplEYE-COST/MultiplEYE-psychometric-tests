@@ -21,7 +21,7 @@ In this repository, we will cover the following psychometric tests:
 
 We will add a short video tutorial for environment setup and running the experiment launcher.
 
-- Installation and run walkthrough: [Video link coming soon](https://example.com/multipleye-psychometric-tests-install-run)
+- Installation and run walkthrough: [Video link](https://drive.switch.ch/index.php/s/ajBuuljFcAr5oHa)
 
 ### Clone the repository
 
