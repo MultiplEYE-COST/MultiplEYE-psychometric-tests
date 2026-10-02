@@ -159,11 +159,16 @@ wiki_vocab: False
 ```bash
 python run_multipleye_psychometric_tests.py
 ```
-7. In the GUI, enter or confirm participant metadata (`participant-id`, language, country code, lab number, and year). Then click `Start`.
-8. Task visibility is controlled by `configs/config.yaml`:
-- Tasks set to `True` are shown and can be deselected for an individual participant.
-- Tasks set to `False` are hidden and cannot be selected at runtime.
+7. In the GUI, enter or confirm participant metadata (`participant-id`, language, country code, lab number, and year). Then review the task selection and click `Start`.
+
+8. The set of available tasks is predefined at the study level in `configs/config.yaml`:
+   - Tasks set to `True` are included in the default task battery and are displayed in the GUI. They can be deselected by the experimenter for an individual participant if necessary (e.g., if the participant is uncomfortable with a specific task or if a session is resumed after an interruption).
+   - Tasks set to `False` are not displayed in the GUI and cannot be selected at runtime.
+
+Thus, `configs/config.yaml` defines which tasks are available for the study, while the GUI allows experimenters to deselect enabled tasks for individual participants.
+
 9. If WMC is enabled, a second WMC window appears to select WMC subtasks.
+
 10. Results are saved in:
 ```text
 data/MultiplEYE_<LANG>_<COUNTRY>_<LAB>_<YEAR>/<PARTICIPANT>_<LANG>_<COUNTRY>_<LAB>_PT<SESSION>/
