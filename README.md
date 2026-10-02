@@ -123,7 +123,7 @@ wiki_vocab: True
 - WMC currently supports macOS and Windows; Linux is not supported for WMC.
 ### Run the tests in other languages
 
-**Note**: The current release (April 2026) includes 25 language versions, namely Albanian, Arabic, Basque, Cantonese, Catalan, Croatian, Czech, Danish, English, Estonian, Farsi, Finnish, German, Hebrew, Italian, Kalaallisut, Latvian, Mandarin, Portuguese, Romansh, Russian, Serbian, Slovenian, Swedish, and Turkish, spanning multiple writing systems and typological language families.
+**Note**: The current release (April 2026) includes 29 language versions, namely Albanian, Arabic, Basque, Cantonese, Catalan, Croatian, Czech, Danish, English, Estonian, Farsi, Finnish, Galician, German, Hebrew, Italian, Japanese, Kalaallisut, Latvian, Mandarin, Polish, Portuguese, Romanian, Romansh, Russian, Serbian, Slovenian, Swedish, and Turkish, spanning multiple writing systems and typological language families.
 
 For more detailed instructions on what and how to prepare and translate the materials for other languages, please refer to Section 6 in [MultiplEYE Data Collection Guidelines](https://multipleye.eu/wp-content/uploads/MultiplEYE-Data-Collection-Guidelines.pdf). It contains the most up-to-date and official guideline for preparing and translating the materials. Here are some simplified instructions for you to follow:
 
