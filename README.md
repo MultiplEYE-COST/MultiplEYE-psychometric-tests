@@ -178,10 +178,11 @@ The participant-specific YAML config is also saved in the participant folder.
 ## Data Collection
 1. When collecting data from each participant, please follow the [MultiplEYE Experimenter Script - Eye-Tracking Session](https://multipleye.eu/wp-content/uploads/MultiplEYE-Experimenter-Script-Eye-Tracking-Session.pdf) and [MultiplEYE Experimenter Script - Psychometric Tests Session](https://multipleye.eu/wp-content/uploads/MultiplEYE-Experimenter-Script-Psychometric-Tests-Session.pdf) and please always check the Participant ID and Session ID (if applicable) before starting the tests.
 2. Upload the whole data folder as a zip/rar file to the MultipLEYE data repository for the corresponding lab.
+3. **Note for WikiVocab** Both arrow keys and the mouse are enabled for this task to make the test adaptive to different versions of different OS. However, reaction time is not used to compute WikiVocab scores or for any further analysis in MultiplEYE; though we record it in the final results. If your lab would like to analyze reaction time in this task, please instruct participants to use either the mouse or keys (according to the convenience of your lab setups) to make reaction time data comparable within a lab.
 
 ## Repository Structure
 ```
-├── .github                   <- Github Actions workflows
+├── .github                   <- GitHub Actions workflows
 │
 ├── configs                   <- Configuration files
 │   ├── config.yaml           <- Lab-level defaults (language, lab metadata, random seed, task toggles)
